@@ -7,16 +7,12 @@ import { PerformanceScore, getScoreColor } from "@/utils/performanceUtils";
 
 interface PerformanceRankingTableProps {
   performers: PerformanceScore[];
+  showLowestFirst?: boolean;
 }
 
-export default function PerformanceRankingTable({ performers }: PerformanceRankingTableProps) {
+export default function PerformanceRankingTable({ performers, showLowestFirst = false }: PerformanceRankingTableProps) {
   return (
     <div>
-      <h3 className="text-lg font-medium flex items-center mb-4">
-        <LineChart className="mr-2 h-5 w-5" />
-        All Team Members Ranking
-      </h3>
-      
       <div className="border rounded-md">
         <div className="grid grid-cols-12 bg-muted p-3 text-sm font-medium border-b">
           <div className="col-span-1">Rank</div>
@@ -30,7 +26,16 @@ export default function PerformanceRankingTable({ performers }: PerformanceRanki
           {performers.map((performer) => (
             <div key={performer.userId} className="grid grid-cols-12 p-3 items-center hover:bg-muted/50">
               <div className="col-span-1 flex items-center">
-                <Badge variant={performer.ranking <= 3 ? "default" : "outline"} className="w-6 h-6 flex items-center justify-center rounded-full p-0">
+                <Badge 
+                  variant={
+                    showLowestFirst 
+                      ? "outline" 
+                      : performer.ranking <= 3 ? "default" : "outline"
+                  } 
+                  className={`w-6 h-6 flex items-center justify-center rounded-full p-0 ${
+                    showLowestFirst && "bg-muted"
+                  }`}
+                >
                   {performer.ranking}
                 </Badge>
               </div>

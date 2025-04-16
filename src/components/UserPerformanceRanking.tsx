@@ -8,17 +8,19 @@ import { calculatePerformanceScores, getScoreColor } from "@/utils/performanceUt
 
 interface UserPerformanceRankingProps {
   users: User[];
+  limit?: number;
 }
 
-export default function UserPerformanceRanking({ users }: UserPerformanceRankingProps) {
+export default function UserPerformanceRanking({ users, limit }: UserPerformanceRankingProps) {
   // Calculate performance scores from mock review data
   const performanceScores = useMemo(() => {
-    return calculatePerformanceScores(users);
-  }, [users]);
+    const scores = calculatePerformanceScores(users);
+    return limit ? scores.slice(0, limit) : scores;
+  }, [users, limit]);
   
   return (
     <div className="space-y-6">
-      <TopPerformers performers={performanceScores} />
+      {!limit && <TopPerformers performers={performanceScores.slice(0, 3)} />}
       <PerformanceRankingTable performers={performanceScores} />
     </div>
   );
