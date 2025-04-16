@@ -1,7 +1,7 @@
-
 import { User } from "@/types";
 import { reviews as mockReviews } from "@/data/mockData";
 import { Trophy, Star } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 export interface PerformanceScore {
   userId: string;
@@ -57,15 +57,18 @@ export const getScoreColor = (score: number): string => {
   return "text-red-600";
 };
 
-export const getRankingIcon = (ranking: number) => {
+export const getRankingIcon = (ranking: number): { 
+  Icon: LucideIcon; 
+  color: string 
+} => {
   switch (ranking) {
     case 1:
-      return <Trophy className="h-5 w-5 text-yellow-500" />;
+      return { Icon: Trophy, color: "text-yellow-500" };
     case 2:
-      return <Trophy className="h-5 w-5 text-gray-400" />;
+      return { Icon: Trophy, color: "text-gray-400" };
     case 3:
-      return <Trophy className="h-5 w-5 text-amber-700" />;
+      return { Icon: Trophy, color: "text-amber-700" };
     default:
-      return <Star className="h-5 w-5 text-gray-400" />;
+      return { Icon: Star, color: "text-gray-400" };
   }
 };
