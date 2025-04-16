@@ -11,3 +11,11 @@ export interface CareerPath {
   color: string;
   roles: CareerRole[];
 }
+
+// Add the Role interface for RoleMapping component
+export interface Role {
+  id: string;
+  title: string;
+  department: string;
+  skills: string[];
+}

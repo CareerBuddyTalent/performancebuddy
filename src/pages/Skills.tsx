@@ -13,6 +13,7 @@ import { CareerPaths } from "@/components/skills/CareerPaths";
 import { RoleMapping } from "@/components/skills/RoleMapping";
 import { RoleSkillsMapping } from "@/components/skills/RoleSkillsMapping";
 import { toast } from "sonner";
+import { Skill } from "@/types";
 
 export default function Skills() {
   const [activeTab, setActiveTab] = useState("skills");
@@ -28,14 +29,50 @@ export default function Skills() {
     { id: "2", name: "Jane Smith" }
   ];
 
+  // Create properly typed mock roles
   const mockRoles = [
-    { id: "1", name: "Frontend Developer" },
-    { id: "2", name: "Backend Developer" }
+    { 
+      id: "1", 
+      title: "Frontend Developer", 
+      department: "Engineering",
+      skills: ["1", "2"] 
+    },
+    { 
+      id: "2", 
+      title: "Backend Developer", 
+      department: "Engineering",
+      skills: ["3", "4"] 
+    }
   ];
 
+  // Create properly typed mock skills
   const mockFilteredSkills = [
-    { id: "1", name: "JavaScript" },
-    { id: "2", name: "React" }
+    { 
+      id: "1", 
+      name: "JavaScript", 
+      description: "Programming language",
+      category: "Technical",
+      levels: [
+        {
+          level: 1,
+          description: "Beginner",
+          expectations: ["Basic syntax"]
+        }
+      ]
+    },
+    { 
+      id: "2", 
+      name: "React", 
+      description: "UI library",
+      category: "Technical",
+      levels: [
+        {
+          level: 1,
+          description: "Beginner",
+          expectations: ["Basic components"]
+        }
+      ]
+    }
   ];
   
   const plans = [
@@ -158,7 +195,7 @@ export default function Skills() {
         <TabsContent value="role-mapping" className="space-y-4">
           <RoleMapping 
             roles={mockRoles} 
-            skills={skills} 
+            skills={mockFilteredSkills} 
             filteredSkills={mockFilteredSkills} 
           />
         </TabsContent>
