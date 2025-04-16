@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { User, ReviewCycle, PerformanceReview } from "@/types";
 import { users as mockUsers } from "@/data/mockData";
 import { v4 as uuidv4 } from 'uuid';
@@ -30,14 +29,19 @@ export default function CreateReviewDialog({
   const [initialComments, setInitialComments] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   
+  // Filter available cycles to only performance review cycles
+  const performanceCycles = cycles.filter(cycle => 
+    cycle.purpose === "performance" || !cycle.purpose // Support legacy cycles without purpose
+  );
+  
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setEmployeeId("");
-      setCycleId(cycles.length > 0 ? cycles[0].id : "");
+      setCycleId(performanceCycles.length > 0 ? performanceCycles[0].id : "");
       setInitialComments("");
     }
-  }, [open, cycles]);
+  }, [open, performanceCycles]);
   
   // Filter users based on current user role
   useEffect(() => {
@@ -127,13 +131,19 @@ export default function CreateReviewDialog({
                   <SelectValue placeholder="Select a review cycle" />
                 </SelectTrigger>
                 <SelectContent>
-                  {cycles.map(cycle => (
+                  {performanceCycles.map(cycle => (
                     <SelectItem key={cycle.id} value={cycle.id}>
-                      {cycle.name}
+                      {cycle.name} {cycle.type && `(${cycle.type})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {performanceCycles.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  No active performance review cycles available. 
+                  <br />Create one in the Cycles section.
+                </p>
+              )}
             </div>
             
             <div className="grid gap-2">

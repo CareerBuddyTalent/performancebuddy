@@ -90,21 +90,65 @@ export const parameters: PerformanceParameter[] = [
 // Mock Review Cycles
 export const reviewCycles: ReviewCycle[] = [
   {
-    id: 'c1',
-    name: 'Mid-Year Review 2024',
-    startDate: new Date('2024-06-01'),
-    endDate: new Date('2024-06-30'),
-    status: 'active',
-    parameters: ['p1', 'p2', 'p3', 'p4', 'p5'],
+    id: "cycle1",
+    name: "Q2 2023 Performance Review",
+    startDate: new Date(2023, 3, 1), // April 1, 2023
+    endDate: new Date(2023, 5, 30), // June 30, 2023
+    status: "completed",
+    parameters: ["param1", "param2", "param3"],
+    type: "quarterly",
+    purpose: "performance"
   },
   {
-    id: 'c2',
-    name: 'Annual Review 2023',
-    startDate: new Date('2023-12-01'),
-    endDate: new Date('2023-12-31'),
-    status: 'completed',
-    parameters: ['p1', 'p2', 'p3', 'p4', 'p5'],
+    id: "cycle2",
+    name: "Mid-Year 2023 Performance Review",
+    startDate: new Date(2023, 5, 1), // June 1, 2023
+    endDate: new Date(2023, 10, 30), // November 30, 2023
+    status: "completed",
+    parameters: ["param1", "param2", "param3"],
+    type: "bi-annual",
+    purpose: "performance"
   },
+  {
+    id: "cycle3",
+    name: "Annual 2023 Performance Review",
+    startDate: new Date(2023, 10, 1), // November 1, 2023
+    endDate: new Date(2024, 0, 31), // January 31, 2024
+    status: "active",
+    parameters: ["param1", "param2", "param3", "param4", "param5"],
+    type: "annual",
+    purpose: "performance"
+  },
+  {
+    id: "cycle4",
+    name: "Q1 2024 Goals Review",
+    startDate: new Date(2024, 0, 1), // January 1, 2024
+    endDate: new Date(2024, 2, 31), // March 31, 2024
+    status: "active",
+    parameters: ["param6", "param7"],
+    type: "quarterly",
+    purpose: "goal"
+  },
+  {
+    id: "cycle5", 
+    name: "April 2024 Team Feedback",
+    startDate: new Date(2024, 3, 1), // April 1, 2024
+    endDate: new Date(2024, 3, 30), // April 30, 2024
+    status: "draft",
+    parameters: ["param8", "param9"],
+    type: "monthly",
+    purpose: "feedback"
+  },
+  {
+    id: "cycle6",
+    name: "Weekly Team Feedback - Apr 15",
+    startDate: new Date(2024, 3, 15), // April 15, 2024
+    endDate: new Date(2024, 3, 21), // April 21, 2024
+    status: "draft",
+    parameters: ["param10"],
+    type: "weekly",
+    purpose: "feedback"
+  }
 ];
 
 // Mock Performance Reviews

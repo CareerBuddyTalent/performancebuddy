@@ -1,4 +1,3 @@
-
 export type UserRole = 'employee' | 'manager' | 'admin';
 
 export interface User {
@@ -28,6 +27,8 @@ export interface ReviewCycle {
   endDate: Date;
   status: 'draft' | 'active' | 'completed';
   parameters: string[]; // ids of parameters
+  type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
+  purpose: 'goal' | 'feedback' | 'performance';
 }
 
 export interface PerformanceReview {
@@ -59,7 +60,6 @@ export interface Goal {
   alignedWith?: string; // department or company goal
   createdAt: Date;
   updatedAt: Date;
-  // New fields for enhanced goal tracking
   integrations?: {
     type: 'salesforce' | 'jira' | 'notion';
     entityId: string;
@@ -163,4 +163,3 @@ export interface SurveyResponse {
   }[];
   submittedAt: Date;
 }
-

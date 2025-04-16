@@ -12,12 +12,21 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import CreateReviewDialog from "@/components/CreateReviewDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 
 export default function Reviews() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [reviews, setReviews] = useState<PerformanceReview[]>(mockReviews);
-  const [cycles, setCycles] = useState<ReviewCycle[]>(mockCycles);
+  const [cycles, setCycles] = useState<ReviewCycle[]>(
+    // Convert the mock cycles to include the new type and purpose properties if they don't have them
+    mockCycles.map(cycle => ({
+      ...cycle,
+      type: cycle.type || (cycle.name.includes("Q") ? "quarterly" : 
+             cycle.name.includes("Annual") ? "annual" : "monthly"),
+      purpose: cycle.purpose || "performance" // Default all existing cycles to performance reviews
+    }))
+  );
   const [activeTab, setActiveTab] = useState("reviews");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   
@@ -35,7 +44,10 @@ export default function Reviews() {
       : [];
   
   // Active cycles that can be used for new reviews
-  const activeCycles = cycles.filter(cycle => cycle.status === 'active');
+  const activeCycles = cycles.filter(cycle => 
+    cycle.status === 'active' && 
+    (cycle.purpose === 'performance' || !cycle.purpose) // Support legacy cycles without purpose
+  );
   
   const handleCreateReview = (newReview: PerformanceReview) => {
     setReviews(prev => [...prev, newReview]);
@@ -147,6 +159,14 @@ export default function Reviews() {
                       Create Review
                     </Button>
                   )}
+                  {activeCycles.length === 0 && isAdmin && (
+                    <Button asChild className="mt-4">
+                      <Link to="/cycles">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Manage Review Cycles
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -163,9 +183,11 @@ export default function Reviews() {
                     Manage organization-wide review cycles
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  New Cycle
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/cycles">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Manage Cycles
+                  </Link>
                 </Button>
               </CardHeader>
               <CardContent>
@@ -173,17 +195,20 @@ export default function Reviews() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
+                      <TableHead>Type</TableHead>
                       <TableHead>Start Date</TableHead>
                       <TableHead>End Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Parameters</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {cycles.map(cycle => {
+                    {cycles
+                      .filter(cycle => cycle.purpose === 'performance' || !cycle.purpose)
+                      .map(cycle => {
                       return (
                         <TableRow key={cycle.id}>
                           <TableCell className="font-medium">{cycle.name}</TableCell>
+                          <TableCell>{cycle.type || "N/A"}</TableCell>
                           <TableCell>{format(new Date(cycle.startDate), 'MMM d, yyyy')}</TableCell>
                           <TableCell>{format(new Date(cycle.endDate), 'MMM d, yyyy')}</TableCell>
                           <TableCell>
@@ -195,7 +220,6 @@ export default function Reviews() {
                               <span className="capitalize">{cycle.status}</span>
                             </Badge>
                           </TableCell>
-                          <TableCell>{cycle.parameters.length}</TableCell>
                         </TableRow>
                       );
                     })}

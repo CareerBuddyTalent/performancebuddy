@@ -17,6 +17,7 @@ import Surveys from "./pages/Surveys";
 import UserManagement from "./pages/UserManagement";
 import UserDetail from "./pages/UserDetail";
 import Reviews from "./pages/Reviews";
+import PerformanceCycles from "./pages/PerformanceCycles";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -122,6 +123,14 @@ const App = () => (
               <ProtectedRoute roles={["admin", "manager"]}>
                 <PageLayout>
                   <Reviews />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/cycles" element={
+              <ProtectedRoute roles={["admin", "manager"]}>
+                <PageLayout>
+                  <PerformanceCycles />
                 </PageLayout>
               </ProtectedRoute>
             } />

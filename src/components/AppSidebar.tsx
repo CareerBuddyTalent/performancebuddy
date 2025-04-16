@@ -1,191 +1,162 @@
 
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuButton, 
-  SidebarMenuItem,
-  useSidebar 
-} from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { 
-  BarChart4, 
-  FileText, 
-  Users, 
-  Target, 
-  MessageSquareMore, 
-  Search, 
-  Settings, 
-  LogOut, 
-  User, 
-  Home, 
-  Building,
-  ClipboardEdit
-} from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import {
+  LayoutDashboard,
+  Target,
+  MessageSquare,
+  BarChart2,
+  GraduationCap,
+  FileQuestion,
+  Users,
+  ClipboardList,
+  CalendarDays
+} from "lucide-react";
 
-export function AppSidebar() {
-  const { user, logout, switchRole } = useAuth();
-  const location = useLocation();
-  const sidebar = useSidebar();
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+  isCollapsed: boolean;
+}
 
-  if (!user) return null;
-
-  // Define menus based on user role
-  const adminMenuItems = [
-    { to: "/home", icon: <Home />, label: "Home" },
-    { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
-    { to: "/users", icon: <Users />, label: "User Management" },
-    { to: "/reviews", icon: <ClipboardEdit />, label: "Reviews" },
-    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
-    { to: "/parameters", icon: <Settings />, label: "Parameters" },
-  ];
-
-  const managerMenuItems = [
-    { to: "/home", icon: <Home />, label: "Home" },
-    { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
-    { to: "/users", icon: <Users />, label: "Team Members" },
-    { to: "/reviews", icon: <ClipboardEdit />, label: "Reviews" },
-    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
-  ];
-
-  const employeeMenuItems = [
-    { to: "/home", icon: <Home />, label: "Home" },
-    { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
-    { to: "/my-reviews", icon: <FileText />, label: "My Reviews" },
-    { to: "/goals", icon: <Target />, label: "Goals" },
-    { to: "/feedback", icon: <MessageSquareMore />, label: "Feedback" },
-    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
-  ];
-
-  // Select menu based on role
-  let menuItems;
-  switch (user.role) {
-    case 'admin':
-      menuItems = adminMenuItems;
-      break;
-    case 'manager':
-      menuItems = managerMenuItems;
-      break;
-    default:
-      menuItems = employeeMenuItems;
-  }
-
-  const handleRoleSwitch = (role: 'admin' | 'manager' | 'employee') => {
-    switchRole(role);
-    setRoleMenuOpen(false);
-  };
+export default function AppSidebar({ className, isCollapsed }: SidebarProps) {
+  const { pathname } = useLocation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const isManager = user?.role === "manager";
 
   return (
-    <Sidebar>
-      <SidebarHeader className="flex items-center justify-between border-b">
-        <div className="flex items-center gap-2">
-          {sidebar.expanded ? (
-            <h1 className="text-xl font-bold text-primary">PerformPath</h1>
-          ) : (
-            <div className="w-8 h-8 bg-primary text-white flex items-center justify-center rounded font-bold">
-              P
-            </div>
+    <div className={cn("flex flex-col h-screen border-r", className)}>
+      <ScrollArea className="flex-1">
+        <div className={cn("flex flex-col gap-1 p-2", isCollapsed ? "items-center" : "")}>
+          <Button
+            variant={pathname === "/dashboard" ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed ? "justify-center" : ""
+            )}
+            asChild
+          >
+            <Link to="/dashboard">
+              <LayoutDashboard className="h-4 w-4 mr-2" />
+              {!isCollapsed && <span>Dashboard</span>}
+            </Link>
+          </Button>
+          
+          <Button
+            variant={pathname === "/goals" ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed ? "justify-center" : ""
+            )}
+            asChild
+          >
+            <Link to="/goals">
+              <Target className="h-4 w-4 mr-2" />
+              {!isCollapsed && <span>Goals</span>}
+            </Link>
+          </Button>
+          
+          <Button
+            variant={pathname === "/feedback" ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed ? "justify-center" : ""
+            )}
+            asChild
+          >
+            <Link to="/feedback">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              {!isCollapsed && <span>Feedback</span>}
+            </Link>
+          </Button>
+          
+          <Button
+            variant={pathname === "/skills" ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed ? "justify-center" : ""
+            )}
+            asChild
+          >
+            <Link to="/skills">
+              <GraduationCap className="h-4 w-4 mr-2" />
+              {!isCollapsed && <span>Skills</span>}
+            </Link>
+          </Button>
+          
+          <Button
+            variant={pathname === "/surveys" ? "secondary" : "ghost"}
+            size="sm"
+            className={cn(
+              "w-full justify-start",
+              isCollapsed ? "justify-center" : ""
+            )}
+            asChild
+          >
+            <Link to="/surveys">
+              <FileQuestion className="h-4 w-4 mr-2" />
+              {!isCollapsed && <span>Surveys</span>}
+            </Link>
+          </Button>
+          
+          {(isAdmin || isManager) && (
+            <Button
+              variant={pathname === "/reviews" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "w-full justify-start",
+                isCollapsed ? "justify-center" : ""
+              )}
+              asChild
+            >
+              <Link to="/reviews">
+                <ClipboardList className="h-4 w-4 mr-2" />
+                {!isCollapsed && <span>Reviews</span>}
+              </Link>
+            </Button>
+          )}
+          
+          {(isAdmin || isManager) && (
+            <Button
+              variant={pathname === "/cycles" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "w-full justify-start",
+                isCollapsed ? "justify-center" : ""
+              )}
+              asChild
+            >
+              <Link to="/cycles">
+                <CalendarDays className="h-4 w-4 mr-2" />
+                {!isCollapsed && <span>Cycles</span>}
+              </Link>
+            </Button>
+          )}
+          
+          {(isAdmin || isManager) && (
+            <Button
+              variant={pathname === "/users" ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "w-full justify-start",
+                isCollapsed ? "justify-center" : ""
+              )}
+              asChild
+            >
+              <Link to="/users">
+                <Users className="h-4 w-4 mr-2" />
+                {!isCollapsed && <span>Users</span>}
+              </Link>
+            </Button>
           )}
         </div>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton asChild data-active={location.pathname === item.to}>
-                    <Link to={item.to}>
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        {sidebar.expanded && (
-          <SidebarGroup className="mt-auto">
-            <div className="mb-4">
-              <div className="text-xs text-muted-foreground">Quick Actions</div>
-              <div className="mt-2 space-y-1">
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <Search className="mr-2 h-4 w-4" />
-                  Quick Search
-                </Button>
-                {(user.role === 'admin' || user.role === 'manager') && (
-                  <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
-                    <Link to="/reviews">
-                      <ClipboardEdit className="mr-2 h-4 w-4" />
-                      Create Review
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </SidebarGroup>
-        )}
-      </SidebarContent>
-      
-      <SidebarFooter className="border-t">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <DropdownMenu open={roleMenuOpen} onOpenChange={setRoleMenuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 p-0 rounded-full">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.profilePicture} />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={() => handleRoleSwitch('admin')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Switch to Admin
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => handleRoleSwitch('manager')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Switch to Manager
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onClick={() => handleRoleSwitch('employee')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Switch to Employee
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {sidebar.expanded && (
-              <div className="flex flex-col">
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+      </ScrollArea>
+    </div>
   );
 }
