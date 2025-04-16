@@ -49,6 +49,15 @@ export default function EmployeeGoals() {
     setIsAddGoalOpen(true);
   };
   
+  // Function to get user name and department by user ID
+  const getUserInfo = (userId: string) => {
+    const goalUser = users.find(u => u.id === userId);
+    return {
+      name: goalUser?.name || "Unknown User",
+      department: goalUser?.department
+    };
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
@@ -114,9 +123,17 @@ export default function EmployeeGoals() {
             <TabsContent value="active" className="space-y-4">
               {activeGoals.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {activeGoals.map((goal: Goal) => (
-                    <GoalCard key={goal.id} goal={goal} />
-                  ))}
+                  {activeGoals.map((goal: Goal) => {
+                    const { name, department } = getUserInfo(goal.userId);
+                    return (
+                      <GoalCard 
+                        key={goal.id} 
+                        goal={goal} 
+                        userName={goal.level === 'individual' ? name : undefined}
+                        department={goal.level === 'individual' ? department : undefined}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex justify-center py-8">
@@ -128,9 +145,17 @@ export default function EmployeeGoals() {
             <TabsContent value="completed" className="space-y-4">
               {completedGoals.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {completedGoals.map((goal: Goal) => (
-                    <GoalCard key={goal.id} goal={goal} />
-                  ))}
+                  {completedGoals.map((goal: Goal) => {
+                    const { name, department } = getUserInfo(goal.userId);
+                    return (
+                      <GoalCard 
+                        key={goal.id} 
+                        goal={goal} 
+                        userName={goal.level === 'individual' ? name : undefined}
+                        department={goal.level === 'individual' ? department : undefined}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex justify-center py-8">
@@ -142,9 +167,17 @@ export default function EmployeeGoals() {
             <TabsContent value="not-started" className="space-y-4">
               {notStartedGoals.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {notStartedGoals.map((goal: Goal) => (
-                    <GoalCard key={goal.id} goal={goal} />
-                  ))}
+                  {notStartedGoals.map((goal: Goal) => {
+                    const { name, department } = getUserInfo(goal.userId);
+                    return (
+                      <GoalCard 
+                        key={goal.id} 
+                        goal={goal} 
+                        userName={goal.level === 'individual' ? name : undefined}
+                        department={goal.level === 'individual' ? department : undefined}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex justify-center py-8">
@@ -156,9 +189,17 @@ export default function EmployeeGoals() {
             <TabsContent value="all" className="space-y-4">
               {filteredGoals.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredGoals.map((goal: Goal) => (
-                    <GoalCard key={goal.id} goal={goal} />
-                  ))}
+                  {filteredGoals.map((goal: Goal) => {
+                    const { name, department } = getUserInfo(goal.userId);
+                    return (
+                      <GoalCard 
+                        key={goal.id} 
+                        goal={goal} 
+                        userName={goal.level === 'individual' ? name : undefined}
+                        department={goal.level === 'individual' ? department : undefined}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="flex justify-center py-8">

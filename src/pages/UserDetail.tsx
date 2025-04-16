@@ -177,7 +177,11 @@ export default function UserDetail() {
             </TabsContent>
             
             <TabsContent value="goals">
-              <UserGoals userName={user.name} userGoals={userGoals} />
+              <UserGoals 
+                userName={user.name} 
+                userGoals={userGoals} 
+                department={user.department} 
+              />
             </TabsContent>
             
             <TabsContent value="skills">

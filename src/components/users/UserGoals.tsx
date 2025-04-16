@@ -7,16 +7,24 @@ import { Goal } from "@/types";
 interface UserGoalsProps {
   userName: string;
   userGoals: Goal[];
+  department?: string; // Add optional department prop
 }
 
-export default function UserGoals({ userName, userGoals }: UserGoalsProps) {
+export default function UserGoals({ userName, userGoals, department }: UserGoalsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Goals</CardTitle>
-        <CardDescription>
-          Current and completed goals for {userName}
-        </CardDescription>
+        <div className="flex flex-col space-y-1">
+          <CardTitle>User Goals</CardTitle>
+          <CardDescription>
+            Current and completed goals for {userName}
+            {department && (
+              <span className="ml-1">
+                • <span className="font-medium">{department}</span> Department
+              </span>
+            )}
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         {userGoals.length > 0 ? (

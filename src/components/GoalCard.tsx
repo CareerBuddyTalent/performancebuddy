@@ -3,12 +3,14 @@ import { Goal } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle2, CircleDashed, Link as LinkIcon } from "lucide-react";
+import { Clock, CheckCircle2, CircleDashed, Link as LinkIcon, User } from "lucide-react";
 import { format } from "date-fns";
 
 interface GoalCardProps {
   goal: Goal;
   onClick?: () => void;
+  userName?: string;
+  department?: string;
 }
 
 const statusIcons = {
@@ -30,7 +32,7 @@ const levelColors = {
   company: "bg-rose-100 text-rose-700"
 };
 
-export default function GoalCard({ goal, onClick }: GoalCardProps) {
+export default function GoalCard({ goal, onClick, userName, department }: GoalCardProps) {
   const daysUntilDue = Math.ceil((goal.dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   
   const isDueSoon = daysUntilDue <= 7 && daysUntilDue > 0;
@@ -46,10 +48,21 @@ export default function GoalCard({ goal, onClick }: GoalCardProps) {
           </div>
         </div>
         {goal.level && (
-          <div className="mt-1">
+          <div className="mt-1 flex flex-wrap gap-2">
             <Badge variant="outline" className={levelColors[goal.level] || ""}>
               {goal.level.charAt(0).toUpperCase() + goal.level.slice(1)}
             </Badge>
+            {goal.level === "individual" && userName && (
+              <Badge variant="outline" className="bg-slate-100 text-slate-700 flex items-center gap-1">
+                <User className="h-3 w-3" />
+                {userName}
+              </Badge>
+            )}
+          </div>
+        )}
+        {department && goal.level === "individual" && (
+          <div className="mt-1">
+            <span className="text-xs text-muted-foreground">{department} Department</span>
           </div>
         )}
       </CardHeader>
