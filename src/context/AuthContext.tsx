@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { users, currentUser as defaultUser } from '@/data/mockData';
@@ -134,6 +135,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Signup error:', error);
         setIsLoading(false);
         return false;
+      }
+      
+      // Send welcome email
+      try {
+        await supabase.functions.invoke('send-welcome-email', {
+          body: { name, email }
+        });
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't return false here, as the signup was successful
       }
       
       if (process.env.NODE_ENV === 'development') {
