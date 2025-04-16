@@ -1,13 +1,13 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ReviewProgress from "@/components/ReviewProgress";
-import RatingsGraph from "@/components/RatingsGraph";
-import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { reviews, goals, feedbackEntries, users, parameters } from "@/data/mockData";
 import { PerformanceReview } from "@/types";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
+import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -30,12 +30,6 @@ export default function Dashboard() {
     // Set reviews where user is the employee being reviewed
     setMyReviews(reviews.filter(review => review.employeeId === user.id));
   }, [user]);
-
-  // Calculate review stats
-  const totalTeamReviews = teamReviews.length;
-  const completedTeamReviews = teamReviews.filter(r => r.status === 'submitted' || r.status === 'acknowledged').length;
-  const inProgressTeamReviews = teamReviews.filter(r => r.status === 'in_progress').length;
-  const notStartedTeamReviews = teamReviews.filter(r => r.status === 'not_started').length;
 
   // Prepare ratings data for graph
   const ratingsData = parameters.map(param => {
@@ -88,56 +82,13 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Total Reviews</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{user.role === 'employee' ? myReviews.length : totalTeamReviews}</div>
-            <p className="text-xs text-muted-foreground">Current review period</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Completed</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{user.role === 'employee' ? myReviews.filter(r => r.status === 'submitted' || r.status === 'acknowledged').length : completedTeamReviews}</div>
-            <p className="text-xs text-muted-foreground">
-              {user.role === 'employee' ? 'Reviews you\'ve acknowledged' : 'Submitted reviews'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">In Progress</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{user.role === 'employee' ? myReviews.filter(r => r.status === 'in_progress').length : inProgressTeamReviews}</div>
-            <p className="text-xs text-muted-foreground">Reviews being worked on</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Goals</div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {user.role === 'employee' 
-                ? goals.filter(g => g.userId === user.id).length 
-                : goals.filter(g => {
-                    const goalUser = users.find(u => u.id === g.userId);
-                    return goalUser && goalUser.manager === user.id;
-                  }).length
-              }
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {user.role === 'employee' ? 'Your active goals' : 'Team goals being tracked'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardStats 
+        user={user} 
+        myReviews={myReviews} 
+        teamReviews={teamReviews} 
+        goals={goals}
+        users={users}
+      />
       
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
@@ -147,69 +98,24 @@ export default function Dashboard() {
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="col-span-4">
-              <RatingsGraph 
-                data={ratingsData} 
-                title="Performance Ratings" 
-                description="Average ratings across all review parameters"
-              />
-            </div>
-            <div className="col-span-3">
-              <ReviewProgress
-                totalReviews={user.role === 'employee' ? myReviews.length : totalTeamReviews}
-                completedReviews={user.role === 'employee' ? myReviews.filter(r => r.status === 'submitted' || r.status === 'acknowledged').length : completedTeamReviews}
-                inProgressReviews={user.role === 'employee' ? myReviews.filter(r => r.status === 'in_progress').length : inProgressTeamReviews}
-                notStartedReviews={user.role === 'employee' ? myReviews.filter(r => r.status === 'not_started').length : notStartedTeamReviews}
-              />
-            </div>
-          </div>
+          <DashboardOverview 
+            ratingsData={ratingsData} 
+            userRole={user.role} 
+            myReviews={myReviews} 
+            teamReviews={teamReviews} 
+          />
         </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4">
-          {(user.role === 'admin' || user.role === 'manager') ? (
-            <AnalyticsDashboard timeframe={timeframe} onTimeframeChange={handleTimeframeChange} />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Trends</CardTitle>
-                <CardDescription>Your performance data over time</CardDescription>
-              </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center">
-                <p className="text-muted-foreground">
-                  Historical performance data will be shown here in future versions.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <AnalyticsContent 
+            userRole={user.role} 
+            timeframe={timeframe} 
+            handleTimeframeChange={handleTimeframeChange} 
+          />
         </TabsContent>
         
         <TabsContent value="activity" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>The latest updates in your organization</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.length > 0 ? (
-                  recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start space-x-4 rtl:space-x-reverse">
-                      <div className="w-2 h-2 rounded-full bg-primary mt-2"></div>
-                      <div className="space-y-1">
-                        <p className="text-sm">{activity.message}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {activity.date.toLocaleDateString()} at {activity.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No recent activity to show.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <TeamActivitySection recentActivity={recentActivity} />
         </TabsContent>
       </Tabs>
     </div>
