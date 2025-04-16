@@ -16,12 +16,13 @@ import Skills from "./pages/Skills";
 import Surveys from "./pages/Surveys";
 import UserManagement from "./pages/UserManagement";
 import UserDetail from "./pages/UserDetail";
+import Reviews from "./pages/Reviews";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 // Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
@@ -30,6 +31,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+  
+  // If roles are specified, check if user has required role
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/home" replace />;
   }
   
   return <>{children}</>;
@@ -108,6 +114,14 @@ const App = () => (
               <ProtectedRoute>
                 <PageLayout>
                   <UserDetail />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/reviews" element={
+              <ProtectedRoute roles={["admin", "manager"]}>
+                <PageLayout>
+                  <Reviews />
                 </PageLayout>
               </ProtectedRoute>
             } />

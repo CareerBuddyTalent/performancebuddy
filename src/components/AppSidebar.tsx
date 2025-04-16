@@ -28,7 +28,8 @@ import {
   LogOut, 
   User, 
   Home, 
-  Building
+  Building,
+  ClipboardEdit
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -45,7 +46,7 @@ export function AppSidebar() {
     { to: "/home", icon: <Home />, label: "Home" },
     { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
     { to: "/users", icon: <Users />, label: "User Management" },
-    { to: "/reviews", icon: <FileText />, label: "Reviews" },
+    { to: "/reviews", icon: <ClipboardEdit />, label: "Reviews" },
     { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
     { to: "/parameters", icon: <Settings />, label: "Parameters" },
   ];
@@ -54,7 +55,7 @@ export function AppSidebar() {
     { to: "/home", icon: <Home />, label: "Home" },
     { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
     { to: "/users", icon: <Users />, label: "Team Members" },
-    { to: "/reviews", icon: <FileText />, label: "Reviews" },
+    { to: "/reviews", icon: <ClipboardEdit />, label: "Reviews" },
     { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
   ];
 
@@ -127,10 +128,14 @@ export function AppSidebar() {
                   <Search className="mr-2 h-4 w-4" />
                   Quick Search
                 </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Create Review
-                </Button>
+                {(user.role === 'admin' || user.role === 'manager') && (
+                  <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                    <Link to="/reviews">
+                      <ClipboardEdit className="mr-2 h-4 w-4" />
+                      Create Review
+                    </Link>
+                  </Button>
+                )}
               </div>
             </div>
           </SidebarGroup>
