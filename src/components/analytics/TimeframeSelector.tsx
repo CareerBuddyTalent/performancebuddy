@@ -1,5 +1,5 @@
 
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TimeframeSelectorProps {
   timeframe: 'week' | 'month' | 'quarter' | 'year';
@@ -8,35 +8,13 @@ interface TimeframeSelectorProps {
 
 export default function TimeframeSelector({ timeframe, onTimeframeChange }: TimeframeSelectorProps) {
   return (
-    <TabsList>
-      <TabsTrigger 
-        value="week" 
-        onClick={() => onTimeframeChange('week')}
-        data-state={timeframe === 'week' ? 'active' : 'inactive'}
-      >
-        Week
-      </TabsTrigger>
-      <TabsTrigger 
-        value="month" 
-        onClick={() => onTimeframeChange('month')}
-        data-state={timeframe === 'month' ? 'active' : 'inactive'}
-      >
-        Month
-      </TabsTrigger>
-      <TabsTrigger 
-        value="quarter" 
-        onClick={() => onTimeframeChange('quarter')}
-        data-state={timeframe === 'quarter' ? 'active' : 'inactive'}
-      >
-        Quarter
-      </TabsTrigger>
-      <TabsTrigger 
-        value="year" 
-        onClick={() => onTimeframeChange('year')}
-        data-state={timeframe === 'year' ? 'active' : 'inactive'}
-      >
-        Year
-      </TabsTrigger>
-    </TabsList>
+    <Tabs value={timeframe} onValueChange={(value) => onTimeframeChange(value as any)}>
+      <TabsList>
+        <TabsTrigger value="week">Week</TabsTrigger>
+        <TabsTrigger value="month">Month</TabsTrigger>
+        <TabsTrigger value="quarter">Quarter</TabsTrigger>
+        <TabsTrigger value="year">Year</TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }
