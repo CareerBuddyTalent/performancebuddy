@@ -1,49 +1,54 @@
 
+import { User } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { TrendingUp } from "lucide-react";
 import { PerformanceScore, getScoreColor, getRankingIcon } from "@/utils/performanceUtils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PerformerCardProps {
   performer: PerformanceScore;
 }
 
 export default function PerformerCard({ performer }: PerformerCardProps) {
+  const scoreColor = getScoreColor(performer.score);
+  const { Icon, color } = getRankingIcon(performer.ranking);
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
+  };
+  
   return (
-    <Card key={performer.userId} className="overflow-hidden">
-      <div className={`h-2 ${performer.ranking === 1 ? 'bg-yellow-500' : performer.ranking === 2 ? 'bg-gray-400' : 'bg-amber-700'}`}></div>
+    <Card>
       <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center space-x-4">
           <div className="relative">
-            <Avatar className="h-12 w-12 border-2 border-background">
+            <Avatar className="h-14 w-14">
               <AvatarImage src={performer.user.profilePicture} alt={performer.user.name} />
-              <AvatarFallback>{performer.user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{getInitials(performer.user.name)}</AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
-              {getRankingIcon(performer.ranking)}
+            <div className="absolute -top-1 -right-1 rounded-full bg-white p-0.5">
+              <Icon className={`h-5 w-5 ${color}`} />
             </div>
           </div>
-          <div>
-            <div className="font-medium">{performer.user.name}</div>
-            <div className="text-sm text-muted-foreground">{performer.user.position || "No position"}</div>
-          </div>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Performance Score:</span>
-            <span className={`font-bold ${getScoreColor(performer.score)}`}>
-              {performer.score}/5
-            </span>
-          </div>
-          <Progress value={performer.score * 20} className="h-2" />
-          <div className="flex justify-between text-xs">
-            <span>Department: {performer.user.department || "N/A"}</span>
-            <span className="flex items-center">
-              <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
-              Top {performer.ranking}
-            </span>
+          
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-medium truncate">
+              {performer.user.name}
+            </h3>
+            <p className="text-sm text-muted-foreground truncate">
+              {performer.user.position}
+            </p>
+            <div className="mt-1 flex items-center">
+              <span className={`text-lg font-bold ${scoreColor}`}>
+                {performer.score}
+              </span>
+              <span className="text-xs ml-1 text-muted-foreground">
+                avg. rating
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>
