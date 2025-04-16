@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -17,7 +16,7 @@ export default function SkillsMatrix({ skills, selectedCategory }: SkillsMatrixP
   const [currentSkill, setCurrentSkill] = useState<Skill | null>(null);
   
   // Filter skills by category if needed
-  const filteredSkills = selectedCategory 
+  const filteredSkills = selectedCategory && selectedCategory !== "all"
     ? skills.filter(skill => skill.category === selectedCategory) 
     : skills;
 

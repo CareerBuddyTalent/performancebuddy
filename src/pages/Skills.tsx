@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, GraduationCap, Users, Target, ListChecks, LineChart } from "lucide-react";
+import { Search, Plus, GraduationCap, Users, Target, ListChecks, LineChart, FileUp, Download } from "lucide-react";
 import SkillsMatrix from "@/components/SkillsMatrix";
 import { Skill } from "@/types";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -12,8 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ImportSkillsDialog } from "@/components/ImportSkillsDialog";
+import { toast } from "@/components/ui/sonner";
 
-// Sample skills data
 const sampleSkills: Skill[] = [
   {
     id: "1",
@@ -182,7 +183,6 @@ const sampleSkills: Skill[] = [
   }
 ];
 
-// Sample roles data
 const roles = [
   { id: "1", title: "Frontend Developer", department: "Engineering", skills: ["1", "3"] },
   { id: "2", title: "Marketing Specialist", department: "Marketing", skills: ["4"] },
@@ -191,7 +191,6 @@ const roles = [
   { id: "5", title: "Team Lead", department: "Engineering", skills: ["1", "2", "3", "5"] }
 ];
 
-// Sample development plans
 const developmentPlans = [
   {
     id: "1",
@@ -224,18 +223,29 @@ export default function Skills() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [skills, setSkills] = useState<Skill[]>(sampleSkills);
   
-  // Get unique categories
-  const categories = Array.from(new Set(sampleSkills.map(skill => skill.category)));
+  const categories = Array.from(new Set(skills.map(skill => skill.category)));
   
-  // Filter skills based on search, category, and role
-  const filteredSkills = sampleSkills.filter(skill => {
+  const filteredSkills = skills.filter(skill => {
     const matchesSearch = skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         skill.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || skill.category === selectedCategory;
     const matchesRole = !selectedRole || roles.find(r => r.id === selectedRole)?.skills.includes(skill.id);
     return matchesSearch && matchesCategory && (selectedRole ? matchesRole : true);
   });
+
+  const handleImportComplete = (importedSkills: Skill[]) => {
+    setSkills(prevSkills => {
+      const existingNames = new Set(prevSkills.map(s => s.name.toLowerCase()));
+      const newSkills = importedSkills.filter(s => !existingNames.has(s.name.toLowerCase()));
+      const updatedSkills = [...prevSkills, ...newSkills];
+      return updatedSkills;
+    });
+    
+    toast.success(`Successfully imported ${importedSkills.length} skills`);
+  };
   
   return (
     <div className="space-y-6">
@@ -269,10 +279,16 @@ export default function Skills() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsAddSkillDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Skill
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
+            <FileUp className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button onClick={() => setIsAddSkillDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Skill
+          </Button>
+        </div>
       </div>
       
       <Tabs defaultValue="matrix" className="space-y-4">
@@ -646,6 +662,12 @@ export default function Skills() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ImportSkillsDialog 
+        open={isImportDialogOpen} 
+        onOpenChange={setIsImportDialogOpen} 
+        onImportComplete={handleImportComplete} 
+      />
     </div>
   );
 }
