@@ -12,6 +12,7 @@ import { AddSkillDialog } from "@/components/skills/AddSkillDialog";
 import { CareerPaths } from "@/components/skills/CareerPaths";
 import { RoleMapping } from "@/components/skills/RoleMapping";
 import { RoleSkillsMapping } from "@/components/skills/RoleSkillsMapping";
+import { toast } from "sonner";
 
 export default function Skills() {
   const [activeTab, setActiveTab] = useState("skills");
@@ -21,6 +22,22 @@ export default function Skills() {
   
   // Mock data - in real app this would come from API/database
   const categories = ["Technical", "Leadership", "Communication", "Project Management"];
+  
+  const mockEmployees = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Smith" }
+  ];
+
+  const mockRoles = [
+    { id: "1", name: "Frontend Developer" },
+    { id: "2", name: "Backend Developer" }
+  ];
+
+  const mockFilteredSkills = [
+    { id: "1", name: "JavaScript" },
+    { id: "2", name: "React" }
+  ];
+  
   const plans = [
     {
       id: "1",
@@ -29,9 +46,9 @@ export default function Skills() {
       skills: ["leadership", "communication", "mentoring"],
       description: "Development plan for engineering leaders",
       objectives: [
-        { id: "1", description: "Complete leadership workshop", dueDate: new Date(2023, 6, 15), status: "completed" },
-        { id: "2", description: "Mentor 2 junior developers", dueDate: new Date(2023, 8, 30), status: "in_progress" },
-        { id: "3", description: "Present at team knowledge sharing session", dueDate: new Date(2023, 9, 15), status: "not_started" }
+        { id: "1", description: "Complete leadership workshop", dueDate: new Date(2023, 6, 15), status: "completed" as const },
+        { id: "2", description: "Mentor 2 junior developers", dueDate: new Date(2023, 8, 30), status: "in_progress" as const },
+        { id: "3", description: "Present at team knowledge sharing session", dueDate: new Date(2023, 9, 15), status: "not_started" as const }
       ],
       createdAt: new Date(2023, 5, 1),
       modifiedAt: new Date(2023, 5, 1)
@@ -43,9 +60,9 @@ export default function Skills() {
       skills: ["react", "typescript", "ui-design"],
       description: "Skill development for frontend specialists",
       objectives: [
-        { id: "4", description: "Build 3 complex components", dueDate: new Date(2023, 7, 15), status: "in_progress" },
-        { id: "5", description: "Complete Advanced TypeScript course", dueDate: new Date(2023, 8, 20), status: "not_started" },
-        { id: "6", description: "Refactor legacy UI component", dueDate: new Date(2023, 9, 10), status: "not_started" }
+        { id: "4", description: "Build 3 complex components", dueDate: new Date(2023, 7, 15), status: "in_progress" as const },
+        { id: "5", description: "Complete Advanced TypeScript course", dueDate: new Date(2023, 8, 20), status: "not_started" as const },
+        { id: "6", description: "Refactor legacy UI component", dueDate: new Date(2023, 9, 10), status: "not_started" as const }
       ],
       createdAt: new Date(2023, 6, 1),
       modifiedAt: new Date(2023, 6, 5)
@@ -77,6 +94,14 @@ export default function Skills() {
       ]
     }
   ];
+
+  const handleImportComplete = () => {
+    toast.success("Skills imported successfully");
+  };
+
+  const handleCreatePlan = (plan: any) => {
+    toast.success(`Development plan "${plan.title}" created successfully`);
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -131,7 +156,11 @@ export default function Skills() {
         </TabsContent>
         
         <TabsContent value="role-mapping" className="space-y-4">
-          <RoleMapping />
+          <RoleMapping 
+            roles={mockRoles} 
+            skills={skills} 
+            filteredSkills={mockFilteredSkills} 
+          />
         </TabsContent>
 
         <TabsContent value="role-skills" className="space-y-4">
@@ -176,11 +205,15 @@ export default function Skills() {
       <ImportSkillsDialog
         open={showImportDialog}
         onOpenChange={setShowImportDialog}
+        onImportComplete={handleImportComplete}
       />
       
       <CreateDevelopmentPlanDialog
         open={showCreatePlanDialog}
         onOpenChange={setShowCreatePlanDialog}
+        onSubmit={handleCreatePlan}
+        skills={skills}
+        employees={mockEmployees}
       />
     </div>
   );
