@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ImportSkillsDialog } from "@/components/ImportSkillsDialog";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import { CreateDevelopmentPlanDialog, DevelopmentPlan } from "@/components/CreateDevelopmentPlanDialog";
 
 const sampleSkills: Skill[] = [
   {
@@ -218,13 +219,23 @@ const developmentPlans = [
   }
 ];
 
+const employees = [
+  { id: "1", name: "Alex Johnson" },
+  { id: "2", name: "Sam Wilson" },
+  { id: "3", name: "Taylor Rodriguez" },
+  { id: "4", name: "Jordan Lee" },
+  { id: "5", name: "Casey Martinez" }
+];
+
 export default function Skills() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isAddSkillDialogOpen, setIsAddSkillDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isCreatePlanDialogOpen, setIsCreatePlanDialogOpen] = useState(false);
   const [skills, setSkills] = useState<Skill[]>(sampleSkills);
+  const [plans, setPlans] = useState<DevelopmentPlan[]>(developmentPlans as DevelopmentPlan[]);
   
   const categories = Array.from(new Set(skills.map(skill => skill.category)));
   
@@ -245,6 +256,10 @@ export default function Skills() {
     });
     
     toast.success(`Successfully imported ${importedSkills.length} skills`);
+  };
+
+  const handleAddDevelopmentPlan = (newPlan: DevelopmentPlan) => {
+    setPlans(prevPlans => [newPlan, ...prevPlans]);
   };
   
   return (
@@ -431,7 +446,7 @@ export default function Skills() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {developmentPlans.map(plan => (
+                {plans.map(plan => (
                   <Card key={plan.id} className="overflow-hidden">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-lg">{plan.title}</CardTitle>
@@ -445,7 +460,7 @@ export default function Skills() {
                           <h4 className="text-sm font-medium mb-1">Target Skills</h4>
                           <div className="flex flex-wrap gap-1">
                             {plan.skills.map(skillId => {
-                              const skill = sampleSkills.find(s => s.id === skillId);
+                              const skill = skills.find(s => s.id === skillId);
                               return skill ? (
                                 <Badge key={skillId} variant="secondary">
                                   {skill.name}
@@ -458,25 +473,29 @@ export default function Skills() {
                         <div>
                           <h4 className="text-sm font-medium mb-1">Objectives</h4>
                           <ScrollArea className="h-32">
-                            <ul className="space-y-2">
-                              {plan.objectives.map(objective => (
-                                <li key={objective.id} className="flex items-start gap-2">
-                                  <div className={`w-2 h-2 rounded-full mt-1.5 ${
-                                    objective.status === 'completed' 
-                                      ? 'bg-green-500' 
-                                      : objective.status === 'in_progress' 
-                                        ? 'bg-amber-500' 
-                                        : 'bg-gray-300'
-                                  }`} />
-                                  <div>
-                                    <p className="text-sm">{objective.description}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                      Due: {objective.dueDate.toLocaleDateString()}
-                                    </p>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
+                            {plan.objectives.length > 0 ? (
+                              <ul className="space-y-2">
+                                {plan.objectives.map(objective => (
+                                  <li key={objective.id} className="flex items-start gap-2">
+                                    <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                                      objective.status === 'completed' 
+                                        ? 'bg-green-500' 
+                                        : objective.status === 'in_progress' 
+                                          ? 'bg-amber-500' 
+                                          : 'bg-gray-300'
+                                    }`} />
+                                    <div>
+                                      <p className="text-sm">{objective.description}</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        Due: {objective.dueDate.toLocaleDateString()}
+                                      </p>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">No objectives added yet.</p>
+                            )}
                           </ScrollArea>
                         </div>
                       </div>
@@ -487,13 +506,16 @@ export default function Skills() {
                   </Card>
                 ))}
                 
-                <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center h-60">
+                <div 
+                  className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center h-60 cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => setIsCreatePlanDialogOpen(true)}
+                >
                   <Target className="h-10 w-10 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium">Create New Plan</h3>
                   <p className="text-sm text-muted-foreground text-center mt-1 mb-4">
                     Set skill development goals for your team members
                   </p>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => setIsCreatePlanDialogOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
                     New Development Plan
                   </Button>
@@ -667,6 +689,14 @@ export default function Skills() {
         open={isImportDialogOpen} 
         onOpenChange={setIsImportDialogOpen} 
         onImportComplete={handleImportComplete} 
+      />
+
+      <CreateDevelopmentPlanDialog
+        open={isCreatePlanDialogOpen}
+        onOpenChange={setIsCreatePlanDialogOpen}
+        onSubmit={handleAddDevelopmentPlan}
+        skills={skills}
+        employees={employees}
       />
     </div>
   );
