@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, name: string, role?: UserRole) => Promise<boolean>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
   isLoading: boolean;
@@ -18,14 +19,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setIsLoading(true);
         
         if (session && session.user) {
           try {
-            // Check if user has a role in our system
             const { data: userRoles, error: roleError } = await supabase
               .from('user_roles')
               .select('role')
@@ -36,10 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.error('Error fetching user role:', roleError);
             }
 
-            // If user has no role, default to 'employee'
             const role = userRoles ? userRoles.role : 'employee';
 
-            // Create user object for our context
             const appUser: User = {
               id: session.user.id,
               name: session.user.user_metadata.full_name || session.user.email?.split('@')[0] || 'User',
@@ -60,22 +57,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
     const checkSession = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
-        // If no session, we can stop loading
         if (!data.session) {
-          // For demo purposes, still set default user in dev environment
           if (process.env.NODE_ENV === 'development') {
             setUser(defaultUser);
           }
           setIsLoading(false);
           return;
         }
-        
-        // Auth state change listener will handle setting the user
       } catch (error) {
         console.error('Session check error:', error);
         setIsLoading(false);
@@ -93,9 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // For demo purposes in development environment, allow demo credentials
       if (process.env.NODE_ENV === 'development') {
-        // Check if this is a demo user
         const demoUser = users.find(u => u.email === email && password === 'password123');
         
         if (demoUser) {
@@ -105,7 +95,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       
-      // Otherwise, try to authenticate with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -117,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      // User will be set by the auth state change listener
       setIsLoading(false);
       return true;
     } catch (error) {
@@ -127,20 +115,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signup = async (email: string, password: string, name: string, role: UserRole = 'employee'): Promise<boolean> => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            role: role
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('Signup error:', error);
+        setIsLoading(false);
+        return false;
+      }
+      
+      if (process.env.NODE_ENV === 'development') {
+        const newUser: User = {
+          id: data.user?.id || '',
+          name,
+          email,
+          role,
+          profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
+        };
+        users.push(newUser);
+      }
+      
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error('Signup error:', error);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
-      // For demo purposes, if we're in development and the user was demo, clear it
       if (process.env.NODE_ENV === 'development') {
         setUser(null);
       }
-      // User will be set to null by the auth state change listener for real auth
     } catch (error) {
       console.error('Logout error:', error);
     }
   };
 
-  // For demo purposes - allows switching between roles
   const switchRole = (role: UserRole) => {
     const roleUsers = {
       employee: users.find(u => u.role === 'employee'),
@@ -153,7 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, switchRole, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, switchRole, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

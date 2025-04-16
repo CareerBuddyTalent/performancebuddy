@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -11,32 +12,30 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  role: z.enum(['employee', 'manager', 'admin']).optional().default('employee')
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function Login() {
-  const { login } = useAuth();
+export default function Signup() {
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const demoCredentials = [
-    { role: "Employee", email: "bob@example.com", password: "password123" },
-    { role: "Manager", email: "jane@example.com", password: "password123" },
-    { role: "Admin (CEO)", email: "john@example.com", password: "password123" },
-  ];
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
+      role: "employee"
     },
   });
 
@@ -45,31 +44,20 @@ export default function Login() {
     setError(null);
     
     try {
-      const success = await login(data.email, data.password);
+      const success = await signup(data.email, data.password, data.name, data.role);
       
       if (success) {
-        toast.success("Login successful!");
+        toast.success("Account created successfully!");
         navigate("/dashboard");
       } else {
-        if (demoCredentials.some(cred => cred.email === data.email)) {
-          setError("Demo login is enabled. Make sure you're using 'password123' as the password.");
-        } else {
-          setError("Invalid email or password. Try one of the demo credentials below.");
-        }
+        setError("Failed to create account. Please try again.");
       }
     } catch (err) {
-      setError("An error occurred while trying to log in. Please try again.");
+      setError("An error occurred while trying to sign up. Please try again.");
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fillDemoCredentials = (email: string, password: string) => {
-    form.setValue("email", email);
-    form.setValue("password", password);
-    
-    form.trigger();
   };
 
   return (
@@ -78,7 +66,7 @@ export default function Login() {
         <Card className="w-full">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-primary">PerformPath</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
+            <CardDescription>Create your account</CardDescription>
           </CardHeader>
           <CardContent>
             {error && (
@@ -90,6 +78,22 @@ export default function Login() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="John Doe"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="email"
@@ -118,7 +122,7 @@ export default function Login() {
                         <Input
                           placeholder="••••••••"
                           type="password"
-                          autoComplete="current-password"
+                          autoComplete="new-password"
                           {...field}
                         />
                       </FormControl>
@@ -126,46 +130,52 @@ export default function Login() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="employee">Employee</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? "Creating Account..." : "Sign Up"}
                 </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex flex-col">
-            <div className="text-sm text-muted-foreground mb-4">
-              <p className="mb-2 font-medium">Demo Credentials:</p>
-              <div className="space-y-2">
-                {demoCredentials.map((cred, index) => (
-                  <div key={index} className="flex items-center justify-between border p-2 rounded-md">
-                    <div>
-                      <span className="font-medium">{cred.role}:</span> {cred.email}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => fillDemoCredentials(cred.email, cred.password)}
-                    >
-                      Use
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="text-center">
-              <p>Don't have an account? {" "}
-                <Link 
-                  to="/signup" 
-                  className="text-primary hover:underline"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
+          <CardFooter className="justify-center">
+            <p className="text-sm text-muted-foreground">
+              Already have an account? {" "}
+              <Button 
+                variant="link" 
+                size="sm" 
+                onClick={() => navigate("/login")}
+              >
+                Log in
+              </Button>
+            </p>
           </CardFooter>
         </Card>
       </div>
     </div>
   );
 }
+
