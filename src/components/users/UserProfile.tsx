@@ -3,7 +3,10 @@ import { User } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Building, Users, LineChart } from "lucide-react";
+import { Mail, Building, Users, LineChart, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface UserProfileProps {
   user: User;
@@ -22,6 +25,9 @@ export default function UserProfile({
   userSkills,
   getPerformanceColor
 }: UserProfileProps) {
+  const { user: currentUser } = useAuth();
+  const canViewDetails = currentUser?.role === 'admin' || currentUser?.role === 'manager';
+
   return (
     <Card className="md:w-1/3">
       <CardContent className="p-6">
@@ -73,6 +79,17 @@ export default function UserProfile({
                 <div className="text-xl font-bold">{userSkills.length}</div>
               </div>
             </div>
+            
+            {canViewDetails && (
+              <div className="mt-6">
+                <Button asChild variant="outline" className="w-full">
+                  <Link to={`/dashboard?userId=${user.id}`} className="inline-flex items-center">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Performance Analytics
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

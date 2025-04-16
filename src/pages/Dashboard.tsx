@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReviewProgress from "@/components/ReviewProgress";
 import RatingsGraph from "@/components/RatingsGraph";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { reviews, goals, feedbackEntries, users, parameters } from "@/data/mockData";
 import { PerformanceReview } from "@/types";
 
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [teamReviews, setTeamReviews] = useState<PerformanceReview[]>([]);
   const [myReviews, setMyReviews] = useState<PerformanceReview[]>([]);
+  const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
   
   useEffect(() => {
     if (!user) return;
@@ -76,6 +78,11 @@ export default function Dashboard() {
   ]
   .sort((a, b) => b.date.getTime() - a.date.getTime())
   .slice(0, 5);
+
+  // Handle timeframe change for analytics dashboard
+  const handleTimeframeChange = (newTimeframe: 'week' | 'month' | 'quarter' | 'year') => {
+    setTimeframe(newTimeframe);
+  };
 
   if (!user) return null;
 
@@ -160,7 +167,9 @@ export default function Dashboard() {
         </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4">
-          <div className="grid gap-4">
+          {(user.role === 'admin' || user.role === 'manager') ? (
+            <AnalyticsDashboard timeframe={timeframe} onTimeframeChange={handleTimeframeChange} />
+          ) : (
             <Card>
               <CardHeader>
                 <CardTitle>Performance Trends</CardTitle>
@@ -172,7 +181,7 @@ export default function Dashboard() {
                 </p>
               </CardContent>
             </Card>
-          </div>
+          )}
         </TabsContent>
         
         <TabsContent value="activity" className="space-y-4">
