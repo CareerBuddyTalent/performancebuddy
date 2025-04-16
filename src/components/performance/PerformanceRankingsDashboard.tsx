@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowUp, ArrowDown, Trophy, AlertTriangle } from "lucide-react";
+import { Trophy, AlertTriangle } from "lucide-react";
 import UserPerformanceRanking from "@/components/UserPerformanceRanking";
 import { calculatePerformanceScores } from "@/utils/performanceUtils";
 import TopUnderperformers from "./TopUnderperformers";
@@ -48,81 +48,91 @@ export default function PerformanceRankingsDashboard() {
   }, [filter, selectedDepartment, selectedCycle]);
   
   return (
-    <Card>
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <CardTitle>Performance Rankings</CardTitle>
-          <CardDescription>
-            View top performers and those needing improvement
-          </CardDescription>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-end gap-2">
-          <Tabs value={filter} onValueChange={(value) => setFilter(value as any)} className="w-[200px]">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="department">Department</TabsTrigger>
-              <TabsTrigger value="cycle">Cycle</TabsTrigger>
-            </TabsList>
-          </Tabs>
+    <Card className="shadow-md">
+      <CardHeader className="border-b bg-muted/30">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-xl">Performance Rankings</CardTitle>
+            <CardDescription>
+              View top performers and those needing improvement
+            </CardDescription>
+          </div>
           
-          {filter === 'department' && (
-            <Select
-              value={selectedDepartment}
-              onValueChange={setSelectedDepartment}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {uniqueDepartments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          
-          {filter === 'cycle' && (
-            <Select
-              value={selectedCycle}
-              onValueChange={setSelectedCycle}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Cycle" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cycles</SelectItem>
-                {availableCycles.map((cycle) => (
-                  <SelectItem key={cycle.id} value={cycle.id}>
-                    {cycle.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <div className="flex flex-col sm:flex-row items-end gap-2">
+            <Tabs value={filter} onValueChange={(value) => setFilter(value as any)} className="w-[200px]">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="department">Department</TabsTrigger>
+                <TabsTrigger value="cycle">Cycle</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            {filter === 'department' && (
+              <Select
+                value={selectedDepartment}
+                onValueChange={setSelectedDepartment}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {uniqueDepartments.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            
+            {filter === 'cycle' && (
+              <Select
+                value={selectedCycle}
+                onValueChange={setSelectedCycle}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select Cycle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Cycles</SelectItem>
+                  {availableCycles.map((cycle) => (
+                    <SelectItem key={cycle.id} value={cycle.id}>
+                      {cycle.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <div className="flex items-center mb-4">
-              <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
-              <h3 className="text-lg font-medium">Top Performers</h3>
-            </div>
-            <UserPerformanceRanking users={filteredUsers} limit={5} />
-          </div>
+      <CardContent className="p-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-2">
+              <div className="flex items-center">
+                <Trophy className="mr-2 h-5 w-5 text-yellow-500" />
+                <h3 className="text-lg font-medium">Top Performers</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <UserPerformanceRanking users={filteredUsers} limit={5} />
+            </CardContent>
+          </Card>
           
-          <div>
-            <div className="flex items-center mb-4">
-              <AlertTriangle className="mr-2 h-5 w-5 text-orange-500" />
-              <h3 className="text-lg font-medium">Needs Improvement</h3>
-            </div>
-            <TopUnderperformers users={filteredUsers} limit={5} />
-          </div>
+          <Card className="border shadow-sm">
+            <CardHeader className="pb-2">
+              <div className="flex items-center">
+                <AlertTriangle className="mr-2 h-5 w-5 text-orange-500" />
+                <h3 className="text-lg font-medium">Needs Improvement</h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <TopUnderperformers users={filteredUsers} limit={5} />
+            </CardContent>
+          </Card>
         </div>
       </CardContent>
     </Card>

@@ -11,6 +11,14 @@ export default function TopPerformers({ performers }: TopPerformersProps) {
   // Get top 3 performers
   const topPerformers = performers.slice(0, 3);
   
+  if (topPerformers.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No top performers data available
+      </div>
+    );
+  }
+  
   return (
     <div>
       <h3 className="text-lg font-medium flex items-center mb-4">
@@ -18,7 +26,7 @@ export default function TopPerformers({ performers }: TopPerformersProps) {
         Top Performers
       </h3>
       
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {topPerformers.map((performer) => (
           <PerformerCard key={performer.userId} performer={performer} />
         ))}
