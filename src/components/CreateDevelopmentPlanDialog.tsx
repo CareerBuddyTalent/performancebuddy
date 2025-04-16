@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Skill } from "@/types";
+import { Skill, DevelopmentPlan } from "@/types";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,22 +32,6 @@ interface CreateDevelopmentPlanDialogProps {
   onSubmit: (data: DevelopmentPlan) => void;
   skills: Skill[];
   employees: { id: string; name: string }[];
-}
-
-export interface DevelopmentPlan {
-  id: string;
-  employeeId: string;
-  title: string;
-  skills: string[];
-  description?: string;
-  objectives: {
-    id: string;
-    description: string;
-    dueDate: Date;
-    status: "not_started" | "in_progress" | "completed";
-  }[];
-  createdAt: Date;
-  modifiedAt: Date;
 }
 
 export function CreateDevelopmentPlanDialog({
