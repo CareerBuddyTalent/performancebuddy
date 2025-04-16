@@ -1,4 +1,3 @@
-
 import { User, PerformanceParameter, ReviewCycle, PerformanceReview, Goal, Feedback } from '@/types';
 
 // Mock Users
@@ -176,9 +175,10 @@ export const goals: Goal[] = [
     dueDate: new Date('2024-09-30'),
     status: 'in_progress',
     progress: 40,
-          alignedWith: "Expand mobile development capabilities",
-          createdAt: new Date('2024-01-15'),
-          updatedAt: new Date('2024-06-01'),
+    alignedWith: "Expand mobile development capabilities",
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-06-01'),
+    level: 'individual',
   },
   {
     id: 'g2',
@@ -188,9 +188,10 @@ export const goals: Goal[] = [
     dueDate: new Date('2024-08-31'),
     status: 'in_progress',
     progress: 60,
-          alignedWith: "Engineering excellence",
-          createdAt: new Date('2024-01-15'),
-          updatedAt: new Date('2024-06-01'),
+    alignedWith: "Engineering excellence",
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-06-01'),
+    level: 'individual',
   },
   {
     id: 'g3',
@@ -200,9 +201,10 @@ export const goals: Goal[] = [
     dueDate: new Date('2024-07-31'),
     status: 'in_progress',
     progress: 75,
-          alignedWith: "Engineering excellence",
-          createdAt: new Date('2024-01-20'),
-          updatedAt: new Date('2024-06-01'),
+    alignedWith: "Engineering excellence",
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date('2024-06-01'),
+    level: 'individual',
   },
   {
     id: 'g4',
@@ -212,9 +214,10 @@ export const goals: Goal[] = [
     dueDate: new Date('2024-12-31'),
     status: 'in_progress',
     progress: 30,
-          alignedWith: "Engineering efficiency",
-          createdAt: new Date('2024-01-10'),
-          updatedAt: new Date('2024-05-28'),
+    alignedWith: "Engineering efficiency",
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-05-28'),
+    level: 'team',
   },
 ];
 
