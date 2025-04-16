@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dropdown, DropdownContent, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui/dropdown-menu"; 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"; 
 import { Button } from "@/components/ui/button";
 import { Skill, SkillLevel } from "@/types";
 import { MoreHorizontal, LineChart, FileText, Download } from "lucide-react";
@@ -157,9 +157,17 @@ export default function SkillsMatrix({ skills, selectedCategory }: SkillsMatrixP
                         </ul>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>Edit Level</DropdownMenuItem>
+                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}

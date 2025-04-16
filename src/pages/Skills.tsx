@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -613,7 +612,7 @@ export default function Skills() {
                   {categories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}
-                  <SelectItem value="new">+ Add New Category</SelectItem>
+                  <SelectItem value="new_category">+ Add New Category</SelectItem>
                 </SelectContent>
               </Select>
             </div>
