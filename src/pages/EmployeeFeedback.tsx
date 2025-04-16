@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FeedbackCard from "@/components/FeedbackCard";
+import FeedbackDialog from "@/components/FeedbackDialog";
 import { feedbackEntries, users } from "@/data/mockData";
 import { Feedback } from "@/types";
 import { MessageSquareText, Search, SendHorizontal } from "lucide-react";
@@ -13,12 +14,14 @@ import { MessageSquareText, Search, SendHorizontal } from "lucide-react";
 export default function EmployeeFeedback() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [feedbackList, setFeedbackList] = useState(feedbackEntries);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   
   if (!user) return null;
   
   // Filter feedback based on user role and search query
-  const receivedFeedback = feedbackEntries.filter(f => f.recipientId === user.id);
-  const sentFeedback = feedbackEntries.filter(f => f.senderId === user.id);
+  const receivedFeedback = feedbackList.filter(f => f.recipientId === user.id);
+  const sentFeedback = feedbackList.filter(f => f.senderId === user.id);
   
   const filteredReceivedFeedback = receivedFeedback.filter(feedback => 
     feedback.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -27,6 +30,10 @@ export default function EmployeeFeedback() {
   const filteredSentFeedback = sentFeedback.filter(feedback => 
     feedback.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  const handleAddFeedback = (newFeedback: Feedback) => {
+    setFeedbackList(prev => [newFeedback, ...prev]);
+  };
   
   return (
     <div className="space-y-6">
@@ -49,7 +56,7 @@ export default function EmployeeFeedback() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button>
+        <Button onClick={() => setShowFeedbackDialog(true)}>
           <SendHorizontal className="mr-2 h-4 w-4" />
           Give Feedback
         </Button>
@@ -111,6 +118,13 @@ export default function EmployeeFeedback() {
           )}
         </TabsContent>
       </Tabs>
+      
+      <FeedbackDialog
+        open={showFeedbackDialog}
+        onOpenChange={setShowFeedbackDialog}
+        onSubmit={handleAddFeedback}
+        currentUser={user}
+      />
     </div>
   );
 }
