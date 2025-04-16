@@ -9,16 +9,137 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      career_paths: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      career_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_position: number | null
+          path_id: string | null
+          title: string
+          years_experience: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_position?: number | null
+          path_id?: string | null
+          title: string
+          years_experience?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_position?: number | null
+          path_id?: string | null
+          title?: string
+          years_experience?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_roles_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "career_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_skills: {
+        Row: {
+          created_at: string | null
+          id: string
+          proficiency_level: number | null
+          role_id: string | null
+          skill_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          proficiency_level?: number | null
+          role_id?: string | null
+          skill_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          proficiency_level?: number | null
+          role_id?: string | null
+          skill_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_skills_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "career_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "manager" | "employee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +254,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "manager", "employee"],
+    },
   },
 } as const
