@@ -15,16 +15,17 @@ import {
   ClipboardList,
   CalendarDays
 } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  isCollapsed: boolean;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export default function AppSidebar({ className, isCollapsed }: SidebarProps) {
+export default function AppSidebar({ className }: SidebarProps) {
   const { pathname } = useLocation();
   const { user } = useAuth();
+  const { expanded } = useSidebar();
   const isAdmin = user?.role === "admin";
   const isManager = user?.role === "manager";
+  const isCollapsed = !expanded;
 
   return (
     <div className={cn("flex flex-col h-screen border-r", className)}>
