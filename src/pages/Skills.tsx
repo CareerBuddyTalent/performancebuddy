@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,10 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Search, Plus, GraduationCap, Users, Target, ListChecks, FileUp } from "lucide-react";
 import SkillsMatrix from "@/components/SkillsMatrix";
-import { Skill } from "@/types";
+import { Skill, DevelopmentPlan } from "@/types";
 import { ImportSkillsDialog } from "@/components/ImportSkillsDialog";
 import { toast } from "sonner";
-import { DevelopmentPlan } from "@/components/CreateDevelopmentPlanDialog";
 import { RoleMapping } from "@/components/skills/RoleMapping";
 import { DevelopmentPlans } from "@/components/skills/DevelopmentPlans";
 import { CareerPaths } from "@/components/skills/CareerPaths";
