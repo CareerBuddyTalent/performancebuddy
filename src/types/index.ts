@@ -132,6 +132,22 @@ export interface ImprovementPlan {
   }[];
 }
 
+export interface DevelopmentPlan {
+  id: string;
+  employeeId: string;
+  title: string;
+  skills: string[];
+  description?: string;
+  objectives: {
+    id: string;
+    description: string;
+    dueDate: Date;
+    status: "not_started" | "in_progress" | "completed";
+  }[];
+  createdAt: Date;
+  modifiedAt: Date;
+}
+
 export interface Survey {
   id: string;
   title: string;
