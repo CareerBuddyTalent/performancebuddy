@@ -314,7 +314,7 @@ export default function Skills() {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Roles</SelectItem>
+                      <SelectItem value="none">All Roles</SelectItem>
                       {roles.map(role => (
                         <SelectItem key={role.id} value={role.id}>{role.title} ({role.department})</SelectItem>
                       ))}
@@ -587,7 +587,6 @@ export default function Skills() {
         </TabsContent>
       </Tabs>
       
-      {/* Add New Skill Dialog */}
       <Dialog open={isAddSkillDialogOpen} onOpenChange={setIsAddSkillDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
