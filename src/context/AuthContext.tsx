@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { users, currentUser as defaultUser } from '@/data/mockData';
@@ -94,7 +93,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // In a real app, this would validate against Supabase Auth
+      // For demo purposes in development environment, allow demo credentials
+      if (process.env.NODE_ENV === 'development') {
+        // Check if this is a demo user
+        const demoUser = users.find(u => u.email === email && password === 'password123');
+        
+        if (demoUser) {
+          setUser(demoUser);
+          setIsLoading(false);
+          return true;
+        }
+      }
+      
+      // Otherwise, try to authenticate with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -119,7 +130,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await supabase.auth.signOut();
-      // User will be set to null by the auth state change listener
+      // For demo purposes, if we're in development and the user was demo, clear it
+      if (process.env.NODE_ENV === 'development') {
+        setUser(null);
+      }
+      // User will be set to null by the auth state change listener for real auth
     } catch (error) {
       console.error('Logout error:', error);
     }

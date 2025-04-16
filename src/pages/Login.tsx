@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -48,9 +49,15 @@ export default function Login() {
       const success = await login(data.email, data.password);
       
       if (success) {
+        toast.success("Login successful!");
         navigate("/dashboard");
       } else {
-        setError("Invalid email or password. Try one of the demo credentials below.");
+        // Show a more specific error message about demo credentials
+        if (demoCredentials.some(cred => cred.email === data.email)) {
+          setError("Demo login is enabled. Make sure you're using 'password123' as the password.");
+        } else {
+          setError("Invalid email or password. Try one of the demo credentials below.");
+        }
       }
     } catch (err) {
       setError("An error occurred while trying to log in. Please try again.");
@@ -63,6 +70,9 @@ export default function Login() {
   const fillDemoCredentials = (email: string, password: string) => {
     form.setValue("email", email);
     form.setValue("password", password);
+    
+    // Optional: Also trigger validation to clear any validation errors
+    form.trigger();
   };
 
   return (
