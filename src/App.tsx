@@ -12,6 +12,8 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import EmployeeGoals from "./pages/EmployeeGoals";
 import EmployeeFeedback from "./pages/EmployeeFeedback";
+import Skills from "./pages/Skills";
+import Surveys from "./pages/Surveys";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +74,22 @@ const App = () => (
               <ProtectedRoute>
                 <PageLayout>
                   <EmployeeFeedback />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/skills" element={
+              <ProtectedRoute>
+                <PageLayout>
+                  <Skills />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/surveys" element={
+              <ProtectedRoute>
+                <PageLayout>
+                  <Surveys />
                 </PageLayout>
               </ProtectedRoute>
             } />

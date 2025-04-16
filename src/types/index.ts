@@ -10,6 +10,8 @@ export interface User {
   department?: string;
   position?: string;
   manager?: string;
+  skills?: string[]; // IDs of skills the user has
+  competencyLevel?: Record<string, number>; // Skill ID to level (1-5) mapping
 }
 
 export interface PerformanceParameter {
@@ -43,6 +45,7 @@ export interface PerformanceReview {
   feedback: string;
   createdAt: Date;
   updatedAt: Date;
+  improvementPlan?: ImprovementPlan; // Optional improvement plan
 }
 
 export interface Goal {
@@ -56,6 +59,30 @@ export interface Goal {
   alignedWith?: string; // department or company goal
   createdAt: Date;
   updatedAt: Date;
+  // New fields for enhanced goal tracking
+  integrations?: {
+    type: 'salesforce' | 'jira' | 'notion';
+    entityId: string;
+    lastSynced?: Date;
+  }[];
+  milestones?: Milestone[];
+  level: 'individual' | 'team' | 'department' | 'company';
+  metrics?: {
+    name: string;
+    target: number;
+    current: number;
+    unit: string;
+  }[];
+}
+
+export interface Milestone {
+  id: string;
+  goalId: string;
+  title: string;
+  description?: string;
+  dueDate: Date;
+  status: 'not_started' | 'in_progress' | 'completed';
+  completedDate?: Date;
 }
 
 export interface Feedback {
@@ -67,3 +94,73 @@ export interface Feedback {
   isAnonymous: boolean;
   createdAt: Date;
 }
+
+export interface Skill {
+  id: string;
+  name: string;
+  description: string;
+  category: string; // Technical, Soft skill, Leadership, etc.
+  levels: SkillLevel[];
+}
+
+export interface SkillLevel {
+  level: number; // 1-5
+  description: string;
+  expectations: string[];
+  examples?: string[];
+}
+
+export interface ImprovementPlan {
+  id: string;
+  reviewId: string;
+  employeeId: string;
+  managerId: string;
+  startDate: Date;
+  endDate: Date;
+  status: 'active' | 'completed' | 'failed';
+  objectives: {
+    id: string;
+    description: string;
+    success_criteria: string;
+    status: 'not_started' | 'in_progress' | 'completed';
+  }[];
+  meetings: {
+    id: string;
+    date: Date;
+    notes: string;
+    attendees: string[]; // User IDs
+  }[];
+}
+
+export interface Survey {
+  id: string;
+  title: string;
+  description: string;
+  questions: SurveyQuestion[];
+  targetAudience: 'all' | 'department' | 'team';
+  audienceIds?: string[]; // Department or team IDs
+  status: 'draft' | 'active' | 'closed';
+  startDate: Date;
+  endDate: Date;
+  responses: SurveyResponse[];
+}
+
+export interface SurveyQuestion {
+  id: string;
+  text: string;
+  type: 'rating' | 'multiple_choice' | 'text';
+  options?: string[]; // For multiple choice
+  required: boolean;
+}
+
+export interface SurveyResponse {
+  id: string;
+  surveyId: string;
+  userId: string;
+  answers: {
+    questionId: string;
+    answer: string | number;
+  }[];
+  submittedAt: Date;
+}
+
