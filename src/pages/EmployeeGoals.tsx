@@ -6,13 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import GoalCard from "@/components/GoalCard";
-import { goals } from "@/data/mockData";
+import AddGoalDialog from "@/components/AddGoalDialog";
+import { goals as initialGoals } from "@/data/mockData";
 import { Goal } from "@/types";
 import { Plus, Search } from "lucide-react";
 
 export default function EmployeeGoals() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [goals, setGoals] = useState(initialGoals);
+  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [goalTypeToAdd, setGoalTypeToAdd] = useState<"individual" | "team">("individual");
   
   if (!user) return null;
   
@@ -30,6 +34,17 @@ export default function EmployeeGoals() {
   const activeGoals = filteredGoals.filter(g => g.status === 'in_progress');
   const completedGoals = filteredGoals.filter(g => g.status === 'completed');
   const notStartedGoals = filteredGoals.filter(g => g.status === 'not_started');
+  
+  // Handler for adding a new goal
+  const handleAddGoal = (newGoal: Goal) => {
+    setGoals(prevGoals => [...prevGoals, newGoal]);
+  };
+  
+  // Handler for opening the add goal dialog
+  const handleOpenAddGoal = (type: "individual" | "team") => {
+    setGoalTypeToAdd(type);
+    setIsAddGoalOpen(true);
+  };
   
   return (
     <div className="space-y-6">
@@ -54,7 +69,7 @@ export default function EmployeeGoals() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button>
+        <Button onClick={() => handleOpenAddGoal(user.role === 'employee' ? 'individual' : 'team')}>
           <Plus className="mr-2 h-4 w-4" />
           {user.role === 'employee' ? 'Add New Goal' : 'Create Team Goal'}
         </Button>
@@ -134,6 +149,15 @@ export default function EmployeeGoals() {
           )}
         </TabsContent>
       </Tabs>
+      
+      {/* Add Goal Dialog */}
+      <AddGoalDialog 
+        open={isAddGoalOpen} 
+        onOpenChange={setIsAddGoalOpen}
+        onGoalAdded={handleAddGoal}
+        defaultLevel={goalTypeToAdd}
+        userId={user.id}
+      />
     </div>
   );
 }
