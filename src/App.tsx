@@ -14,6 +14,8 @@ import EmployeeGoals from "./pages/EmployeeGoals";
 import EmployeeFeedback from "./pages/EmployeeFeedback";
 import Skills from "./pages/Skills";
 import Surveys from "./pages/Surveys";
+import UserManagement from "./pages/UserManagement";
+import UserDetail from "./pages/UserDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +92,22 @@ const App = () => (
               <ProtectedRoute>
                 <PageLayout>
                   <Surveys />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/users" element={
+              <ProtectedRoute>
+                <PageLayout>
+                  <UserManagement />
+                </PageLayout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/user/:userId" element={
+              <ProtectedRoute>
+                <PageLayout>
+                  <UserDetail />
                 </PageLayout>
               </ProtectedRoute>
             } />

@@ -27,7 +27,8 @@ import {
   Settings, 
   LogOut, 
   User, 
-  Home 
+  Home, 
+  Building
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -41,26 +42,29 @@ export function AppSidebar() {
 
   // Define menus based on user role
   const adminMenuItems = [
-    { to: "/", icon: <Home />, label: "Home" },
+    { to: "/home", icon: <Home />, label: "Home" },
     { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
-    { to: "/employees", icon: <Users />, label: "Employees" },
+    { to: "/users", icon: <Users />, label: "User Management" },
     { to: "/reviews", icon: <FileText />, label: "Reviews" },
+    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
     { to: "/parameters", icon: <Settings />, label: "Parameters" },
   ];
 
   const managerMenuItems = [
-    { to: "/", icon: <Home />, label: "Home" },
+    { to: "/home", icon: <Home />, label: "Home" },
     { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
-    { to: "/team", icon: <Users />, label: "My Team" },
+    { to: "/users", icon: <Users />, label: "Team Members" },
     { to: "/reviews", icon: <FileText />, label: "Reviews" },
+    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
   ];
 
   const employeeMenuItems = [
-    { to: "/", icon: <Home />, label: "Home" },
+    { to: "/home", icon: <Home />, label: "Home" },
     { to: "/dashboard", icon: <BarChart4 />, label: "Dashboard" },
     { to: "/my-reviews", icon: <FileText />, label: "My Reviews" },
     { to: "/goals", icon: <Target />, label: "Goals" },
     { to: "/feedback", icon: <MessageSquareMore />, label: "Feedback" },
+    { to: "/skills", icon: <Building />, label: "Skills & Competencies" },
   ];
 
   // Select menu based on role
