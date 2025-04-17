@@ -313,6 +313,7 @@ const SidebarMenuButton = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { 
     asChild?: boolean;
     "data-active"?: boolean;
+    className?: string;  // Add this line to accept className
   }
 >(({ className, children, asChild = false, "data-active": active, ...props }, ref) => {
   const { expanded } = useSidebar()
@@ -325,7 +326,7 @@ const SidebarMenuButton = React.forwardRef<
         ref={ref}
         className={cn(
           "group relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg p-3 text-center hover:bg-primary/10 hover:text-sidebar-foreground focus:outline-none active:bg-primary/20 data-[active=true]:text-sidebar-primary",
-          className
+          className  // Use cn to merge classNames
         )}
         data-active={active}
         {...props}
@@ -353,7 +354,7 @@ const SidebarMenuButton = React.forwardRef<
       ref={ref}
       className={cn(
         "relative flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-primary/10 hover:text-sidebar-foreground active:bg-primary/20 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
-        className
+        className  // Use cn to merge classNames
       )}
       data-active={active}
       {...props}
