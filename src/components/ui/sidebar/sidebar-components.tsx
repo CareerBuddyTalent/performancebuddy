@@ -12,7 +12,7 @@ export const Sidebar = React.forwardRef<
   <aside
     ref={ref}
     className={cn(
-      "group fixed inset-y-0 left-0 z-20 flex h-full shrink-0 flex-col border-r bg-background text-foreground transition-[width] ease-in-out focus:outline-none data-[expanded=false]:w-[70px] data-[expanded=true]:w-64 md:relative xl:data-[expanded=false]:w-[288px]",
+      "group fixed inset-y-0 left-0 z-20 flex h-full shrink-0 flex-col border-r bg-white text-black transition-[width] ease-in-out focus:outline-none data-[expanded=false]:w-[70px] data-[expanded=true]:w-64 md:relative xl:data-[expanded=false]:w-[288px]",
       className
     )}
     data-expanded="true"
@@ -75,7 +75,7 @@ export const SidebarTrigger = ({ className }: { className?: string }) => {
   return (
     <button
       className={cn(
-        "inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-primary/10 active:bg-primary/50",
+        "inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-gray-200 active:bg-gray-300",
         className
       )}
       onClick={toggle}
@@ -121,7 +121,7 @@ export const SidebarCollapse = () => {
   const { expanded, toggle } = useSidebar()
   return (
     <div className="relative hidden h-6 pr-4 text-right md:block">
-      <div className="absolute -right-3 top-0 z-10 h-6 w-6 cursor-pointer rounded-full border bg-background">
+      <div className="absolute -right-3 top-0 z-10 h-6 w-6 cursor-pointer rounded-full border bg-white">
         <div
           role="button"
           onClick={toggle}
