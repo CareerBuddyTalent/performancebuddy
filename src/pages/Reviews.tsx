@@ -4,7 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import ActiveReviewCycle from "@/components/reviews/ActiveReviewCycle";
-import { mockParameters, mockActiveCycle } from "@/components/reviews/mockReviewData";
+import PastReviews from "@/components/reviews/PastReviews";
+import { mockParameters, mockActiveCycle, mockPastReviews } from "@/components/reviews/mockReviewData";
 
 export default function Reviews() {
   const { user } = useAuth();
@@ -49,6 +50,8 @@ export default function Reviews() {
         parameters={mockParameters}
         onSubmit={handleSubmitReview}
       />
+
+      <PastReviews reviews={mockPastReviews} />
     </div>
   );
 }
