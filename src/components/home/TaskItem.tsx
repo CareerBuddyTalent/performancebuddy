@@ -2,7 +2,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { 
+  MoreHorizontal, 
+  FileText, 
+  MessageSquare, 
+  TrendingUp, 
+  Clock, 
+  FileCheck, 
+  UserPlus 
+} from "lucide-react";
 import { ReactNode } from "react";
 
 interface TaskAssignee {
@@ -18,15 +26,25 @@ interface TaskItemProps {
   type: string;
   assignee: TaskAssignee;
   action: string;
-  icon: ReactNode;
+  iconType: string;
 }
+
+// Map of icon types to their components
+const iconComponents: Record<string, ReactNode> = {
+  FileText: <FileText className="h-5 w-5 text-white" />,
+  MessageSquare: <MessageSquare className="h-5 w-5 text-white" />,
+  TrendingUp: <TrendingUp className="h-5 w-5 text-white" />,
+  Clock: <Clock className="h-5 w-5 text-white" />,
+  UserPlus: <UserPlus className="h-5 w-5 text-white" />,
+  FileCheck: <FileCheck className="h-5 w-5 text-white" />
+};
 
 export default function TaskItem({ task }: { task: TaskItemProps }) {
   return (
     <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-          {task.icon}
+          {iconComponents[task.iconType]}
         </div>
         <div>
           <div className="font-medium">{task.title}</div>

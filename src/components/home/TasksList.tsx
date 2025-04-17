@@ -1,6 +1,5 @@
 
 import TaskItem from "./TaskItem";
-import { ReactNode } from "react";
 
 interface TaskAssignee {
   name: string;
@@ -15,7 +14,7 @@ interface TaskItemProps {
   type: string;
   assignee: TaskAssignee;
   action: string;
-  icon: ReactNode;
+  iconType: string;
 }
 
 export default function TasksList({ tasks }: { tasks: TaskItemProps[] }) {

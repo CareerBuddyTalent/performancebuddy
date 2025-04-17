@@ -1,9 +1,5 @@
 
 import { ReactNode } from "react";
-import { 
-  FileText, MessageSquare, TrendingUp, 
-  Clock, FileCheck, UserPlus 
-} from "lucide-react";
 
 // Mock data for notifications
 export const notifications = [
@@ -49,7 +45,7 @@ export const getTasksMockData = () => [
     type: "Performance", 
     assignee: { name: "Jane Doe", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
     action: "Review",
-    icon: <FileText className="h-5 w-5 text-white" />
+    iconType: "FileText"
   },
   { 
     id: 2, 
@@ -58,7 +54,7 @@ export const getTasksMockData = () => [
     type: "Interview", 
     assignee: { name: "Franco Delort", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
     action: "Add feedback",
-    icon: <MessageSquare className="h-5 w-5 text-white" />
+    iconType: "MessageSquare"
   },
   { 
     id: 3, 
@@ -67,7 +63,7 @@ export const getTasksMockData = () => [
     type: "Performance", 
     assignee: { name: "Ronald Edgar", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png", initial: "RE" },
     action: "Take action",
-    icon: <TrendingUp className="h-5 w-5 text-white" />
+    iconType: "TrendingUp"
   },
   { 
     id: 4, 
@@ -76,7 +72,7 @@ export const getTasksMockData = () => [
     type: "Time Off", 
     assignee: { name: "Ruchir Gupta", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
     action: "Approve",
-    icon: <Clock className="h-5 w-5 text-white" />
+    iconType: "Clock"
   },
   { 
     id: 5, 
@@ -85,7 +81,7 @@ export const getTasksMockData = () => [
     type: "Recruitment", 
     assignee: { name: "Jane Doe", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
     action: "Approve",
-    icon: <UserPlus className="h-5 w-5 text-white" />
+    iconType: "UserPlus"
   },
   { 
     id: 6, 
@@ -94,7 +90,7 @@ export const getTasksMockData = () => [
     type: "Documents", 
     assignee: { name: "Wade Wilson", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
     action: "Take action",
-    icon: <FileCheck className="h-5 w-5 text-white" />
+    iconType: "FileCheck"
   }
 ];
 
