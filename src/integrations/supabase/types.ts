@@ -71,6 +71,83 @@ export type Database = {
           },
         ]
       }
+      companies: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mock_users: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          department: string | null
+          email: string
+          id: string
+          manager: string | null
+          name: string
+          position: string | null
+          profile_picture: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email: string
+          id?: string
+          manager?: string | null
+          name: string
+          position?: string | null
+          profile_picture?: string | null
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string
+          id?: string
+          manager?: string | null
+          name?: string
+          position?: string | null
+          profile_picture?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_skills: {
         Row: {
           created_at: string | null

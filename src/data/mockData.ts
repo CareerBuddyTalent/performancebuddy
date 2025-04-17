@@ -1,4 +1,26 @@
-import { User, PerformanceParameter, ReviewCycle, PerformanceReview, Goal, Feedback } from '@/types';
+import { User, PerformanceParameter, ReviewCycle, PerformanceReview, Goal, Feedback, Company } from '@/types';
+
+// Mock Companies
+export const companies: Company[] = [
+  {
+    id: 'comp1',
+    name: 'Acme Corporation',
+    description: 'A global leader in innovative solutions',
+    logoUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=acme'
+  },
+  {
+    id: 'comp2',
+    name: 'TechNova',
+    description: 'Cutting-edge technology provider',
+    logoUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=technova'
+  },
+  {
+    id: 'comp3',
+    name: 'Global Enterprises',
+    description: 'Multinational business services',
+    logoUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=global'
+  }
+];
 
 // Mock Users
 export const users: User[] = [
@@ -10,6 +32,8 @@ export const users: User[] = [
     profilePicture: 'https://randomuser.me/api/portraits/men/1.jpg',
     department: 'Executive',
     position: 'CEO',
+    companyId: 'comp1',
+    company: companies[0]
   },
   {
     id: '2',
@@ -20,6 +44,8 @@ export const users: User[] = [
     department: 'Engineering',
     position: 'Engineering Manager',
     manager: '1',
+    companyId: 'comp1',
+    company: companies[0]
   },
   {
     id: '3',
@@ -30,6 +56,8 @@ export const users: User[] = [
     department: 'Engineering',
     position: 'Software Engineer',
     manager: '2',
+    companyId: 'comp1',
+    company: companies[0]
   },
   {
     id: '4',
@@ -40,6 +68,8 @@ export const users: User[] = [
     department: 'Engineering',
     position: 'Frontend Developer',
     manager: '2',
+    companyId: 'comp1',
+    company: companies[0]
   },
   {
     id: '5',
@@ -50,7 +80,32 @@ export const users: User[] = [
     department: 'Product',
     position: 'Product Manager',
     manager: '1',
+    companyId: 'comp2',
+    company: companies[1]
   },
+  {
+    id: '6',
+    name: 'Dana Lee',
+    email: 'dana@example.com',
+    role: 'employee',
+    profilePicture: 'https://randomuser.me/api/portraits/women/6.jpg',
+    department: 'Marketing',
+    position: 'Marketing Specialist',
+    manager: '5',
+    companyId: 'comp2',
+    company: companies[1]
+  },
+  {
+    id: '7',
+    name: 'Evan Black',
+    email: 'evan@example.com',
+    role: 'admin',
+    profilePicture: 'https://randomuser.me/api/portraits/men/7.jpg',
+    department: 'Executive',
+    position: 'CTO',
+    companyId: 'comp3',
+    company: companies[2]
+  }
 ];
 
 // Mock Performance Parameters
