@@ -1,10 +1,10 @@
 
 import React from "react";
-import { NavItem } from "@/components/sidebar/navigation-config";
+import { NavigationItem } from "@/components/sidebar/navigation-config";
 
 interface SidebarNavGroupProps {
   title: string;
-  items: NavItem[];
+  items: NavigationItem[];
 }
 
 export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) {
@@ -17,12 +17,12 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
       </h2>
       <div className="space-y-1">
         {items.map((item) => (
-          <div key={item.href} className="flex items-center">
+          <div key={item.path} className="flex items-center">
             {item.icon && (
               <item.icon className="mr-3 h-4 w-4 text-white/70" />
             )}
             <span className="text-sm font-medium text-white/70 hover:text-white">
-              {item.title}
+              {item.label}
             </span>
           </div>
         ))}
