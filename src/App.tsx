@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import Reviews from "./pages/Reviews";
 import PerformanceCycles from "./pages/PerformanceCycles";
 import CompanyManagement from "./pages/CompanyManagement";
 import NotFound from "./pages/NotFound";
+import Performance from "@/pages/Performance";
 
 const queryClient = new QueryClient();
 
@@ -147,6 +147,8 @@ const App = () => (
                   </PageLayout>
                 </ProtectedRoute>
               } />
+              
+              <Route path="/performance" element={<Performance />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

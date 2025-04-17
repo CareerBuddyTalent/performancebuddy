@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,29 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add custom styles for Performance dark theme */
+.performance-theme {
+  background-color: #111827;
+  color: white;
+}
+
+.performance-dark-bg {
+  background-color: #1F2937;
+}
+
+.performance-nav-item {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.performance-nav-item:hover {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.performance-nav-item.active {
+  background-color: #374151;
 }

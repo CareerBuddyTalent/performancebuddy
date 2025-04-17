@@ -41,19 +41,13 @@ export default function CompanySelector({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="flex items-center justify-between text-sm font-normal text-white"
         >
           {selectedCompany ? (
             <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={selectedCompany.logoUrl} alt={selectedCompany.name} />
-                <AvatarFallback>
-                  {selectedCompany.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
               <span>{selectedCompany.name}</span>
             </div>
           ) : (
@@ -65,11 +59,11 @@ export default function CompanySelector({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Search company..." />
-          <CommandEmpty>No company found.</CommandEmpty>
-          <CommandGroup>
+      <PopoverContent className="w-[200px] p-0 bg-gray-800 border-gray-700">
+        <Command className="bg-gray-800">
+          <CommandInput placeholder="Search company..." className="text-white" />
+          <CommandEmpty className="text-gray-400">No company found.</CommandEmpty>
+          <CommandGroup className="text-white">
             {companies.map((company) => (
               <CommandItem
                 key={company.id}
@@ -78,11 +72,12 @@ export default function CompanySelector({
                   onCompanyChange(company.id);
                   setOpen(false);
                 }}
+                className="text-white hover:bg-gray-700"
               >
                 <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-5 w-5">
                     <AvatarImage src={company.logoUrl} alt={company.name} />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-gray-700 text-gray-200 text-xs">
                       {company.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -91,7 +86,7 @@ export default function CompanySelector({
                 <Check
                   className={cn(
                     "ml-auto h-4 w-4",
-                    selectedCompanyId === company.id ? "opacity-100" : "opacity-0"
+                    selectedCompanyId === company.id ? "opacity-100 text-green-500" : "opacity-0"
                   )}
                 />
               </CommandItem>
