@@ -6,6 +6,7 @@ import { ReviewCycle, ReviewParameter } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
 import CycleDetailsForm from "./details/CycleDetailsForm";
 import CycleParameters from "./parameters/CycleParameters";
+import { format } from "date-fns";
 
 interface CreateCycleDialogProps {
   open: boolean;
@@ -30,7 +31,6 @@ export default function CreateCycleDialog({
   const [activeTab, setActiveTab] = useState("details");
   const [parameters, setParameters] = useState<ReviewParameter[]>([]);
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setName("");
@@ -45,7 +45,6 @@ export default function CreateCycleDialog({
     }
   }, [open]);
 
-  // Set default cycle name based on type and purpose
   useEffect(() => {
     const date = new Date();
     const month = date.toLocaleString('default', { month: 'long' });
@@ -75,7 +74,6 @@ export default function CreateCycleDialog({
     setName(cycleName);
   }, [type, purpose]);
   
-  // Restrict certain combinations (bi-annual/annual only for performance)
   useEffect(() => {
     if ((type === 'bi-annual' || type === 'annual') && purpose !== 'performance') {
       setPurpose('performance');
@@ -91,7 +89,6 @@ export default function CreateCycleDialog({
     
     if (!name || !startDate || !endDate) return;
     
-    // Create a new cycle
     const newCycle: ReviewCycle = {
       id: uuidv4(),
       name,
