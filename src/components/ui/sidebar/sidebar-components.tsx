@@ -12,7 +12,7 @@ export const Sidebar = React.forwardRef<
   <aside
     ref={ref}
     className={cn(
-      "group fixed inset-y-0 left-0 z-20 flex h-full shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground transition-[width] ease-in-out focus:outline-none data-[expanded=false]:w-[70px] data-[expanded=true]:w-64 md:relative xl:data-[expanded=false]:w-[288px]",
+      "group fixed inset-y-0 left-0 z-20 flex h-full shrink-0 flex-col border-r bg-background text-foreground transition-[width] ease-in-out focus:outline-none data-[expanded=false]:w-[70px] data-[expanded=true]:w-64 md:relative xl:data-[expanded=false]:w-[288px]",
       className
     )}
     data-expanded="true"
