@@ -7,7 +7,8 @@ import CompanySelector from "@/components/CompanySelector";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Bell, LayoutGrid } from "lucide-react";
+import { Search, LayoutGrid } from "lucide-react";
+import NotificationPopover from "@/components/dashboard/NotificationPopover";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -40,9 +41,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
               <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
                 <Search className="h-5 w-5" />
               </button>
-              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
-                <Bell className="h-5 w-5" />
-              </button>
+              <NotificationPopover />
               <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
                 <LayoutGrid className="h-5 w-5" />
               </button>
