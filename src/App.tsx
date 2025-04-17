@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,7 @@ import PerformanceCycles from "./pages/PerformanceCycles";
 import CompanyManagement from "./pages/CompanyManagement";
 import NotFound from "./pages/NotFound";
 import Performance from "@/pages/Performance";
+import MyProfile from "@/pages/MyProfile";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +79,14 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
+                <Route path="/my-profile" element={
+                  <ProtectedRoute>
+                    <PageLayout>
+                      <MyProfile />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
+                
                 <Route path="/goals" element={
                   <ProtectedRoute>
                     <PageLayout>
@@ -87,13 +95,7 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/feedback" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <EmployeeFeedback />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
+                {/* Remove the Feedback route which was for the Roadmap */}
                 
                 <Route path="/skills" element={
                   <ProtectedRoute>

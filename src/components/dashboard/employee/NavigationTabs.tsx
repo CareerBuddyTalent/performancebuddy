@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserCircle, BarChart2, Target, FileText } from "lucide-react";
+import { UserCircle, BarChart2, Target } from "lucide-react";
 
 interface NavigationTabsProps {
   goalProgress: number;
@@ -15,7 +15,7 @@ export default function NavigationTabs({ goalProgress }: NavigationTabsProps) {
         className="flex items-center whitespace-nowrap rounded-full"
         asChild
       >
-        <Link to="/user/profile">
+        <Link to="/my-profile">
           <UserCircle className="mr-2 h-4 w-4" />
           Profile
         </Link>
@@ -40,17 +40,6 @@ export default function NavigationTabs({ goalProgress }: NavigationTabsProps) {
         <Link to="/goals">
           <Target className="mr-2 h-4 w-4" />
           Goals • {goalProgress}%
-        </Link>
-      </Button>
-      
-      <Button 
-        variant="ghost" 
-        className="flex items-center whitespace-nowrap rounded-full"
-        asChild
-      >
-        <Link to="/feedback">
-          <FileText className="mr-2 h-4 w-4" />
-          Roadmap
         </Link>
       </Button>
     </div>

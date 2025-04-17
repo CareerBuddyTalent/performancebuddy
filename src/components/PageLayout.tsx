@@ -1,3 +1,4 @@
+
 import { ReactNode, useState } from 'react';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -48,7 +49,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <h1 className="hidden md:block text-xl font-semibold capitalize">
-                {location.pathname.replace('/', '') || 'Home'}
+                {location.pathname.replace('/', '').replace('-', ' ') || 'Home'}
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -84,8 +85,8 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                   <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
                     Goals
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
-                    Feedback
+                  <DropdownMenuItem onClick={() => handleNavigate('/my-profile')}>
+                    My Profile
                   </DropdownMenuItem>
                   {(user?.role === 'admin' || user?.role === 'manager') && (
                     <DropdownMenuItem onClick={() => handleNavigate('/users')}>
@@ -110,7 +111,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                 )}
               </div>
               {user && (
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 cursor-pointer" onClick={() => navigate('/my-profile')}>
                   <AvatarImage src={user.profilePicture} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>

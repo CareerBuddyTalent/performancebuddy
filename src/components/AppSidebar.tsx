@@ -16,7 +16,7 @@ import {
 // Define the navigation items with role-based access
 const navigationItems = [
   { path: '/home', label: 'Home', icon: Home, roles: ['admin', 'manager', 'employee'] },
-  { path: '/my-profile', label: 'My profile', icon: User, roles: ['admin', 'manager', 'employee'] },
+  { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
   { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] }, // Removed employee access
   { path: '/recruitment', label: 'Recruitment', icon: Briefcase, roles: ['admin', 'manager'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager'] },
