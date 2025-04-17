@@ -1,11 +1,10 @@
-
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Search, LayoutGrid } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import NotificationPopover from "@/components/dashboard/NotificationPopover";
-import { homeMenuItems } from "@/config/navigationConfig";
+import { homeMenuItems, employeeMenuItems, adminMenuItems } from "@/config/navigationConfig";
 
 interface HomeHeaderProps {
   user: User;
@@ -21,6 +20,19 @@ export default function HomeHeader({
   setSearchOpen,
 }: HomeHeaderProps) {
   const navigate = useNavigate();
+  
+  const menuItems = (() => {
+    switch (user.role) {
+      case 'admin':
+        return adminMenuItems;
+      case 'employee':
+        return employeeMenuItems;
+      case 'manager':
+        return homeMenuItems;
+      default:
+        return employeeMenuItems;
+    }
+  })();
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -53,7 +65,7 @@ export default function HomeHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            {homeMenuItems.map((item) => (
+            {menuItems.map((item) => (
               <DropdownMenuItem key={item.path} onClick={() => navigate(item.path)}>
                 {item.label}
               </DropdownMenuItem>
