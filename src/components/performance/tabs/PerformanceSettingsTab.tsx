@@ -6,7 +6,7 @@ import GoalSettingsDialog from "@/components/performance/GoalSettingsDialog";
 import ManageCyclesDialog from "@/components/performance/ManageCyclesDialog";
 import ManageReportsDialog from "@/components/performance/ManageReportsDialog";
 import SetPermissionsDialog from "@/components/performance/SetPermissionsDialog";
-import { Calendar, FileChart, ShieldCheck, Settings } from "lucide-react";
+import { Calendar, FileText, ShieldCheck, Settings } from "lucide-react";
 
 export default function PerformanceSettingsTab() {
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
@@ -64,7 +64,7 @@ export default function PerformanceSettingsTab() {
                   size="sm"
                   onClick={() => setIsReportsOpen(true)}
                 >
-                  <FileChart className="h-4 w-4 mr-2" />
+                  <FileText className="h-4 w-4 mr-2" />
                   Manage Reports
                 </Button>
               </div>

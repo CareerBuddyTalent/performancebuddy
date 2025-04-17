@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { FileChart, PlusCircle, Download } from "lucide-react";
+import { FileText, PlusCircle, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ManageReportsDialogProps {
