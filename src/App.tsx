@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ import Surveys from "./pages/Surveys";
 import UserManagement from "./pages/UserManagement";
 import UserDetail from "./pages/UserDetail";
 import Reviews from "./pages/Reviews";
+import SelfReview from "./pages/SelfReview";
 import PerformanceCycles from "./pages/PerformanceCycles";
 import CompanyManagement from "./pages/CompanyManagement";
 import NotFound from "./pages/NotFound";
@@ -130,9 +132,17 @@ const App = () => (
                 } />
                 
                 <Route path="/reviews" element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
+                  <ProtectedRoute>
                     <PageLayout>
                       <Reviews />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/self-review" element={
+                  <ProtectedRoute>
+                    <PageLayout>
+                      <SelfReview />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
