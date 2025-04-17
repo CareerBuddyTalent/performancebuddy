@@ -16,7 +16,7 @@ export const navigationItems: NavigationItem[] = [
   { path: '/home', label: 'Home', icon: Home, roles: ['admin', 'manager', 'employee'] },
   { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
   { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] },
-  { path: '/recruitment', label: 'Recruitment', icon: Briefcase, roles: ['manager'] },
+  { path: '/recruitment', label: 'Recruitment', icon: Briefcase, roles: ['admin'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager'] },
   { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
 ];
