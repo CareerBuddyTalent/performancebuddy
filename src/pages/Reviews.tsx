@@ -5,12 +5,16 @@ import { useToast } from "@/hooks/use-toast";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import ActiveReviewCycle from "@/components/reviews/ActiveReviewCycle";
 import PastReviews from "@/components/reviews/PastReviews";
+import ManagerFeedback from "@/components/reviews/ManagerFeedback";
 import { mockParameters, mockActiveCycle, mockPastReviews } from "@/components/reviews/mockReviewData";
 
 export default function Reviews() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get the latest review's feedback if it exists
+  const latestReview = mockPastReviews[0];
 
   const handleSubmitReview = async (data: any) => {
     setIsSubmitting(true);
@@ -45,6 +49,14 @@ export default function Reviews() {
         deadline={mockActiveCycle.deadline}
       />
       
+      {latestReview && (
+        <ManagerFeedback
+          feedback={latestReview.feedback || ""}
+          dateSubmitted={latestReview.submittedDate}
+          status={latestReview.status}
+        />
+      )}
+      
       <SelfReviewForm 
         cycleId={mockActiveCycle.id}
         parameters={mockParameters}
@@ -55,3 +67,4 @@ export default function Reviews() {
     </div>
   );
 }
+
