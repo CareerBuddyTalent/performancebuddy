@@ -6,6 +6,7 @@ import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import ActiveReviewCycle from "@/components/reviews/ActiveReviewCycle";
 import PastReviews from "@/components/reviews/PastReviews";
 import ManagerFeedback from "@/components/reviews/ManagerFeedback";
+import ReviewProgress from "@/components/ReviewProgress";
 import { mockParameters, mockActiveCycle, mockPastReviews } from "@/components/reviews/mockReviewData";
 
 export default function Reviews() {
@@ -15,6 +16,12 @@ export default function Reviews() {
 
   // Get the latest review's feedback if it exists
   const latestReview = mockPastReviews[0];
+
+  // Calculate review statistics for progress tracking
+  const totalReviews = mockPastReviews.length + 1; // Including active review
+  const completedReviews = mockPastReviews.filter(review => review.status === "completed").length;
+  const inProgressReviews = mockPastReviews.filter(review => review.status === "in_progress").length;
+  const notStartedReviews = totalReviews - completedReviews - inProgressReviews;
 
   const handleSubmitReview = async (data: any) => {
     setIsSubmitting(true);
@@ -44,10 +51,19 @@ export default function Reviews() {
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold tracking-tight mb-6">Reviews</h1>
       
-      <ActiveReviewCycle 
-        name={mockActiveCycle.name}
-        deadline={mockActiveCycle.deadline}
-      />
+      <div className="grid gap-6 md:grid-cols-2 mb-6">
+        <ActiveReviewCycle 
+          name={mockActiveCycle.name}
+          deadline={mockActiveCycle.deadline}
+        />
+        
+        <ReviewProgress
+          totalReviews={totalReviews}
+          completedReviews={completedReviews}
+          inProgressReviews={inProgressReviews}
+          notStartedReviews={notStartedReviews}
+        />
+      </div>
       
       {latestReview && (
         <ManagerFeedback
@@ -67,4 +83,3 @@ export default function Reviews() {
     </div>
   );
 }
-
