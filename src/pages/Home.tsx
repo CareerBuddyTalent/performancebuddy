@@ -19,6 +19,7 @@ import {
   getTasksMockData, 
   favorites 
 } from "@/components/home/mockData";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export default function Home() {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export default function Home() {
   const navigate = useNavigate();
   const tasks = getTasksMockData();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Role-based access control
   useEffect(() => {
@@ -42,6 +44,11 @@ export default function Home() {
   const recruitmentCount = 2;
   const hrCount = 2;
 
+  // Handle navigation to different sections
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -51,12 +58,59 @@ export default function Home() {
           <button 
             className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
             onClick={() => setSearchOpen(true)}
+            aria-label="Search"
           >
             <Search className="h-5 w-5" />
           </button>
-          <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
-            <Bell className="h-5 w-5" />
-          </button>
+          
+          <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+            <PopoverTrigger asChild>
+              <button 
+                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700 relative"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="end">
+              <div className="p-3 border-b">
+                <h3 className="font-medium">Notifications</h3>
+              </div>
+              <div className="max-h-96 overflow-auto">
+                {notifications.map((notification) => (
+                  <div 
+                    key={notification.id} 
+                    className="p-3 border-b hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                    onClick={() => setNotificationsOpen(false)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
+                        <img 
+                          src={notification.sender.avatar} 
+                          alt={notification.sender.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{notification.title}</h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{notification.description}</p>
+                        <p className="text-xs text-gray-400 mt-1">{notification.days} days ago</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-2 text-center border-t">
+                <button 
+                  className="text-sm text-blue-600 hover:underline"
+                  onClick={() => handleNavigate('/notifications')}
+                >
+                  View all notifications
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
