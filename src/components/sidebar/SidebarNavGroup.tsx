@@ -25,8 +25,11 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
           >
             {item.icon && (
               <div className="mr-3 text-white/70">
-                {/* Here we create a React element with the icon component, without passing className directly to it */}
-                {React.createElement(item.icon, { size: 16 })}
+                {/* Use the icon component directly with a proper TypeScript cast */}
+                {React.createElement(item.icon, { 
+                  // Use proper type assertion to ensure TypeScript knows these props are valid
+                  ...(({ size: 16 }) as React.SVGProps<SVGSVGElement>)
+                })}
               </div>
             )}
             <span className="text-sm font-medium text-white/70 hover:text-white">
