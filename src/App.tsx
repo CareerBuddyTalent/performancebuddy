@@ -151,7 +151,13 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/performance" element={<Performance />} />
+                <Route path="/performance" element={
+                  <ProtectedRoute roles={["admin", "manager"]}>
+                    <PageLayout allowedRoles={["admin", "manager"]}>
+                      <Performance />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

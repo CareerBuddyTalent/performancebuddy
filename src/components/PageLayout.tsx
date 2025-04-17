@@ -77,9 +77,11 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                   <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
                     Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
-                    Performance
-                  </DropdownMenuItem>
+                  {(user?.role === 'admin' || user?.role === 'manager') && (
+                    <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
+                      Performance
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
                     Goals
                   </DropdownMenuItem>
