@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import TaskCounters from "./TaskCounters";
 import TasksList from "./TasksList";
 import TeamMembersSection from "./TeamMembersSection";
+import NotificationsList from "./NotificationsList";
 
 interface MainContentProps {
   tasks: any[];
