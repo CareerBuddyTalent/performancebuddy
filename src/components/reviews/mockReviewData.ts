@@ -35,7 +35,7 @@ export const mockPastReviews = [
     cycleId: "cycle-prev1",
     cycleName: "Q4 2023 Performance Review",
     submittedDate: "2023-12-15",
-    status: "completed",
+    status: "completed" as "completed" | "in_progress" | "pending",
     overallRating: 4,
     feedback: "Great job this quarter! You've shown significant improvement in your technical skills and collaboration with the team."
   },
@@ -44,7 +44,7 @@ export const mockPastReviews = [
     cycleId: "cycle-prev2",
     cycleName: "Q3 2023 Performance Review",
     submittedDate: "2023-09-30",
-    status: "completed",
+    status: "completed" as "completed" | "in_progress" | "pending",
     overallRating: 3,
     feedback: "Solid performance overall. Continue focusing on improving your communication with stakeholders."
   },
@@ -53,7 +53,7 @@ export const mockPastReviews = [
     cycleId: "cycle-prev3",
     cycleName: "Mid-Year 2023 Performance Review",
     submittedDate: "2023-06-30",
-    status: "completed",
+    status: "completed" as "completed" | "in_progress" | "pending",
     overallRating: 3.5,
     feedback: "You're making good progress on your development goals. Keep up the good work!"
   }
