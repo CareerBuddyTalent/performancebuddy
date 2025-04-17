@@ -20,6 +20,7 @@ export interface User {
   competencyLevel?: Record<string, number>; // Skill ID to level (1-5) mapping
   companyId?: string; // Reference to the company
   company?: Company; // Company object
+  bio?: string; // Adding bio property to fix the TypeScript error
 }
 
 export interface PerformanceParameter {
