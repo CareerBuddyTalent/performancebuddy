@@ -1,7 +1,8 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code, HeartHandshake } from "lucide-react";
 import { ReviewSkill } from "@/types";
 import { AddSkillForm } from "./AddSkillForm";
@@ -15,14 +16,25 @@ interface SkillsUploaderProps {
 
 export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted }: SkillsUploaderProps) {
   const [activeTab, setActiveTab] = useState("technical");
+  const { user } = useAuth();
   
-  // Filter skills by category
-  const technicalSkills = skills.filter(skill => skill.category === "technical");
-  const softSkills = skills.filter(skill => skill.category === "soft");
+  // Filter skills by category and visibility based on user role
+  const filterSkillsByRole = (skills: ReviewSkill[], category: string) => {
+    return skills.filter(skill => 
+      skill.category === category && 
+      skill.visibleTo.includes(user?.role || 'employee')
+    );
+  };
+  
+  const technicalSkills = filterSkillsByRole(skills, "technical");
+  const softSkills = filterSkillsByRole(skills, "soft");
+  
+  // Only show add form for admin and manager roles
+  const canManageSkills = user?.role === 'admin' || user?.role === 'manager';
   
   return (
     <div className="space-y-6">
-      <AddSkillForm onSkillAdded={onSkillAdded} />
+      {canManageSkills && <AddSkillForm onSkillAdded={onSkillAdded} />}
       
       <Card>
         <CardHeader>
@@ -46,6 +58,7 @@ export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted }: SkillsU
                 skills={technicalSkills} 
                 onDeleteSkill={onSkillDeleted}
                 categoryIcon="technical"
+                canDelete={canManageSkills}
               />
             </TabsContent>
             
@@ -54,6 +67,7 @@ export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted }: SkillsU
                 skills={softSkills} 
                 onDeleteSkill={onSkillDeleted}
                 categoryIcon="soft"
+                canDelete={canManageSkills}
               />
             </TabsContent>
           </Tabs>

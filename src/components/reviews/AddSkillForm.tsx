@@ -32,7 +32,8 @@ export function AddSkillForm({ onSkillAdded }: AddSkillFormProps) {
       name: skillName,
       description: skillDescription,
       category: skillCategory,
-      isActive: true
+      isActive: true,
+      visibleTo: ["admin", "manager", "employee"] // By default, visible to all
     };
     
     onSkillAdded(newSkill);

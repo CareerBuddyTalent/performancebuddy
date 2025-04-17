@@ -197,4 +197,5 @@ export interface ReviewSkill {
   description: string;
   category: "technical" | "soft";
   isActive: boolean;
+  visibleTo: ("admin" | "manager" | "employee")[]; // new field for role-based visibility
 }

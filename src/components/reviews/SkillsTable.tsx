@@ -9,9 +9,10 @@ interface SkillsTableProps {
   skills: ReviewSkill[];
   onDeleteSkill: (skillId: string) => void;
   categoryIcon: "technical" | "soft";
+  canDelete: boolean;
 }
 
-export function SkillsTable({ skills, onDeleteSkill, categoryIcon }: SkillsTableProps) {
+export function SkillsTable({ skills, onDeleteSkill, categoryIcon, canDelete }: SkillsTableProps) {
   const Icon = categoryIcon === "technical" ? Code : HeartHandshake;
   const iconColor = categoryIcon === "technical" ? "text-blue-500" : "text-purple-500";
 
@@ -28,7 +29,7 @@ export function SkillsTable({ skills, onDeleteSkill, categoryIcon }: SkillsTable
               <TableRow>
                 <TableHead>Skill Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                {canDelete && <TableHead className="w-[100px]">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -41,15 +42,17 @@ export function SkillsTable({ skills, onDeleteSkill, categoryIcon }: SkillsTable
                   <TableCell className="max-w-md truncate">
                     {skill.description}
                   </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDeleteSkill(skill.id)}
-                    >
-                      <Trash className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </TableCell>
+                  {canDelete && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDeleteSkill(skill.id)}
+                      >
+                        <Trash className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
