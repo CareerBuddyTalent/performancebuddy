@@ -10,6 +10,7 @@ import TaskCounters from "@/components/home/TaskCounters";
 import TasksList from "@/components/home/TasksList";
 import TeamMembersSection from "@/components/home/TeamMembersSection";
 import FavoritesSection from "@/components/home/FavoritesSection";
+import SearchDialog from "@/components/home/SearchDialog";
 
 // Import mock data
 import { 
@@ -24,6 +25,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
   const navigate = useNavigate();
   const tasks = getTasksMockData();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Role-based access control
   useEffect(() => {
@@ -46,7 +48,10 @@ export default function Home() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold tracking-tight">Home</h1>
         <div className="flex items-center gap-4">
-          <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+          <button 
+            className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+            onClick={() => setSearchOpen(true)}
+          >
             <Search className="h-5 w-5" />
           </button>
           <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
@@ -90,6 +95,9 @@ export default function Home() {
           <FavoritesSection favorites={favorites} />
         </div>
       </div>
+
+      {/* Search Dialog */}
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
