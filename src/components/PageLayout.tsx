@@ -18,6 +18,7 @@ import {
   Target, 
   BarChart,
   Users,
+  ChartPie,
 } from "lucide-react";
 import NotificationPopover from "@/components/dashboard/NotificationPopover";
 import { 
@@ -58,6 +59,8 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
     if (location.pathname === '/') return 'Dashboard';
     return location.pathname.split('/')[1].replace('-', ' ').replace(/^\w/, c => c.toUpperCase()) || 'Home';
   };
+
+  const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
 
   return (
     <SidebarProvider>
@@ -107,6 +110,12 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                       <Target className="h-4 w-4 mr-2" />
                       Goals
                     </DropdownMenuItem>
+                    {canAccessPerformance && (
+                      <DropdownMenuItem onClick={() => handleNavigate('/performance')} className="cursor-pointer">
+                        <ChartPie className="h-4 w-4 mr-2" />
+                        Performance
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuGroup>
                   
                   <DropdownMenuSeparator />
@@ -179,6 +188,12 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                       <Settings className="h-4 w-4 mr-2" />
                       Settings
                     </DropdownMenuItem>
+                    {canAccessPerformance && (
+                      <DropdownMenuItem onClick={() => navigate('/performance')} className="cursor-pointer">
+                        <BarChart className="h-4 w-4 mr-2" />
+                        Performance
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuGroup>
                   
                   <DropdownMenuSeparator />

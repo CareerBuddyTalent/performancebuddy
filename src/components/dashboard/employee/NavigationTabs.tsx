@@ -1,7 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { UserCircle, BarChart2, Target } from "lucide-react";
+import { UserCircle, BarChart2, Target, ChartPie } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavigationTabsProps {
   goalProgress: number;
@@ -9,8 +10,10 @@ interface NavigationTabsProps {
 
 export default function NavigationTabs({ goalProgress }: NavigationTabsProps) {
   const location = useLocation();
+  const { user } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
+  const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
 
   return (
     <div className="flex overflow-x-auto pb-2 gap-2">
@@ -58,6 +61,23 @@ export default function NavigationTabs({ goalProgress }: NavigationTabsProps) {
           Goals • {goalProgress}%
         </Link>
       </Button>
+      
+      {canAccessPerformance && (
+        <Button 
+          variant={isActive('/performance') ? "default" : "ghost"} 
+          className={`flex items-center whitespace-nowrap rounded-full ${
+            isActive('/performance') 
+              ? "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white" 
+              : "hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+          }`}
+          asChild
+        >
+          <Link to="/performance">
+            <ChartPie className="mr-2 h-4 w-4" />
+            Analytics
+          </Link>
+        </Button>
+      )}
     </div>
   );
 }
