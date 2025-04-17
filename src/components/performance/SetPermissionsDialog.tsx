@@ -2,23 +2,11 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShieldCheck, Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface PermissionRole {
-  id: string;
-  role: string;
-  viewAll: boolean;
-  editOwn: boolean;
-  editAll: boolean;
-  createNew: boolean;
-  deleteOwn: boolean;
-  deleteAll: boolean;
-  exportData: boolean;
-}
+import RolePermissionsTable from "./permissions/RolePermissionsTable";
+import DataAccessControls from "./permissions/DataAccessControls";
+import { PermissionRole } from "./permissions/types";
 
 interface SetPermissionsDialogProps {
   open: boolean;
@@ -77,132 +65,13 @@ export default function SetPermissionsDialog({ open, onOpenChange }: SetPermissi
           </div>
           
           {activeSection === "roles" && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Role-Based Permissions</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Role</TableHead>
-                    <TableHead>View All</TableHead>
-                    <TableHead>Edit Own</TableHead>
-                    <TableHead>Edit All</TableHead>
-                    <TableHead>Create New</TableHead>
-                    <TableHead>Delete Own</TableHead>
-                    <TableHead>Delete All</TableHead>
-                    <TableHead>Export Data</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {permissions.map(role => (
-                    <TableRow key={role.id}>
-                      <TableCell className="font-medium">{role.role}</TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.viewAll} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "viewAll", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.editOwn} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "editOwn", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.editAll} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "editAll", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.createNew} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "createNew", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.deleteOwn} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "deleteOwn", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.deleteAll} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "deleteAll", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={role.exportData} 
-                          onCheckedChange={(checked) => handlePermissionChange(role.id, "exportData", checked)}
-                          disabled={role.role === "Admin"}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <p className="text-sm text-muted-foreground">
-                Note: Admin permissions cannot be modified
-              </p>
-            </div>
+            <RolePermissionsTable 
+              permissions={permissions} 
+              onPermissionChange={handlePermissionChange} 
+            />
           )}
           
-          {activeSection === "data" && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Data Access Controls</h3>
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Performance Reviews</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch id="manager-view-all" defaultChecked />
-                      <span>Managers can view all team reviews</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch id="manager-export" defaultChecked />
-                      <span>Managers can export team reviews</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium">Goals</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch id="employee-create-goals" defaultChecked />
-                      <span>Employees can create personal goals</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch id="approval-required" defaultChecked />
-                      <span>Goal approval required</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium">Analytics Data</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch id="employee-analytics" />
-                      <span>Employees can view personal analytics</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch id="sensitive-data" defaultChecked />
-                      <span>Hide sensitive data (salary, rankings)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeSection === "data" && <DataAccessControls />}
         </div>
         
         <DialogFooter>

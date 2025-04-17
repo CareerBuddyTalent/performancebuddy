@@ -1,61 +1,86 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ShieldCheck, Save } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import RolePermissionsTable from "./permissions/RolePermissionsTable";
+import DataAccessControls from "./permissions/DataAccessControls";
+import { PermissionRole } from "./permissions/types";
 
-import React from 'react';
-import { Link, useLocation } from "react-router-dom";
-import { NavigationItem } from "./navigation-config";
-import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  useSidebar
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-
-interface SidebarNavGroupProps {
-  title: string;
-  items: NavigationItem[];
-  className?: string;
+interface SetPermissionsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function SidebarNavGroup({ title, items, className }: SidebarNavGroupProps) {
-  const location = useLocation();
-  const { expanded } = useSidebar();
+export default function SetPermissionsDialog({ open, onOpenChange }: SetPermissionsDialogProps) {
+  const { toast } = useToast();
+  const [activeSection, setActiveSection] = useState("roles");
   
-  if (items.length === 0) {
-    return null;
-  }
+  // Mock permission data
+  const [permissions, setPermissions] = useState<PermissionRole[]>([
+    { id: "1", role: "Admin", viewAll: true, editOwn: true, editAll: true, createNew: true, deleteOwn: true, deleteAll: true, exportData: true },
+    { id: "2", role: "Manager", viewAll: true, editOwn: true, editAll: false, createNew: true, deleteOwn: true, deleteAll: false, exportData: true },
+    { id: "3", role: "Employee", viewAll: false, editOwn: true, editAll: false, createNew: false, deleteOwn: false, deleteAll: false, exportData: false },
+  ]);
 
-  const isActive = (path: string) => location.pathname === path;
+  const handlePermissionChange = (roleId: string, permission: keyof PermissionRole, value: boolean) => {
+    setPermissions(permissions.map(role => 
+      role.id === roleId ? { ...role, [permission]: value } : role
+    ));
+  };
+
+  const handleSavePermissions = () => {
+    toast({
+      title: "Permissions saved",
+      description: "Your permission settings have been updated",
+    });
+    onOpenChange(false);
+  };
 
   return (
-    <SidebarGroup className={cn("mt-6", className)}>
-      {expanded && (
-        <SidebarGroupLabel>
-          {title}
-        </SidebarGroupLabel>
-      )}
-      <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.path}>
-            <Link 
-              to={item.path}
-              className="flex items-center gap-3 w-full"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader>
+          <DialogTitle>Set Permissions</DialogTitle>
+          <DialogDescription>
+            Control who can view and manage performance data
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-6 py-4">
+          <div className="flex justify-center space-x-4 mb-4">
+            <Button 
+              variant={activeSection === "roles" ? "default" : "outline"} 
+              onClick={() => setActiveSection("roles")}
             >
-              <SidebarMenuButton
-                data-active={isActive(item.path)}
-                className={cn(
-                  "flex py-3 px-6 text-sm hover:bg-gray-800",
-                  isActive(item.path) ? "bg-gray-800 text-white font-medium" : "text-gray-300"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {expanded && <span>{item.label}</span>}
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
+              Role Permissions
+            </Button>
+            <Button 
+              variant={activeSection === "data" ? "default" : "outline"} 
+              onClick={() => setActiveSection("data")}
+            >
+              Data Access
+            </Button>
+          </div>
+          
+          {activeSection === "roles" && (
+            <RolePermissionsTable 
+              permissions={permissions} 
+              onPermissionChange={handlePermissionChange} 
+            />
+          )}
+          
+          {activeSection === "data" && <DataAccessControls />}
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSavePermissions}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Permissions
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
