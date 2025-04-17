@@ -1,3 +1,4 @@
+
 export type UserRole = 'employee' | 'manager' | 'admin';
 
 export interface Company {
@@ -188,4 +189,12 @@ export interface SurveyResponse {
     answer: string | number;
   }[];
   submittedAt: Date;
+}
+
+export interface ReviewSkill {
+  id: string;
+  name: string;
+  description: string;
+  category: "technical" | "soft";
+  isActive: boolean;
 }
