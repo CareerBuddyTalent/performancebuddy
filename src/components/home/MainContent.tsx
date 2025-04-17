@@ -6,6 +6,8 @@ import TaskCounters from "./TaskCounters";
 import TasksList from "./TasksList";
 import TeamMembersSection from "./TeamMembersSection";
 import NotificationsList from "./NotificationsList";
+import TeamReviewStatus from "./TeamReviewStatus";
+import { useAuth } from "@/context/AuthContext";
 
 interface MainContentProps {
   tasks: any[];
@@ -30,9 +32,22 @@ export default function MainContent({
   setActiveTab,
   handleNavigate,
 }: MainContentProps) {
+  const { user } = useAuth();
+  const isManager = user?.role === 'manager';
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-full">
       <div className="flex-1 space-y-6">
+        {isManager && (
+          <TeamReviewStatus 
+            teamMembers={teamMembers.map(member => ({
+              ...member,
+              status: 'not_started',
+              daysOverdue: Math.floor(Math.random() * 10) // Mock data for demonstration
+            }))}
+          />
+        )}
+        
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center justify-between">
