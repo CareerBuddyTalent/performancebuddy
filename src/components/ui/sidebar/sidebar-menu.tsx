@@ -72,7 +72,7 @@ export const SidebarMenuButton = React.forwardRef<
     <Comp
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 hover:bg-primary/10 hover:text-sidebar-foreground active:bg-primary/20 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
+        sidebarMenuButton({ active: !!active }),
         className
       )}
       data-active={active}

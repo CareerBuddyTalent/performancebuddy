@@ -42,9 +42,10 @@ export default function SidebarNavGroup({ title, items, className }: SidebarNavG
             >
               <SidebarMenuButton
                 data-active={isActive(item.path)}
-                className={`flex py-3 px-6 text-sm hover:bg-gray-800 ${
+                className={cn(
+                  "flex py-3 px-6 text-sm hover:bg-gray-800",
                   isActive(item.path) ? "bg-gray-800 text-white font-medium" : "text-gray-300"
-                }`}
+                )}
               >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
