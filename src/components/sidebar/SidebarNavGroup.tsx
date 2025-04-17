@@ -8,16 +8,19 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface SidebarNavGroupProps {
   title: string;
   items: NavigationItem[];
-  className?: string; // Make className optional in the props
+  className?: string;
 }
 
 export default function SidebarNavGroup({ title, items, className }: SidebarNavGroupProps) {
   const location = useLocation();
+  const { expanded } = useSidebar();
   
   if (items.length === 0) {
     return null;
@@ -26,25 +29,27 @@ export default function SidebarNavGroup({ title, items, className }: SidebarNavG
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <SidebarGroup className="mt-6">
+    <SidebarGroup className={cn("mt-6", className)}>
       <SidebarGroupLabel className="px-6 text-gray-400 uppercase text-xs">
         {title}
       </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.path}>
-            <SidebarMenuButton
-              asChild
-              className={`flex py-3 px-6 text-sm hover:bg-gray-800 ${
-                isActive(item.path) ? "bg-gray-800 text-white font-medium" : "text-gray-300"
-              }`}
-              data-active={isActive(item.path)}
+            <Link 
+              to={item.path}
+              className="flex items-center gap-3 w-full"
             >
-              <Link to={item.path} className="flex items-center gap-3">
+              <SidebarMenuButton
+                data-active={isActive(item.path)}
+                className={`flex py-3 px-6 text-sm hover:bg-gray-800 ${
+                  isActive(item.path) ? "bg-gray-800 text-white font-medium" : "text-gray-300"
+                }`}
+              >
                 <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
-              </Link>
-            </SidebarMenuButton>
+              </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         ))}
       </SidebarMenu>
