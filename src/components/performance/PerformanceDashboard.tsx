@@ -1,18 +1,19 @@
 
 import { useState } from "react";
 import { Goal } from "@/types";
-import { Search, Plus, Settings, MoreHorizontal, ChevronDown, Filter } from "lucide-react";
+import { Search, Plus, Settings, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useCompany } from "@/context/CompanyContext";
 import { useNotifications } from "@/hooks/use-notifications";
 import { toast } from "@/hooks/use-toast";
 import PerformanceStatsCards from "./PerformanceStatsCards";
 import PerformanceTabs from "./PerformanceTabs";
+import GoalFormDialog from "./GoalFormDialog";
+import { v4 as uuidv4 } from "uuid";
 
-// Mock performance goals data
-const performanceGoals: Goal[] = [
+// Initial mock performance goals data
+const initialGoals: Goal[] = [
   {
     id: "1",
     userId: "user1",
@@ -95,10 +96,9 @@ export default function PerformanceDashboard() {
   const { companies, currentCompany } = useCompany();
   const [activeTab, setActiveTab] = useState("goals");
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('quarter');
+  const [performanceGoals, setPerformanceGoals] = useState<Goal[]>(initialGoals);
+  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
   const { addNotification } = useNotifications();
-  
-  const goalsCompletion = 50;
-  const roadmapCompletion = 73;
   
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
@@ -118,6 +118,61 @@ export default function PerformanceDashboard() {
     });
   };
 
+  const handleAddGoal = () => {
+    setIsAddGoalOpen(true);
+  };
+
+  const handleAddGoalSubmit = (goal: Goal) => {
+    // In a real app, this would be an API call
+    const newGoal = {
+      ...goal,
+      id: uuidv4(),
+      userId: user?.id || 'user1',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    setPerformanceGoals(prev => [...prev, newGoal]);
+    setIsAddGoalOpen(false);
+    
+    toast({
+      title: "Goal created",
+      description: "New goal has been created successfully.",
+    });
+  };
+
+  const handleUpdateGoal = (updatedGoal: Goal) => {
+    // In a real app, this would be an API call
+    setPerformanceGoals(prev => 
+      prev.map(goal => goal.id === updatedGoal.id ? { ...updatedGoal, updatedAt: new Date() } : goal)
+    );
+    
+    toast({
+      title: "Goal updated",
+      description: "The goal has been updated successfully.",
+    });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    // In a real app, this would be an API call
+    setPerformanceGoals(prev => prev.filter(goal => goal.id !== goalId));
+    
+    toast({
+      title: "Goal deleted",
+      description: "The goal has been removed successfully.",
+    });
+  };
+
+  // Calculate completion percentages for stats cards
+  const goalsCompletion = performanceGoals.length > 0 
+    ? Math.round((performanceGoals.filter(g => g.status === 'completed').length / performanceGoals.length) * 100) 
+    : 0;
+    
+  const activeGoalsCount = performanceGoals.filter(g => g.status !== 'completed').length;
+  const roadmapCompletion = performanceGoals.length > 0 
+    ? Math.round(performanceGoals.reduce((sum, goal) => sum + goal.progress, 0) / performanceGoals.length) 
+    : 0;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -133,7 +188,7 @@ export default function PerformanceDashboard() {
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          <Button>
+          <Button onClick={handleAddGoal}>
             <Plus className="h-4 w-4 mr-2" />
             Add Goal
           </Button>
@@ -144,7 +199,7 @@ export default function PerformanceDashboard() {
       <PerformanceStatsCards 
         goalsCompletion={goalsCompletion} 
         roadmapCompletion={roadmapCompletion} 
-        activeGoalsCount={performanceGoals.length}
+        activeGoalsCount={activeGoalsCount}
       />
 
       {/* Tab Navigation */}
@@ -155,6 +210,17 @@ export default function PerformanceDashboard() {
         performanceGoals={performanceGoals} 
         timeframe={timeframe}
         handleExport={handleExport}
+        onAddGoal={handleAddGoalSubmit}
+        onUpdateGoal={handleUpdateGoal}
+        onDeleteGoal={handleDeleteGoal}
+      />
+
+      {/* Add Goal Dialog */}
+      <GoalFormDialog
+        open={isAddGoalOpen}
+        onOpenChange={setIsAddGoalOpen}
+        goal={null}
+        onSave={handleAddGoalSubmit}
       />
     </div>
   );

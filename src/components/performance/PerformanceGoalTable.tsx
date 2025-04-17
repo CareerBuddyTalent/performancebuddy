@@ -1,15 +1,30 @@
 
 import { useState } from "react";
 import { Goal } from "@/types";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, Edit, Trash } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/context/AuthContext";
 
 interface PerformanceGoalTableProps {
   goals: Goal[];
+  onEditGoal?: (goal: Goal) => void;
+  onDeleteGoal?: (goalId: string) => void;
+  onUpdateStatus?: (goalId: string, status: string) => void;
+  onUpdateProgress?: (goalId: string, progress: number) => void;
 }
 
-export default function PerformanceGoalTable({ goals }: PerformanceGoalTableProps) {
+export default function PerformanceGoalTable({ 
+  goals, 
+  onEditGoal, 
+  onDeleteGoal,
+  onUpdateStatus,
+  onUpdateProgress
+}: PerformanceGoalTableProps) {
+  const { user } = useAuth();
+  const canEdit = user?.role === 'admin' || user?.role === 'manager';
+  
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
@@ -23,12 +38,29 @@ export default function PerformanceGoalTable({ goals }: PerformanceGoalTableProp
             <th className="px-4 py-3">Progress</th>
             <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Approved</th>
+            {canEdit && <th className="px-4 py-3">Actions</th>}
           </tr>
         </thead>
         <tbody>
-          {goals.map((goal) => (
-            <PerformanceGoalRow key={goal.id} goal={goal} />
-          ))}
+          {goals.length > 0 ? (
+            goals.map((goal) => (
+              <PerformanceGoalRow 
+                key={goal.id} 
+                goal={goal} 
+                canEdit={canEdit} 
+                onEdit={onEditGoal}
+                onDelete={onDeleteGoal}
+                onUpdateStatus={onUpdateStatus}
+                onUpdateProgress={onUpdateProgress}
+              />
+            ))
+          ) : (
+            <tr>
+              <td colSpan={canEdit ? 9 : 8} className="px-4 py-8 text-center text-gray-400">
+                No goals found. Add a goal to get started.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
@@ -37,9 +69,21 @@ export default function PerformanceGoalTable({ goals }: PerformanceGoalTableProp
 
 interface PerformanceGoalRowProps {
   goal: Goal;
+  canEdit: boolean;
+  onEdit?: (goal: Goal) => void;
+  onDelete?: (goalId: string) => void;
+  onUpdateStatus?: (goalId: string, status: string) => void;
+  onUpdateProgress?: (goalId: string, progress: number) => void;
 }
 
-function PerformanceGoalRow({ goal }: PerformanceGoalRowProps) {
+function PerformanceGoalRow({ 
+  goal, 
+  canEdit, 
+  onEdit, 
+  onDelete,
+  onUpdateStatus,
+  onUpdateProgress
+}: PerformanceGoalRowProps) {
   const getStatusColor = (status: string, progress: number) => {
     if (status === "not_started" || progress < 25) return "text-red-500";
     if (progress < 50) return "text-orange-500";
@@ -56,6 +100,18 @@ function PerformanceGoalRow({ goal }: PerformanceGoalRowProps) {
     if (progress < 25) return "bg-red-500";
     if (progress < 50) return "bg-orange-500";
     return "bg-emerald-500";
+  };
+
+  const handleStatusChange = (newStatus: string) => {
+    if (onUpdateStatus) {
+      onUpdateStatus(goal.id, newStatus);
+    }
+  };
+
+  const handleProgressUpdate = (newProgress: number) => {
+    if (onUpdateProgress) {
+      onUpdateProgress(goal.id, newProgress);
+    }
   };
 
   const metric = goal.metrics?.[0];
@@ -125,17 +181,56 @@ function PerformanceGoalRow({ goal }: PerformanceGoalRowProps) {
         </div>
       </td>
       <td className="px-4 py-4">
-        <Button 
-          variant="ghost" 
-          className={`flex items-center ${statusColor}`}
-        >
-          {statusText}
-          <ChevronDown className="h-4 w-4 ml-1" />
-        </Button>
+        {canEdit ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className={`flex items-center ${statusColor}`}
+              >
+                {statusText}
+                <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleStatusChange("not_started")}>
+                Delayed
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStatusChange("in_progress")}>
+                In Progress
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStatusChange("completed")}>
+                Completed
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <span className={statusColor}>{statusText}</span>
+        )}
       </td>
       <td className="px-4 py-4">
         <Check className="h-5 w-5 text-green-500" />
       </td>
+      {canEdit && (
+        <td className="px-4 py-4">
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => onEdit && onEdit(goal)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => onDelete && onDelete(goal.id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </td>
+      )}
     </tr>
   );
 }

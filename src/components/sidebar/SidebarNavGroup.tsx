@@ -30,9 +30,11 @@ export default function SidebarNavGroup({ title, items, className }: SidebarNavG
 
   return (
     <SidebarGroup className={cn("mt-6", className)}>
-      <SidebarGroupLabel className="px-6 text-gray-400 uppercase text-xs">
-        {title}
-      </SidebarGroupLabel>
+      {expanded && (
+        <SidebarGroupLabel>
+          {title}
+        </SidebarGroupLabel>
+      )}
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.path}>
