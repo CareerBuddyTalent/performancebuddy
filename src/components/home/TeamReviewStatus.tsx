@@ -69,4 +69,5 @@ export default function TeamReviewStatus({ teamMembers }: TeamReviewStatusProps)
         )}
       </CardContent>
     </Card>
-  </div>
+  );
+}
