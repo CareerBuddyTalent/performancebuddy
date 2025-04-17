@@ -101,48 +101,48 @@ export const favorites = [
     title: "Jane Doe",
     subtitle: "Designer (Product)",
     avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    type: "person"
+    type: "person" as const
   },
   { 
     id: 2, 
     title: "Ruchir Gupta",
     subtitle: "Executive (Design)",
     avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    type: "person"
+    type: "person" as const
   },
   { 
     id: 3, 
     title: "Poorva Gupta",
     subtitle: "Designer (Product)",
     avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    type: "person"
+    type: "person" as const
   },
   { 
     id: 4, 
     title: "People Product",
-    type: "dashboard"
+    type: "dashboard" as const
   },
   { 
     id: 5, 
     title: "Product Owner",
-    type: "dashboard"
+    type: "dashboard" as const
   },
   { 
     id: 6, 
     title: "Monthly Active Users",
     subtitle: "People Product • Wade Wilson",
-    type: "chart"
+    type: "chart" as const
   },
   { 
     id: 7, 
     title: "Product NPS",
     subtitle: "People Product • Wade Wilson",
-    type: "chart"
+    type: "chart" as const
   },
   { 
     id: 8, 
     title: "eNPS",
     subtitle: "Talent • Alena Olga",
-    type: "chart"
+    type: "chart" as const
   }
 ];
