@@ -1,29 +1,23 @@
 
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Search, Bell, LayoutGrid } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, LayoutGrid } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import NotificationPopover from "@/components/dashboard/NotificationPopover";
 
 interface HomeHeaderProps {
   user: User;
-  notificationsOpen: boolean;
-  setNotificationsOpen: (open: boolean) => void;
   layoutGridOpen: boolean;
   setLayoutGridOpen: (open: boolean) => void;
   setSearchOpen: (open: boolean) => void;
-  notifications: any[];
 }
 
 export default function HomeHeader({
   user,
-  notificationsOpen,
-  setNotificationsOpen,
   layoutGridOpen,
   setLayoutGridOpen,
   setSearchOpen,
-  notifications
 }: HomeHeaderProps) {
   const navigate = useNavigate();
 
@@ -48,59 +42,7 @@ export default function HomeHeader({
           <Search className="h-5 w-5" />
         </Button>
         
-        <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="rounded-full relative"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <div className="p-3 border-b flex justify-between items-center">
-              <h3 className="font-medium">Notifications</h3>
-              <Button variant="ghost" size="sm" className="h-8 text-xs">Mark all as read</Button>
-            </div>
-            <div className="max-h-96 overflow-auto">
-              {notifications.map((notification) => (
-                <div 
-                  key={notification.id} 
-                  className="p-3 border-b hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                  onClick={() => setNotificationsOpen(false)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
-                      <img 
-                        src={notification.sender.avatar} 
-                        alt={notification.sender.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{notification.title}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                        {notification.description}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">{notification.days} days ago</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-2 text-center border-t">
-              <button 
-                className="text-sm text-blue-600 hover:underline"
-                onClick={() => handleNavigate('/notifications')}
-              >
-                View all notifications
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <NotificationPopover />
 
         <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
           <DropdownMenuTrigger asChild>

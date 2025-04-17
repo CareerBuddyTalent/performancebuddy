@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { notifications, teamMembers, getTasksMockData } from "@/components/home/mockData";
+import { teamMembers, getTasksMockData } from "@/components/home/mockData";
 
 import HomeHeader from "@/components/home/HomeHeader";
 import MainContent from "@/components/home/MainContent";
@@ -14,7 +14,6 @@ export default function Home() {
   const navigate = useNavigate();
   const tasks = getTasksMockData();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [layoutGridOpen, setLayoutGridOpen] = useState(false);
 
   useEffect(() => {
@@ -38,16 +37,12 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <HomeHeader 
         user={user}
-        notificationsOpen={notificationsOpen}
-        setNotificationsOpen={setNotificationsOpen}
         layoutGridOpen={layoutGridOpen}
         setLayoutGridOpen={setLayoutGridOpen}
         setSearchOpen={setSearchOpen}
-        notifications={notifications}
       />
 
       <MainContent 
-        notifications={notifications}
         tasks={tasks}
         teamMembers={teamMembers}
         todoCount={todoCount}

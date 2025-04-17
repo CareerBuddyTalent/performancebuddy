@@ -1,15 +1,12 @@
-
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import NotificationCard from "./NotificationCard";
 import TaskCounters from "./TaskCounters";
 import TasksList from "./TasksList";
 import TeamMembersSection from "./TeamMembersSection";
 
 interface MainContentProps {
-  notifications: any[];
   tasks: any[];
   teamMembers: any[];
   todoCount: number;
@@ -22,7 +19,6 @@ interface MainContentProps {
 }
 
 export default function MainContent({
-  notifications,
   tasks,
   teamMembers,
   todoCount,
@@ -47,14 +43,7 @@ export default function MainContent({
             <CardDescription>Latest announcements and updates</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 overflow-x-auto pb-2 pt-2">
-              {notifications.map((notification) => (
-                <NotificationCard 
-                  key={notification.id} 
-                  notification={notification} 
-                />
-              ))}
-            </div>
+            <NotificationsList />
           </CardContent>
         </Card>
 
