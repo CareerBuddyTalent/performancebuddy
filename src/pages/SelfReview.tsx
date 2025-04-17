@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, CheckCircle } from "lucide-react";
+import { Clock } from "lucide-react";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import { ReviewSkill } from "@/types";
 import { initialSkills } from "@/data/reviewSkillsData";

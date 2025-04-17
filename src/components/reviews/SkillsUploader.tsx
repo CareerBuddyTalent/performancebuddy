@@ -7,15 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,27 +14,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle, Circle, Code, FileSpreadsheet, HeartHandshake, Plus, Trash, Upload } from "lucide-react";
+import { Code, HeartHandshake, Plus, Trash } from "lucide-react";
 import { ReviewSkill } from "@/types";
-import { ImportSkillsDialog } from "../ImportSkillsDialog";
 
 interface SkillsUploaderProps {
   skills: ReviewSkill[];
   onSkillAdded: (skill: ReviewSkill) => void;
   onSkillDeleted: (skillId: string) => void;
-  onSkillsImported: (skills: ReviewSkill[]) => void;
 }
 
-export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted, onSkillsImported }: SkillsUploaderProps) {
+export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted }: SkillsUploaderProps) {
   const { toast } = useToast();
   const [skillName, setSkillName] = useState("");
   const [skillDescription, setSkillDescription] = useState("");
   const [skillCategory, setSkillCategory] = useState<"technical" | "soft">("technical");
   const [activeTab, setActiveTab] = useState("technical");
-  const [showImportDialog, setShowImportDialog] = useState(false);
   
   // Filter skills by category
   const technicalSkills = skills.filter(skill => skill.category === "technical");
@@ -79,39 +66,11 @@ export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted, onSkillsI
     });
   };
   
-  const handleDeleteSkill = (skillId: string, skillName: string) => {
-    onSkillDeleted(skillId);
-    
-    toast({
-      title: "Skill deleted",
-      description: `${skillName} has been removed.`,
-    });
-  };
-  
-  const handleImportComplete = (importedSkills: any[]) => {
-    // Convert the imported skills to the ReviewSkill format
-    const formattedSkills: ReviewSkill[] = importedSkills.map(skill => ({
-      id: skill.id,
-      name: skill.name,
-      description: skill.description || "",
-      category: skill.category.toLowerCase().includes("soft") ? "soft" : "technical",
-      isActive: true
-    }));
-    
-    onSkillsImported(formattedSkills);
-  };
-  
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Add Review Skills</CardTitle>
-            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
-              <Upload className="mr-2 h-4 w-4" />
-              Import Skills
-            </Button>
-          </div>
+          <CardTitle>Add Review Skills</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
@@ -178,7 +137,7 @@ export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted, onSkillsI
             <TabsContent value="technical">
               <SkillsTable 
                 skills={technicalSkills} 
-                onDeleteSkill={handleDeleteSkill} 
+                onDeleteSkill={onSkillDeleted} 
                 categoryIcon={<Code className="h-4 w-4 text-blue-500" />}
               />
             </TabsContent>
@@ -186,26 +145,20 @@ export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted, onSkillsI
             <TabsContent value="soft">
               <SkillsTable 
                 skills={softSkills} 
-                onDeleteSkill={handleDeleteSkill}
+                onDeleteSkill={onSkillDeleted}
                 categoryIcon={<HeartHandshake className="h-4 w-4 text-purple-500" />}
               />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-      
-      <ImportSkillsDialog
-        open={showImportDialog}
-        onOpenChange={setShowImportDialog}
-        onImportComplete={handleImportComplete}
-      />
     </div>
   );
 }
 
 interface SkillsTableProps {
   skills: ReviewSkill[];
-  onDeleteSkill: (skillId: string, skillName: string) => void;
+  onDeleteSkill: (skillId: string) => void;
   categoryIcon: React.ReactNode;
 }
 
@@ -240,7 +193,7 @@ function SkillsTable({ skills, onDeleteSkill, categoryIcon }: SkillsTableProps) 
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onDeleteSkill(skill.id, skill.name)}
+                      onClick={() => onDeleteSkill(skill.id)}
                     >
                       <Trash className="h-4 w-4 text-red-500" />
                     </Button>

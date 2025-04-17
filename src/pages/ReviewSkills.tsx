@@ -16,24 +16,7 @@ export default function ReviewSkills() {
   
   const handleDeleteSkill = (skillId: string) => {
     setSkills(prevSkills => prevSkills.filter(skill => skill.id !== skillId));
-  };
-  
-  const handleImportSkills = (importedSkills: ReviewSkill[]) => {
-    setSkills(prevSkills => {
-      // Filter out duplicates based on name
-      const existingNames = new Set(prevSkills.map(skill => skill.name.toLowerCase()));
-      const filteredImports = importedSkills.filter(
-        skill => !existingNames.has(skill.name.toLowerCase())
-      );
-      
-      if (filteredImports.length < importedSkills.length) {
-        toast.info(`${importedSkills.length - filteredImports.length} duplicate skills were skipped.`);
-      }
-      
-      return [...prevSkills, ...filteredImports];
-    });
-    
-    toast.success(`Successfully imported ${importedSkills.length} skills.`);
+    toast.success("Skill deleted successfully");
   };
   
   if (!user) return null;
@@ -51,7 +34,6 @@ export default function ReviewSkills() {
         skills={skills}
         onSkillAdded={handleAddSkill}
         onSkillDeleted={handleDeleteSkill}
-        onSkillsImported={handleImportSkills}
       />
     </div>
   );
