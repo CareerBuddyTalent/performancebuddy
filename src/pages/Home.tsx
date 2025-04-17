@@ -1,30 +1,21 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Search, Bell, LayoutGrid, ChevronRight } from "lucide-react";
-
-import { 
-  notifications, 
-  teamMembers, 
-  getTasksMockData 
-} from "@/components/home/mockData";
-
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from "@/components/ui/popover";
-
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { notifications, teamMembers, getTasksMockData } from "@/components/home/mockData";
 
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+import NotificationCard from "@/components/home/NotificationCard";
+import TaskCounters from "@/components/home/TaskCounters";
+import TasksList from "@/components/home/TasksList";
+import TeamMembersSection from "@/components/home/TeamMembersSection";
+import SearchDialog from "@/components/home/SearchDialog";
 
 export default function Home() {
   const { user } = useAuth();
@@ -104,7 +95,9 @@ export default function Home() {
                       </div>
                       <div>
                         <h4 className="font-medium">{notification.title}</h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{notification.description}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                          {notification.description}
+                        </p>
                         <p className="text-xs text-gray-400 mt-1">{notification.days} days ago</p>
                       </div>
                     </div>
@@ -201,7 +194,7 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg">Action Items</CardTitle>
                 <div>
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList>
                       <TabsTrigger value="tasks">All</TabsTrigger>
                       <TabsTrigger value="today">Today</TabsTrigger>
@@ -213,7 +206,7 @@ export default function Home() {
               <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              <Tabs value={activeTab} className="w-full">
+              <Tabs value={activeTab}>
                 <TabsContent value="tasks" className="mt-0">
                   <TasksList tasks={tasks} />
                 </TabsContent>
