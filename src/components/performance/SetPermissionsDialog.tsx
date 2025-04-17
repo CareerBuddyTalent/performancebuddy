@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import RolePermissionsTable from "./permissions/RolePermissionsTable";
-import DataAccessControls from "./permissions/DataAccessControls";
-import { PermissionRole } from "./permissions/types";
+import RolePermissionsTable from "@/components/performance/permissions/RolePermissionsTable";
+import DataAccessControls from "@/components/performance/permissions/DataAccessControls";
+import { PermissionRole } from "@/components/performance/permissions/types";
 
 interface SetPermissionsDialogProps {
   open: boolean;

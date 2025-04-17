@@ -2,18 +2,7 @@
 import React from "react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-
-interface PermissionRole {
-  id: string;
-  role: string;
-  viewAll: boolean;
-  editOwn: boolean;
-  editAll: boolean;
-  createNew: boolean;
-  deleteOwn: boolean;
-  deleteAll: boolean;
-  exportData: boolean;
-}
+import { PermissionRole } from "./types";
 
 interface RolePermissionsTableProps {
   permissions: PermissionRole[];
