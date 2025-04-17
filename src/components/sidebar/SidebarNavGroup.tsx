@@ -48,7 +48,7 @@ export default function SidebarNavGroup({ title, items, className }: SidebarNavG
                 )}
               >
                 <item.icon className="h-5 w-5" />
-                <span>{item.icon.name !== 'span' ? item.label : null}</span>
+                {expanded && <span>{item.label}</span>}
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
