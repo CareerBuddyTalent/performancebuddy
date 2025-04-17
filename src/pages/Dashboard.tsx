@@ -8,6 +8,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
 import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
+import EmployeeDashboard from "@/components/dashboard/EmployeeDashboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Dashboard() {
@@ -81,7 +82,23 @@ export default function Dashboard() {
   };
 
   if (!user) return null;
+  
+  // Render employee dashboard for employee users
+  if (user.role === 'employee') {
+    return (
+      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+        <EmployeeDashboard 
+          reviews={reviews}
+          goals={goals}
+          feedbackEntries={feedbackEntries}
+          users={users}
+          parameters={parameters}
+        />
+      </div>
+    );
+  }
 
+  // Render manager/admin dashboard
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <DashboardStats 

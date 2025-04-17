@@ -6,6 +6,7 @@ import AppSidebar from "@/components/AppSidebar";
 import CompanySelector from "@/components/CompanySelector";
 import { useCompany } from "@/context/CompanyContext";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificationContext } from "@/context/NotificationContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, LayoutGrid } from "lucide-react";
 import NotificationPopover from "@/components/dashboard/NotificationPopover";
@@ -19,6 +20,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
   const location = useLocation();
   const { companies, currentCompany } = useCompany();
   const { user } = useAuth();
+  const { unreadCount } = useNotificationContext();
 
   // Check if user has required role
   if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
