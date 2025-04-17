@@ -1,4 +1,3 @@
-
 import { ReactNode, useState } from 'react';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -88,9 +87,11 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
                   <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
                     Feedback
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleNavigate('/users')}>
-                    Team Members
-                  </DropdownMenuItem>
+                  {(user?.role === 'admin' || user?.role === 'manager') && (
+                    <DropdownMenuItem onClick={() => handleNavigate('/users')}>
+                      Team Members
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               

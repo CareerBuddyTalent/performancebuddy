@@ -112,16 +112,16 @@ const App = () => (
                 } />
                 
                 <Route path="/users" element={
-                  <ProtectedRoute>
-                    <PageLayout>
+                  <ProtectedRoute roles={["admin", "manager"]}>
+                    <PageLayout allowedRoles={["admin", "manager"]}>
                       <UserManagement />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
                 
                 <Route path="/user/:userId" element={
-                  <ProtectedRoute>
-                    <PageLayout>
+                  <ProtectedRoute roles={["admin", "manager"]}>
+                    <PageLayout allowedRoles={["admin", "manager"]}>
                       <UserDetail />
                     </PageLayout>
                   </ProtectedRoute>
