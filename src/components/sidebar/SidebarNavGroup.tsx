@@ -13,9 +13,10 @@ import {
 interface SidebarNavGroupProps {
   title: string;
   items: NavigationItem[];
+  className?: string; // Make className optional in the props
 }
 
-export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) {
+export default function SidebarNavGroup({ title, items, className }: SidebarNavGroupProps) {
   const location = useLocation();
   
   if (items.length === 0) {
