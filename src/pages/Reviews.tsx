@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
@@ -9,11 +9,20 @@ import ManagerFeedback from "@/components/reviews/ManagerFeedback";
 import ReviewProgress from "@/components/ReviewProgress";
 import GoalProgress from "@/components/goals/GoalProgress";
 import { mockParameters, mockActiveCycle, mockPastReviews } from "@/components/reviews/mockReviewData";
+import { initialSkills } from "@/data/reviewSkillsData";
+import { ReviewSkill } from "@/types";
 
 export default function Reviews() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skills, setSkills] = useState<ReviewSkill[]>([]);
+
+  // In a real app, fetch skills from your backend
+  useEffect(() => {
+    // Simulating API call with mock data
+    setSkills(initialSkills || []);
+  }, []);
 
   // Get the latest review's feedback if it exists
   const latestReview = mockPastReviews[0];
@@ -91,6 +100,7 @@ export default function Reviews() {
       <SelfReviewForm 
         cycleId={mockActiveCycle.id}
         parameters={mockParameters}
+        skills={skills}
         onSubmit={handleSubmitReview}
       />
 

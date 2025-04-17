@@ -1,11 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Clock, CheckCircle } from "lucide-react";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
+import { ReviewSkill } from "@/types";
+import { initialSkills } from "@/data/reviewSkillsData";
 
 // Mock data - Replace with actual data from your backend
 const mockParameters = [
@@ -42,6 +44,13 @@ export default function SelfReview() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skills, setSkills] = useState<ReviewSkill[]>([]);
+
+  // In a real app, fetch skills from your backend
+  useEffect(() => {
+    // Simulating API call with mock data
+    setSkills(initialSkills || []);
+  }, []);
 
   const handleSubmitReview = async (data: any) => {
     setIsSubmitting(true);
@@ -101,6 +110,7 @@ export default function SelfReview() {
         <SelfReviewForm 
           cycleId={mockActiveCycle.id}
           parameters={mockParameters}
+          skills={skills}
           onSubmit={handleSubmitReview}
         />
       </div>

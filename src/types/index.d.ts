@@ -28,3 +28,12 @@ export interface DevelopmentPlan {
   createdAt: Date;
   modifiedAt: Date;
 }
+
+export interface ReviewSkill {
+  id: string;
+  name: string;
+  description: string;
+  category: "technical" | "soft";
+  isActive: boolean;
+}
+

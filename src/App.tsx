@@ -21,6 +21,7 @@ import UserManagement from "./pages/UserManagement";
 import UserDetail from "./pages/UserDetail";
 import Reviews from "./pages/Reviews";
 import SelfReview from "./pages/SelfReview";
+import ReviewSkills from "./pages/ReviewSkills";
 import PerformanceCycles from "./pages/PerformanceCycles";
 import CompanyManagement from "./pages/CompanyManagement";
 import NotFound from "./pages/NotFound";
@@ -143,6 +144,14 @@ const App = () => (
                   <ProtectedRoute>
                     <PageLayout>
                       <SelfReview />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/review-skills" element={
+                  <ProtectedRoute roles={["admin"]}>
+                    <PageLayout allowedRoles={["admin"]}>
+                      <ReviewSkills />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
