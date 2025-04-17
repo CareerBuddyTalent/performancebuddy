@@ -9,4 +9,6 @@ export interface AuthContextType {
   switchRole: (role: UserRole) => void;
   isLoading: boolean;
   requestReview: (managerId: string, comments?: string) => Promise<boolean>;
+  authError: string | null;
+  clearAuthError: () => void;
 }

@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,9 +22,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, authError, clearAuthError } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const demoCredentials = [
@@ -31,6 +31,13 @@ export default function Login() {
     { role: "Manager", email: "jane@example.com", password: "password123" },
     { role: "Admin (CEO)", email: "john@example.com", password: "password123" },
   ];
+
+  // Clear auth errors when component unmounts or on form change
+  useEffect(() => {
+    return () => {
+      clearAuthError();
+    };
+  }, [clearAuthError]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -40,9 +47,18 @@ export default function Login() {
     },
   });
 
+  // Clear auth errors when form values change
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (authError) {
+        clearAuthError();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, authError, clearAuthError]);
+
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
-    setError(null);
     
     try {
       const success = await login(data.email, data.password);
@@ -50,15 +66,8 @@ export default function Login() {
       if (success) {
         toast.success("Login successful!");
         navigate("/dashboard");
-      } else {
-        if (demoCredentials.some(cred => cred.email === data.email)) {
-          setError("Demo login is enabled. Make sure you're using 'password123' as the password.");
-        } else {
-          setError("Invalid email or password. Try one of the demo credentials below.");
-        }
       }
     } catch (err) {
-      setError("An error occurred while trying to log in. Please try again.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -81,10 +90,10 @@ export default function Login() {
             <CardDescription>Sign in to your account</CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
+            {authError && (
               <Alert variant="destructive" className="mb-4">
                 <ExclamationTriangleIcon className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{authError}</AlertDescription>
               </Alert>
             )}
 

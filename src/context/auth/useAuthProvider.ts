@@ -13,6 +13,7 @@ import {
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = setupUserSession(setUser, setIsLoading);
@@ -20,33 +21,67 @@ export function useAuthProvider() {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    const { success, user: loggedInUser } = await loginUser(email, password);
-    
-    if (success && loggedInUser) {
-      setUser(loggedInUser);
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const { success, user: loggedInUser, error } = await loginUser(email, password);
+      
+      if (success && loggedInUser) {
+        setUser(loggedInUser);
+        return true;
+      }
+      
+      if (error) {
+        setAuthError(error);
+      }
+      
+      return false;
+    } catch (error) {
+      setAuthError('An unexpected error occurred during login');
+      console.error('Login error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
-    return success;
   };
 
   const signup = async (email: string, password: string, name: string, role: UserRole = 'employee'): Promise<boolean> => {
-    setIsLoading(true);
-    const { success, user: newUser } = await signupUser(email, password, name, role);
-    
-    if (success && newUser) {
-      setUser(newUser);
+    try {
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const { success, user: newUser, error } = await signupUser(email, password, name, role);
+      
+      if (success && newUser) {
+        setUser(newUser);
+        return true;
+      }
+      
+      if (error) {
+        setAuthError(error);
+      }
+      
+      return false;
+    } catch (error) {
+      setAuthError('An unexpected error occurred during signup');
+      console.error('Signup error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
-    return success;
   };
 
   const logout = async () => {
-    await logoutUser();
-    if (process.env.NODE_ENV === 'development') {
-      setUser(null);
+    try {
+      setAuthError(null);
+      await logoutUser();
+      if (process.env.NODE_ENV === 'development') {
+        setUser(null);
+      }
+    } catch (error) {
+      setAuthError('An error occurred during logout');
+      console.error('Logout error:', error);
     }
   };
 
@@ -62,13 +97,25 @@ export function useAuthProvider() {
   };
 
   const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
-    if (!user) return false;
-    
-    setIsLoading(true);
-    const success = await requestUserReview(user.id, managerId, comments);
-    setIsLoading(false);
-    
-    return success;
+    try {
+      if (!user) return false;
+      
+      setIsLoading(true);
+      setAuthError(null);
+      
+      const success = await requestUserReview(user.id, managerId, comments);
+      return success;
+    } catch (error) {
+      setAuthError('An error occurred while requesting review');
+      console.error('Review request error:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearAuthError = () => {
+    setAuthError(null);
   };
 
   return {
@@ -78,6 +125,8 @@ export function useAuthProvider() {
     logout,
     switchRole,
     isLoading,
-    requestReview
+    requestReview,
+    authError,
+    clearAuthError
   };
 }

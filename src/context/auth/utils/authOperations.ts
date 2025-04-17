@@ -7,13 +7,22 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * Handles user login with email and password
  */
-export const loginUser = async (email: string, password: string): Promise<{ success: boolean; user?: User }> => {
+export const loginUser = async (email: string, password: string): Promise<{ 
+  success: boolean; 
+  user?: User;
+  error?: string;
+}> => {
   try {
     if (process.env.NODE_ENV === 'development') {
       const demoUser = users.find(u => u.email === email && password === 'password123');
       
       if (demoUser) {
         return { success: true, user: demoUser };
+      } else if (users.some(u => u.email === email)) {
+        return { 
+          success: false, 
+          error: 'Invalid password. For demo accounts, use "password123".' 
+        };
       }
     }
     
@@ -24,13 +33,19 @@ export const loginUser = async (email: string, password: string): Promise<{ succ
     
     if (error) {
       console.error('Login error:', error);
-      return { success: false };
+      return { 
+        success: false, 
+        error: error.message || 'Invalid email or password' 
+      };
     }
     
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return { success: false };
+    return { 
+      success: false, 
+      error: error.message || 'An unexpected error occurred during login' 
+    };
   }
 };
 
@@ -42,7 +57,11 @@ export const signupUser = async (
   password: string, 
   name: string, 
   role: UserRole = 'employee'
-): Promise<{ success: boolean; user?: User }> => {
+): Promise<{ 
+  success: boolean; 
+  user?: User;
+  error?: string;
+}> => {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -57,7 +76,10 @@ export const signupUser = async (
     
     if (error) {
       console.error('Signup error:', error);
-      return { success: false };
+      return { 
+        success: false, 
+        error: error.message || 'Failed to create account' 
+      };
     }
     
     // Send welcome email
@@ -83,9 +105,12 @@ export const signupUser = async (
     }
     
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error);
-    return { success: false };
+    return { 
+      success: false, 
+      error: error.message || 'An unexpected error occurred during signup' 
+    };
   }
 };
 
@@ -97,6 +122,7 @@ export const logoutUser = async (): Promise<void> => {
     await supabase.auth.signOut();
   } catch (error) {
     console.error('Logout error:', error);
+    throw error;
   }
 };
 

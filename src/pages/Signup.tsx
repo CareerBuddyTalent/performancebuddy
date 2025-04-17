@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -24,10 +25,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Signup() {
-  const { signup } = useAuth();
+  const { signup, authError, clearAuthError } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Clear auth errors when component unmounts
+  useEffect(() => {
+    return () => {
+      clearAuthError();
+    };
+  }, [clearAuthError]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -39,9 +46,18 @@ export default function Signup() {
     },
   });
 
+  // Clear auth errors when form values change
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (authError) {
+        clearAuthError();
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, authError, clearAuthError]);
+
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
-    setError(null);
     
     try {
       const success = await signup(data.email, data.password, data.name, data.role);
@@ -49,11 +65,8 @@ export default function Signup() {
       if (success) {
         toast.success("Account created successfully!");
         navigate("/dashboard");
-      } else {
-        setError("Failed to create account. Please try again.");
       }
     } catch (err) {
-      setError("An error occurred while trying to sign up. Please try again.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -69,10 +82,10 @@ export default function Signup() {
             <CardDescription>Create your account</CardDescription>
           </CardHeader>
           <CardContent>
-            {error && (
+            {authError && (
               <Alert variant="destructive" className="mb-4">
                 <ExclamationTriangleIcon className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{authError}</AlertDescription>
               </Alert>
             )}
 
@@ -164,13 +177,12 @@ export default function Signup() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Already have an account? {" "}
-              <Button 
-                variant="link" 
-                size="sm" 
-                onClick={() => navigate("/login")}
+              <Link 
+                to="/login" 
+                className="text-primary hover:underline"
               >
                 Log in
-              </Button>
+              </Link>
             </p>
           </CardFooter>
         </Card>
@@ -178,4 +190,3 @@ export default function Signup() {
     </div>
   );
 }
-
