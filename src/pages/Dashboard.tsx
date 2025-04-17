@@ -8,7 +8,7 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
 import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
-import EmployeeDashboard from "@/components/dashboard/EmployeeDashboard";
+import EmployeeDashboard from "@/components/dashboard/employee";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Dashboard() {

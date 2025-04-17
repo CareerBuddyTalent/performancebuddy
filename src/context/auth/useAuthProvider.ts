@@ -187,15 +187,16 @@ export function useAuthProvider() {
       
       // In production, we would create a DB record here
       if (process.env.NODE_ENV === 'production') {
+        // Fix: Use a more generic method to insert data when the table may not be in the type system
         const { error } = await supabase
-          .from('review_requests')
+          .from('review_requests' as any) // Using 'as any' to temporarily bypass TypeScript limitations
           .insert({
             id: uuidv4(),
             employee_id: user.id,
             manager_id: managerId,
             comments: comments || '',
             status: 'pending',
-            created_at: new Date()
+            created_at: new Date().toISOString() // Fix: Convert Date to string
           });
   
         if (error) {
