@@ -8,4 +8,5 @@ export interface AuthContextType {
   logout: () => void;
   switchRole: (role: UserRole) => void;
   isLoading: boolean;
+  requestReview: (managerId: string, comments?: string) => Promise<boolean>;
 }

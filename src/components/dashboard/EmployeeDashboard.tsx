@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,13 +13,21 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import { useNotificationContext } from "@/context/NotificationContext";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function EmployeeDashboard({ reviews, goals, feedbackEntries, users, parameters }: any) {
-  const { user } = useAuth();
+  const { user, requestReview } = useAuth();
   const { addNotification } = useNotificationContext();
   const [activeTab, setActiveTab] = useState("yourReviews");
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [reviewComments, setReviewComments] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   if (!user) return null;
+
+  // Find user's manager
+  const manager = users.find((u: any) => u.name === user.manager);
 
   // Filter reviews for this employee
   const myReviews = reviews.filter(review => review.employeeId === user.id);
@@ -36,16 +43,51 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
   
   // Placeholder for overall performance grade
   const overallGrade = "Exceeding";
-  
-  // Get the user's manager
-  const manager = users.find(u => user.manager === u.id);
 
-  const handleRequestReview = () => {
-    addNotification({
-      title: "Review requested",
-      description: "Your request for a performance review has been sent to your manager",
-      type: "success",
-    });
+  const handleRequestReviewClick = () => {
+    setIsRequestDialogOpen(true);
+  };
+
+  const handleRequestReviewSubmit = async () => {
+    if (!manager) {
+      addNotification({
+        title: "Error",
+        description: "Could not find your manager. Please contact HR.",
+        type: "error",
+      });
+      setIsRequestDialogOpen(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const success = await requestReview(manager.id, reviewComments);
+      
+      if (success) {
+        addNotification({
+          title: "Review requested",
+          description: `Your request for a performance review has been sent to ${manager.name}`,
+          type: "success",
+        });
+      } else {
+        addNotification({
+          title: "Request failed",
+          description: "There was an error requesting your review. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      addNotification({
+        title: "Request failed",
+        description: "There was an error requesting your review. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+      setReviewComments("");
+      setIsRequestDialogOpen(false);
+    }
   };
 
   return (
@@ -248,10 +290,11 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
           
           <TabsContent value="yourReviews" className="mt-0">
             <div className="flex justify-end mb-4">
-              <Button onClick={handleRequestReview}>
+              <Button onClick={handleRequestReviewClick}>
                 Request review
               </Button>
             </div>
+            
             <div className="grid gap-6 md:grid-cols-2">
               {/* Current/Upcoming Review */}
               <Card className="border border-gray-200 dark:border-gray-800">
@@ -375,6 +418,42 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Request Review Dialog */}
+      <Dialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Request Performance Review</DialogTitle>
+            <DialogDescription>
+              This will send a review request to your manager{manager ? ` (${manager.name})` : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="comments" className="text-sm font-medium">Additional Comments (Optional)</label>
+                <Textarea
+                  id="comments"
+                  placeholder="Add any context or specific areas you'd like feedback on"
+                  value={reviewComments}
+                  onChange={(e) => setReviewComments(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRequestDialogOpen(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button onClick={handleRequestReviewSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { supabase } from "@/integrations/supabase/client";
 import { users, currentUser as defaultUser } from '@/data/mockData';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
@@ -178,12 +179,59 @@ export function useAuthProvider() {
     setUser(userForRole);
   };
 
+  const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
+    try {
+      if (!user) return false;
+
+      setIsLoading(true);
+      
+      // In production, we would create a DB record here
+      if (process.env.NODE_ENV === 'production') {
+        const { error } = await supabase
+          .from('review_requests')
+          .insert({
+            id: uuidv4(),
+            employee_id: user.id,
+            manager_id: managerId,
+            comments: comments || '',
+            status: 'pending',
+            created_at: new Date()
+          });
+  
+        if (error) {
+          console.error('Error requesting review:', error);
+          setIsLoading(false);
+          return false;
+        }
+      } else {
+        // Simulate API delay in development
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // For development, we'll just log this
+        console.log('Review requested with:', {
+          employee_id: user.id,
+          manager_id: managerId,
+          comments: comments || '',
+          status: 'pending'
+        });
+      }
+      
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      console.error('Error requesting review:', error);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   return {
     user,
     login,
     signup,
     logout,
     switchRole,
-    isLoading
+    isLoading,
+    requestReview
   };
 }
