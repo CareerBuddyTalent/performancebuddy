@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Search, Bell, LayoutGrid } from "lucide-react";
+import { Search, Bell, LayoutGrid, ChevronRight } from "lucide-react";
 
-// Import our refactored components
+// Import our components
 import NotificationCard from "@/components/home/NotificationCard";
 import TaskCounters from "@/components/home/TaskCounters";
 import TasksList from "@/components/home/TasksList";
@@ -19,11 +19,13 @@ import {
   getTasksMockData, 
   favorites 
 } from "@/components/home/mockData";
+
 import { 
   Popover, 
   PopoverContent, 
   PopoverTrigger 
 } from "@/components/ui/popover";
+
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -31,9 +33,13 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
 export default function Home() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("tasks");
   const navigate = useNavigate();
   const tasks = getTasksMockData();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -63,30 +69,38 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold tracking-tight">Home</h1>
-        <div className="flex items-center gap-4">
-          <button 
-            className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">Welcome, {user.name}</h1>
+          <p className="text-muted-foreground">Here's what's happening in your workspace today</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="rounded-full"
             onClick={() => setSearchOpen(true)}
             aria-label="Search"
           >
             <Search className="h-5 w-5" />
-          </button>
+          </Button>
           
           <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
             <PopoverTrigger asChild>
-              <button 
-                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700 relative"
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="rounded-full relative"
                 aria-label="Notifications"
               >
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
+              </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-3 border-b">
+              <div className="p-3 border-b flex justify-between items-center">
                 <h3 className="font-medium">Notifications</h3>
+                <Button variant="ghost" size="sm" className="h-8 text-xs">Mark all as read</Button>
               </div>
               <div className="max-h-96 overflow-auto">
                 {notifications.map((notification) => (
@@ -125,12 +139,14 @@ export default function Home() {
 
           <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
             <DropdownMenuTrigger asChild>
-              <button 
-                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="rounded-full"
                 aria-label="Quick Access"
               >
                 <LayoutGrid className="h-5 w-5" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
@@ -157,33 +173,79 @@ export default function Home() {
       </div>
 
       {/* Main content with sidebar layout */}
-      <div className="flex flex-col md:flex-row gap-6 h-full">
+      <div className="flex flex-col lg:flex-row gap-6 h-full">
         {/* Main content area */}
         <div className="flex-1 space-y-6">
-          {/* Notifications section */}
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {notifications.map((notification) => (
-              <NotificationCard 
-                key={notification.id} 
-                notification={notification} 
-              />
-            ))}
-          </div>
+          {/* Featured notifications */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center justify-between">
+                <span>Important Updates</span>
+                <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleNavigate('/notifications')}>
+                  View All <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </CardTitle>
+              <CardDescription>Latest announcements and updates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4 overflow-x-auto pb-2 pt-2">
+                {notifications.map((notification) => (
+                  <NotificationCard 
+                    key={notification.id} 
+                    notification={notification} 
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Task counts */}
-          <TaskCounters 
-            todoCount={todoCount}
-            performanceCount={performanceCount}
-            recruitmentCount={recruitmentCount}
-            hrCount={hrCount}
-          />
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Task Overview</CardTitle>
+              <CardDescription>Your current workload at a glance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TaskCounters 
+                todoCount={todoCount}
+                performanceCount={performanceCount}
+                recruitmentCount={recruitmentCount}
+                hrCount={hrCount}
+              />
+            </CardContent>
+          </Card>
 
           {/* Tasks list */}
-          <TasksList tasks={tasks} />
+          <Card>
+            <CardHeader className="pb-0">
+              <Tabs defaultValue="tasks" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">Your Tasks</CardTitle>
+                  <TabsList>
+                    <TabsTrigger value="tasks">All</TabsTrigger>
+                    <TabsTrigger value="today">Today</TabsTrigger>
+                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                  </TabsList>
+                </div>
+                <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
+              </Tabs>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <TabsContent value="tasks" className="mt-0">
+                <TasksList tasks={tasks} />
+              </TabsContent>
+              <TabsContent value="today" className="mt-0">
+                <TasksList tasks={tasks.filter(task => task.dueIn.includes("1 day"))} />
+              </TabsContent>
+              <TabsContent value="upcoming" className="mt-0">
+                <TasksList tasks={tasks.filter(task => !task.dueIn.includes("1 day"))} />
+              </TabsContent>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar */}
-        <div className="w-full md:w-80 space-y-6">
+        <div className="w-full lg:w-80 space-y-6">
           {/* Team members section */}
           <TeamMembersSection members={teamMembers} />
 

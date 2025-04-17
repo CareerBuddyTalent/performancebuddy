@@ -1,6 +1,7 @@
 
 import React from "react";
 import { NavigationItem } from "@/components/sidebar/navigation-config";
+import { Link } from "react-router-dom";
 
 interface SidebarNavGroupProps {
   title: string;
@@ -17,16 +18,20 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
       </h2>
       <div className="space-y-1">
         {items.map((item) => (
-          <div key={item.path} className="flex items-center">
+          <Link 
+            key={item.path} 
+            to={item.path}
+            className="flex items-center px-4 py-2 rounded-md hover:bg-white/10 transition-colors"
+          >
             {item.icon && (
               <div className="mr-3 text-white/70">
-                <item.icon size={16} />
+                {React.createElement(item.icon, { size: 16 })}
               </div>
             )}
             <span className="text-sm font-medium text-white/70 hover:text-white">
               {item.label}
             </span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

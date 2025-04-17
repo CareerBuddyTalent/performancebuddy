@@ -41,7 +41,7 @@ const iconComponents: Record<string, ReactNode> = {
 
 export default function TaskItem({ task }: { task: TaskItemProps }) {
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 gap-3">
       <div className="flex items-center gap-4">
         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
           {iconComponents[task.iconType]}
@@ -51,7 +51,7 @@ export default function TaskItem({ task }: { task: TaskItemProps }) {
           <div className="text-sm text-red-500">Due in {task.dueIn}</div>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Badge variant="outline" className="bg-gray-200 dark:bg-gray-700 text-xs font-normal">
           {task.type}
         </Badge>

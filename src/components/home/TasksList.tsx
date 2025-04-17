@@ -18,8 +18,16 @@ interface TaskItemProps {
 }
 
 export default function TasksList({ tasks }: { tasks: TaskItemProps[] }) {
+  if (tasks.length === 0) {
+    return (
+      <div className="p-8 text-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <p className="text-gray-500 dark:text-gray-400">No tasks available</p>
+      </div>
+    );
+  }
+  
   return (
-    <div className="space-y-px">
+    <div className="space-y-2 rounded-lg overflow-hidden">
       {tasks.map((task) => (
         <TaskItem key={task.id} task={task} />
       ))}
