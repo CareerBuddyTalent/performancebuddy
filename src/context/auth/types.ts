@@ -1,5 +1,4 @@
-
-import { User, UserRole } from '@/types';
+import { User, UserRole } from '@/types/user';
 
 export interface AuthContextType {
   user: User | null;
