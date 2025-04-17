@@ -57,3 +57,4 @@ export default function SidebarNavGroup({ title, items, className }: SidebarNavG
     </SidebarGroup>
   );
 }
+
