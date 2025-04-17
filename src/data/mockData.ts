@@ -1,4 +1,5 @@
 import { User, PerformanceParameter, ReviewCycle, PerformanceReview, Goal, Feedback, Company } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
 
 // Mock Companies
 export const companies: Company[] = [
@@ -142,7 +143,7 @@ export const parameters: PerformanceParameter[] = [
   },
 ];
 
-// Mock Review Cycles
+// Mock Review Cycles - Updated to use ReviewParameter objects instead of strings
 export const reviewCycles: ReviewCycle[] = [
   {
     id: "cycle1",
@@ -150,7 +151,32 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2023, 3, 1), // April 1, 2023
     endDate: new Date(2023, 5, 30), // June 30, 2023
     status: "completed",
-    parameters: ["param1", "param2", "param3"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Job Knowledge",
+        description: "Understanding of job-related skills and requirements",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Quality of Work",
+        description: "Accuracy, thoroughness, and effectiveness of work performed",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Communication Skills",
+        description: "Effectiveness in expressing ideas and information",
+        category: "soft",
+        required: true,
+        maxScore: 5
+      }
+    ],
     type: "quarterly",
     purpose: "performance"
   },
@@ -160,7 +186,32 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2023, 5, 1), // June 1, 2023
     endDate: new Date(2023, 10, 30), // November 30, 2023
     status: "completed",
-    parameters: ["param1", "param2", "param3"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Job Knowledge",
+        description: "Understanding of job-related skills and requirements",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Quality of Work",
+        description: "Accuracy, thoroughness, and effectiveness of work performed",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Team Collaboration",
+        description: "Ability to work effectively with others",
+        category: "soft",
+        required: true,
+        maxScore: 5
+      }
+    ],
     type: "bi-annual",
     purpose: "performance"
   },
@@ -170,7 +221,48 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2023, 10, 1), // November 1, 2023
     endDate: new Date(2024, 0, 31), // January 31, 2024
     status: "active",
-    parameters: ["param1", "param2", "param3", "param4", "param5"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Job Knowledge",
+        description: "Understanding of job-related skills and requirements",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Quality of Work",
+        description: "Accuracy, thoroughness, and effectiveness of work performed",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Communication Skills",
+        description: "Effectiveness in expressing ideas and information",
+        category: "soft",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Leadership",
+        description: "Ability to guide and influence others",
+        category: "soft",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Initiative",
+        description: "Self-motivation and proactive approach to work",
+        category: "performance",
+        required: true,
+        maxScore: 5
+      }
+    ],
     type: "annual",
     purpose: "performance"
   },
@@ -180,7 +272,24 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2024, 0, 1), // January 1, 2024
     endDate: new Date(2024, 2, 31), // March 31, 2024
     status: "active",
-    parameters: ["param6", "param7"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Goal Progress",
+        description: "Progress towards defined goals",
+        category: "goals",
+        required: true,
+        maxScore: 5
+      },
+      {
+        id: uuidv4(),
+        name: "Goal Quality",
+        description: "Ambition and quality of set goals",
+        category: "goals",
+        required: true,
+        maxScore: 5
+      }
+    ],
     type: "quarterly",
     purpose: "goal"
   },
@@ -190,7 +299,24 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2024, 3, 1), // April 1, 2024
     endDate: new Date(2024, 3, 30), // April 30, 2024
     status: "draft",
-    parameters: ["param8", "param9"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Strengths",
+        description: "Areas where the employee excels",
+        category: "custom",
+        required: true,
+        maxScore: 0
+      },
+      {
+        id: uuidv4(),
+        name: "Areas for Improvement",
+        description: "Areas where the employee can improve",
+        category: "custom",
+        required: true,
+        maxScore: 0
+      }
+    ],
     type: "monthly",
     purpose: "feedback"
   },
@@ -200,7 +326,16 @@ export const reviewCycles: ReviewCycle[] = [
     startDate: new Date(2024, 3, 15), // April 15, 2024
     endDate: new Date(2024, 3, 21), // April 21, 2024
     status: "draft",
-    parameters: ["param10"],
+    parameters: [
+      {
+        id: uuidv4(),
+        name: "Weekly Contribution",
+        description: "Contribution to team goals this week",
+        category: "custom",
+        required: true,
+        maxScore: 0
+      }
+    ],
     type: "weekly",
     purpose: "feedback"
   }
