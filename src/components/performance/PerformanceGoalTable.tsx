@@ -52,6 +52,7 @@ export default function PerformanceGoalTable({
                 onEditGoal={onEditGoal}
                 onDeleteGoal={onDeleteGoal}
                 onUpdateStatus={onUpdateStatus}
+                onUpdateProgress={onUpdateProgress}
               />
             ))
           ) : (

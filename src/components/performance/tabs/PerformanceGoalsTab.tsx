@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import PerformanceGoalTable from "@/components/performance/PerformanceGoalTable";
 import GoalFormDialog from "@/components/performance/GoalFormDialog";
+import GoalSettingsDialog from "@/components/performance/GoalSettingsDialog";
 
 interface PerformanceGoalsTabProps {
   goals: Goal[];
@@ -24,6 +25,7 @@ export default function PerformanceGoalsTab({
 }: PerformanceGoalsTabProps) {
   const { user } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
@@ -31,6 +33,10 @@ export default function PerformanceGoalsTab({
   const handleAddGoal = () => {
     setSelectedGoal(null);
     setIsDialogOpen(true);
+  };
+
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -116,7 +122,7 @@ export default function PerformanceGoalsTab({
         <div className="flex items-center gap-2">
           {canEdit && (
             <>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleOpenSettings}>
                 <Settings className="h-4 w-4 mr-2" />
                 Configure
               </Button>
@@ -143,6 +149,11 @@ export default function PerformanceGoalsTab({
         onOpenChange={setIsDialogOpen}
         goal={selectedGoal}
         onSave={handleSaveGoal}
+      />
+
+      <GoalSettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
       />
     </Card>
   );

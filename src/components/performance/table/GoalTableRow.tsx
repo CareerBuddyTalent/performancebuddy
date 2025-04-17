@@ -1,11 +1,13 @@
 
 import { Goal } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Edit, Trash, Calendar, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { GoalStatusCell } from "./GoalStatusCell";
+import { GoalProgressCell } from "./GoalProgressCell";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface GoalTableRowProps {
   goal: Goal;
@@ -13,66 +15,77 @@ interface GoalTableRowProps {
   onEditGoal?: (goal: Goal) => void;
   onDeleteGoal?: (goalId: string) => void;
   onUpdateStatus?: (goalId: string, status: string) => void;
+  onUpdateProgress?: (goalId: string, progress: number) => void;
 }
 
-export function GoalTableRow({
-  goal,
-  canEdit,
-  onEditGoal,
+export function GoalTableRow({ 
+  goal, 
+  canEdit, 
+  onEditGoal, 
   onDeleteGoal,
   onUpdateStatus,
+  onUpdateProgress
 }: GoalTableRowProps) {
+  
+  const handleUpdateStatus = (status: string) => {
+    onUpdateStatus?.(goal.id, status);
+  };
+  
+  const handleUpdateProgress = (progress: number) => {
+    onUpdateProgress?.(goal.id, progress);
+  };
+  
   return (
     <TableRow key={goal.id}>
       <TableCell className="font-medium">
         <div>
-          <p className="font-semibold">{goal.title}</p>
-          <p className="text-sm text-muted-foreground">{goal.description}</p>
+          <div className="font-medium">{goal.title}</div>
+          <div className="text-sm text-muted-foreground">{goal.description}</div>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center">
-          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-          {new Date(goal.dueDate).toLocaleDateString()}
-        </div>
+        {goal.dueDate ? format(new Date(goal.dueDate), 'MMM d, yyyy') : 'No due date'}
       </TableCell>
-      <TableCell>
-        <div className="w-full max-w-xs">
-          <div className="flex justify-between mb-1">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{goal.progress}%</span>
-          </div>
-          <Progress value={goal.progress} className="h-2" />
-        </div>
-      </TableCell>
+      
+      <GoalProgressCell 
+        progress={goal.progress} 
+        canEdit={canEdit} 
+        onUpdateProgress={handleUpdateProgress} 
+      />
+      
       <GoalStatusCell 
         status={goal.status} 
         canEdit={canEdit} 
-        onUpdateStatus={(status) => onUpdateStatus?.(goal.id, status)} 
+        onUpdateStatus={handleUpdateStatus} 
       />
+      
       <TableCell>
-        <Badge variant="outline" className="capitalize">
-          {goal.level}
-        </Badge>
+        <Badge variant="outline">{goal.level}</Badge>
       </TableCell>
+      
       {canEdit && (
         <TableCell className="text-right">
-          <div className="flex items-center justify-end space-x-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => onEditGoal?.(goal)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => onDeleteGoal?.(goal.id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEditGoal?.(goal)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onDeleteGoal?.(goal.id)}
+                className="text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </TableCell>
       )}
     </TableRow>
