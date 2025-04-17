@@ -26,7 +26,13 @@ export const mockActiveCycle = {
   id: "cycle1",
   name: "Q1 2024 Performance Review",
   deadline: "2024-03-31",
-  status: "active"
+  status: "active",
+  personalGoals: [
+    { id: "1", title: "Complete React Training", status: "completed" },
+    { id: "2", title: "Improve Code Quality", status: "in_progress" },
+    { id: "3", title: "Learn TypeScript", status: "in_progress" },
+    { id: "4", title: "Master Testing", status: "not_started" }
+  ]
 };
 
 export const mockPastReviews = [

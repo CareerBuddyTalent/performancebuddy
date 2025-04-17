@@ -7,6 +7,7 @@ import ActiveReviewCycle from "@/components/reviews/ActiveReviewCycle";
 import PastReviews from "@/components/reviews/PastReviews";
 import ManagerFeedback from "@/components/reviews/ManagerFeedback";
 import ReviewProgress from "@/components/ReviewProgress";
+import GoalProgress from "@/components/goals/GoalProgress";
 import { mockParameters, mockActiveCycle, mockPastReviews } from "@/components/reviews/mockReviewData";
 
 export default function Reviews() {
@@ -22,6 +23,12 @@ export default function Reviews() {
   const completedReviews = mockPastReviews.filter(review => review.status === "completed").length;
   const inProgressReviews = mockPastReviews.filter(review => review.status === "in_progress").length;
   const notStartedReviews = totalReviews - completedReviews - inProgressReviews;
+
+  // Calculate goal completion metrics
+  const personalGoals = mockActiveCycle.personalGoals || [];
+  const completedGoals = personalGoals.filter(goal => goal.status === "completed").length;
+  const inProgressGoals = personalGoals.filter(goal => goal.status === "in_progress").length;
+  const totalGoals = personalGoals.length;
 
   const handleSubmitReview = async (data: any) => {
     setIsSubmitting(true);
@@ -51,17 +58,25 @@ export default function Reviews() {
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold tracking-tight mb-6">Reviews</h1>
       
-      <div className="grid gap-6 md:grid-cols-2 mb-6">
-        <ActiveReviewCycle 
-          name={mockActiveCycle.name}
-          deadline={mockActiveCycle.deadline}
-        />
-        
-        <ReviewProgress
-          totalReviews={totalReviews}
-          completedReviews={completedReviews}
-          inProgressReviews={inProgressReviews}
-          notStartedReviews={notStartedReviews}
+      <div className="grid gap-6 mb-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          <ActiveReviewCycle 
+            name={mockActiveCycle.name}
+            deadline={mockActiveCycle.deadline}
+          />
+          
+          <ReviewProgress
+            totalReviews={totalReviews}
+            completedReviews={completedReviews}
+            inProgressReviews={inProgressReviews}
+            notStartedReviews={notStartedReviews}
+          />
+        </div>
+
+        <GoalProgress
+          totalGoals={totalGoals}
+          completedGoals={completedGoals}
+          inProgressGoals={inProgressGoals}
         />
       </div>
       
