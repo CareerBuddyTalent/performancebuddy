@@ -21,10 +21,8 @@ export function AddSkillForm({ onSkillAdded }: AddSkillFormProps) {
   
   const handleAddSkill = () => {
     if (!skillName.trim()) {
-      toast({
-        title: "Skill name required",
-        description: "Please provide a name for the skill.",
-        variant: "destructive",
+      toast.error("Skill name required", {
+        description: "Please provide a name for the skill."
       });
       return;
     }
@@ -43,9 +41,8 @@ export function AddSkillForm({ onSkillAdded }: AddSkillFormProps) {
     setSkillName("");
     setSkillDescription("");
     
-    toast({
-      title: "Skill added",
-      description: `${skillName} has been added to ${skillCategory} skills.`,
+    toast.success("Skill added", {
+      description: `${skillName} has been added to ${skillCategory} skills.`
     });
   };
 
