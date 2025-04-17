@@ -16,15 +16,21 @@ export default function ManagerFeedback({
   dateSubmitted,
   status
 }: ManagerFeedbackProps) {
+  const getBadgeVariant = () => {
+    switch(status) {
+      case "completed": return "default";
+      case "in_progress": return "secondary";
+      case "pending": return "outline";
+      default: return "secondary";
+    }
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center space-x-2">
           <CardTitle className="text-lg font-medium">Manager Feedback</CardTitle>
-          <Badge 
-            variant={status === "completed" ? "success" : 
-                    status === "in_progress" ? "warning" : "secondary"}
-          >
+          <Badge variant={getBadgeVariant()}>
             {status}
           </Badge>
         </div>
