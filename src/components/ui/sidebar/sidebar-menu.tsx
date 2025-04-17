@@ -27,13 +27,15 @@ const sidebarMenuButton = cva(
   }
 )
 
+export interface SidebarMenuButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean;
+  "data-active"?: boolean;
+  className?: string;
+}
+
 export const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement> & { 
-    asChild?: boolean;
-    "data-active"?: boolean;
-    className?: string;
-  }
+  SidebarMenuButtonProps
 >(({ className, children, asChild = false, "data-active": active, ...props }, ref) => {
   const { expanded } = useSidebar()
 
