@@ -2,19 +2,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Search, Bell, LayoutGrid, ChevronRight } from "lucide-react";
 import { notifications, teamMembers, getTasksMockData } from "@/components/home/mockData";
 
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-import NotificationCard from "@/components/home/NotificationCard";
-import TaskCounters from "@/components/home/TaskCounters";
-import TasksList from "@/components/home/TasksList";
-import TeamMembersSection from "@/components/home/TeamMembersSection";
+import HomeHeader from "@/components/home/HomeHeader";
+import MainContent from "@/components/home/MainContent";
 import SearchDialog from "@/components/home/SearchDialog";
 
 export default function Home() {
@@ -45,186 +36,28 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">Welcome, {user.name}</h1>
-          <p className="text-muted-foreground">Here's what's happening in your workspace today</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="rounded-full"
-            onClick={() => setSearchOpen(true)}
-            aria-label="Search"
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-          
-          <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="rounded-full relative"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-3 border-b flex justify-between items-center">
-                <h3 className="font-medium">Notifications</h3>
-                <Button variant="ghost" size="sm" className="h-8 text-xs">Mark all as read</Button>
-              </div>
-              <div className="max-h-96 overflow-auto">
-                {notifications.map((notification) => (
-                  <div 
-                    key={notification.id} 
-                    className="p-3 border-b hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                    onClick={() => setNotificationsOpen(false)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0">
-                        <img 
-                          src={notification.sender.avatar} 
-                          alt={notification.sender.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{notification.title}</h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                          {notification.description}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">{notification.days} days ago</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-2 text-center border-t">
-                <button 
-                  className="text-sm text-blue-600 hover:underline"
-                  onClick={() => handleNavigate('/notifications')}
-                >
-                  View all notifications
-                </button>
-              </div>
-            </PopoverContent>
-          </Popover>
+      <HomeHeader 
+        user={user}
+        notificationsOpen={notificationsOpen}
+        setNotificationsOpen={setNotificationsOpen}
+        layoutGridOpen={layoutGridOpen}
+        setLayoutGridOpen={setLayoutGridOpen}
+        setSearchOpen={setSearchOpen}
+        notifications={notifications}
+      />
 
-          <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="rounded-full"
-                aria-label="Quick Access"
-              >
-                <LayoutGrid className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
-                Dashboard
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
-                Performance
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
-                Goals
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
-                Feedback
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/users')}>
-                Team Members
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/calendar')}>
-                Calendar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-6 h-full">
-        <div className="flex-1 space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center justify-between">
-                <span>Important Updates</span>
-                <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleNavigate('/notifications')}>
-                  View All <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardTitle>
-              <CardDescription>Latest announcements and updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-4 overflow-x-auto pb-2 pt-2">
-                {notifications.map((notification) => (
-                  <NotificationCard 
-                    key={notification.id} 
-                    notification={notification} 
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Your Tasks</CardTitle>
-              <CardDescription>Track your pending tasks and actions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TaskCounters 
-                todoCount={todoCount}
-                performanceCount={performanceCount}
-                recruitmentCount={recruitmentCount}
-                hrCount={hrCount}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Action Items</CardTitle>
-                <div>
-                  <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList>
-                      <TabsTrigger value="tasks">All</TabsTrigger>
-                      <TabsTrigger value="today">Today</TabsTrigger>
-                      <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-              </div>
-              <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <Tabs value={activeTab}>
-                <TabsContent value="tasks" className="mt-0">
-                  <TasksList tasks={tasks} />
-                </TabsContent>
-                <TabsContent value="today" className="mt-0">
-                  <TasksList tasks={tasks.filter(task => task.dueIn.includes("1 day"))} />
-                </TabsContent>
-                <TabsContent value="upcoming" className="mt-0">
-                  <TasksList tasks={tasks.filter(task => !task.dueIn.includes("1 day"))} />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="w-full lg:w-80">
-          <TeamMembersSection members={teamMembers} />
-        </div>
-      </div>
+      <MainContent 
+        notifications={notifications}
+        tasks={tasks}
+        teamMembers={teamMembers}
+        todoCount={todoCount}
+        performanceCount={performanceCount}
+        recruitmentCount={recruitmentCount}
+        hrCount={hrCount}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleNavigate={handleNavigate}
+      />
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
