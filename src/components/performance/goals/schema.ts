@@ -12,7 +12,21 @@ export const goalFormSchema = z.object({
   metricTarget: z.number().optional(),
   metricCurrent: z.number().optional(),
   metricUnit: z.string().optional(),
+  // Add support for aligning goals with review parameters
+  alignedParameters: z.array(z.string()).optional(),
+  weight: z.number().min(0).max(100).optional(),
 });
 
 export type GoalFormValues = z.infer<typeof goalFormSchema>;
 
+// Schema for review parameters
+export const reviewParameterSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().optional(),
+  category: z.enum(["technical", "soft", "performance", "goals", "custom"]),
+  required: z.boolean().default(true),
+  maxScore: z.number().min(0).max(10),
+});
+
+export type ReviewParameterValues = z.infer<typeof reviewParameterSchema>;

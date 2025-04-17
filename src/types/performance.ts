@@ -14,9 +14,21 @@ export interface ReviewCycle {
   startDate: Date;
   endDate: Date;
   status: 'draft' | 'active' | 'completed';
-  parameters: string[]; // ids of parameters
+  parameters: ReviewParameter[]; // Updated from string[] to ReviewParameter[]
   type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
   purpose: 'goal' | 'feedback' | 'performance';
+  weightings?: {
+    [key: string]: number; // Category to weighting mapping (adds up to 100)
+  };
+}
+
+export interface ReviewParameter {
+  id: string;
+  name: string;
+  description?: string;
+  category: 'technical' | 'soft' | 'performance' | 'goals' | 'custom';
+  required: boolean;
+  maxScore: number; // typically 5 or 10
 }
 
 export interface PerformanceReview {

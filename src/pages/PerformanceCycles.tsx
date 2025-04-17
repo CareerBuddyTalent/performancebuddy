@@ -1,23 +1,83 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ReviewCycle } from "@/types";
+import { ReviewCycle, ReviewParameter } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import CycleManagement from "@/components/cycles/CycleManagement";
 import { reviewCycles as mockCycles } from "@/data/mockData";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function PerformanceCycles() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [cycles, setCycles] = useState<ReviewCycle[]>(
-    // Convert the mock cycles to include the new type and purpose properties
-    mockCycles.map(cycle => ({
-      ...cycle,
-      type: cycle.name.includes("Q") ? "quarterly" : 
-            cycle.name.includes("Annual") ? "annual" : "monthly",
-      purpose: "performance" // Default all existing cycles to performance reviews
-    }))
-  );
+  
+  // Convert legacy mock cycles to include the new parameter structure
+  const [cycles, setCycles] = useState<ReviewCycle[]>(() => {
+    return mockCycles.map(cycle => {
+      // Create default parameters based on cycle purpose
+      let defaultParams: ReviewParameter[] = [];
+      
+      if (cycle.name.includes("Performance") || cycle.name.includes("Annual")) {
+        defaultParams = [
+          {
+            id: uuidv4(),
+            name: "Job Knowledge",
+            description: "Understanding of job-related skills and requirements",
+            category: "performance",
+            required: true,
+            maxScore: 5
+          },
+          {
+            id: uuidv4(),
+            name: "Quality of Work",
+            description: "Accuracy, thoroughness, and effectiveness of work performed",
+            category: "performance",
+            required: true,
+            maxScore: 5
+          }
+        ];
+      } else if (cycle.name.includes("Feedback")) {
+        defaultParams = [
+          {
+            id: uuidv4(),
+            name: "Strengths",
+            description: "Areas where the employee excels",
+            category: "custom",
+            required: true,
+            maxScore: 0
+          },
+          {
+            id: uuidv4(),
+            name: "Areas for Improvement",
+            description: "Areas where the employee can improve",
+            category: "custom",
+            required: true,
+            maxScore: 0
+          }
+        ];
+      } else {
+        defaultParams = [
+          {
+            id: uuidv4(),
+            name: "Goal Progress",
+            description: "Progress towards defined goals",
+            category: "goals",
+            required: true,
+            maxScore: 5
+          }
+        ];
+      }
+      
+      return {
+        ...cycle,
+        type: cycle.name.includes("Q") ? "quarterly" : 
+              cycle.name.includes("Annual") ? "annual" : "monthly",
+        purpose: cycle.name.includes("Performance") || cycle.name.includes("Annual") ? "performance" : 
+                cycle.name.includes("Feedback") ? "feedback" : "goal",
+        parameters: defaultParams
+      };
+    });
+  });
   
   const isAdmin = user?.role === "admin";
   
