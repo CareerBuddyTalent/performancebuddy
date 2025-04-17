@@ -5,6 +5,7 @@ import { Search, LayoutGrid } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import NotificationPopover from "@/components/dashboard/NotificationPopover";
+import { homeMenuItems } from "@/config/navigationConfig";
 
 interface HomeHeaderProps {
   user: User;
@@ -20,15 +21,6 @@ export default function HomeHeader({
   setSearchOpen,
 }: HomeHeaderProps) {
   const navigate = useNavigate();
-
-  const menuItems = [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Performance', path: '/performance' },
-    { label: 'Goals', path: '/goals' },
-    { label: 'Feedback', path: '/feedback' },
-    { label: 'Team Members', path: '/users' },
-    { label: 'Calendar', path: '/calendar' },
-  ];
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -61,7 +53,7 @@ export default function HomeHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            {menuItems.map((item) => (
+            {homeMenuItems.map((item) => (
               <DropdownMenuItem key={item.path} onClick={() => navigate(item.path)}>
                 {item.label}
               </DropdownMenuItem>
