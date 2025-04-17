@@ -1,8 +1,12 @@
-
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/AppSidebar"; // Changed from named import to default import
+import AppSidebar from "@/components/AppSidebar";
+import CompanySelector from "@/components/CompanySelector";
+import { useCompany } from "@/context/CompanyContext";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Search, Bell, LayoutGrid } from "lucide-react";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -10,28 +14,51 @@ interface PageLayoutProps {
 
 export default function PageLayout({ children }: PageLayoutProps) {
   const location = useLocation();
-  
-  // Create a formatted title based on the current route
-  const getPageTitle = () => {
-    const path = location.pathname;
-    if (path === '/') return 'Home';
-    
-    return path
-      .split('/')
-      .filter(Boolean)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-  };
+  const { companies, currentCompany } = useCompany();
+  const { user } = useAuth();
 
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
-            <SidebarTrigger />
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold">{getPageTitle()}</h1>
+          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <h1 className="hidden md:block text-xl font-semibold capitalize">
+                {location.pathname.replace('/', '') || 'Home'}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+                <Search className="h-5 w-5" />
+              </button>
+              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+                <Bell className="h-5 w-5" />
+              </button>
+              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+                <LayoutGrid className="h-5 w-5" />
+              </button>
+              <div className="flex items-center gap-2 border-l pl-4 ml-2">
+                {currentCompany && (
+                  <CompanySelector 
+                    companies={companies} 
+                    selectedCompanyId={currentCompany.id} 
+                    onCompanyChange={id => {
+                      const company = companies.find(c => c.id === id);
+                      if (company) {
+                        // This is handled by the CompanyContext
+                      }
+                    }} 
+                  />
+                )}
+              </div>
+              {user && (
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.profilePicture} alt={user.name} />
+                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+              )}
             </div>
           </header>
           <main className="flex-1 p-6">{children}</main>
