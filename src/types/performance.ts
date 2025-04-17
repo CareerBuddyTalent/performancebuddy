@@ -1,4 +1,3 @@
-
 import { ImprovementPlan } from './development';
 
 export interface PerformanceParameter {
@@ -28,7 +27,8 @@ export interface ReviewParameter {
   description?: string;
   category: 'technical' | 'soft' | 'performance' | 'goals' | 'custom';
   required: boolean;
-  maxScore: number; // typically 5 or 10
+  maxScore: number;
+  weight?: number; // percentage weight in the overall review score
 }
 
 export interface PerformanceReview {

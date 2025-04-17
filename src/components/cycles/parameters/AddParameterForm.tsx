@@ -7,8 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Plus, Settings2 } from "lucide-react";
 import { v4 as uuidv4 } from 'uuid';
+import ParameterWeightForm from "./ParameterWeightForm";
+import ParameterScoringForm from "./ParameterScoringForm";
 
 interface AddParameterFormProps {
   onAddParameter: (parameter: ReviewParameter) => void;
@@ -21,7 +24,8 @@ export default function AddParameterForm({ onAddParameter }: AddParameterFormPro
     description: "",
     category: "performance",
     required: true,
-    maxScore: 5
+    maxScore: 5,
+    weight: 0
   });
 
   const handleSubmit = () => {
@@ -33,14 +37,16 @@ export default function AddParameterForm({ onAddParameter }: AddParameterFormPro
       description: "",
       category: "performance",
       required: true,
-      maxScore: 5
+      maxScore: 5,
+      weight: 0
     });
   };
 
   return (
-    <div className="border rounded-md p-4">
-      <h4 className="text-sm font-medium mb-3">Add New Parameter</h4>
-      <div className="space-y-3">
+    <div className="border rounded-md p-4 space-y-4">
+      <h4 className="text-sm font-medium">Add New Parameter</h4>
+      
+      <div className="space-y-4">
         <div className="grid gap-2">
           <Label htmlFor="paramName">Parameter Name</Label>
           <Input
@@ -55,7 +61,7 @@ export default function AddParameterForm({ onAddParameter }: AddParameterFormPro
         </div>
         
         <div className="grid gap-2">
-          <Label htmlFor="paramDescription">Description (Optional)</Label>
+          <Label htmlFor="paramDescription">Description</Label>
           <Textarea
             id="paramDescription"
             value={parameter.description}
@@ -68,68 +74,65 @@ export default function AddParameterForm({ onAddParameter }: AddParameterFormPro
           />
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="paramCategory">Category</Label>
-            <Select
-              value={parameter.category}
-              onValueChange={(value: "technical" | "soft" | "performance" | "goals" | "custom") => 
-                setParameter({
-                  ...parameter,
-                  category: value
-                })
-              }
-            >
-              <SelectTrigger id="paramCategory">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="performance">Performance</SelectItem>
-                <SelectItem value="soft">Soft Skills</SelectItem>
-                <SelectItem value="technical">Technical Skills</SelectItem>
-                <SelectItem value="goals">Goal-related</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="paramMaxScore">Max Score</Label>
-            <Select
-              value={parameter.maxScore.toString()}
-              onValueChange={(value) => 
-                setParameter({
-                  ...parameter,
-                  maxScore: parseInt(value)
-                })
-              }
-            >
-              <SelectTrigger id="paramMaxScore">
-                <SelectValue placeholder="Select max score" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">No Score (Text only)</SelectItem>
-                <SelectItem value="3">3-point scale</SelectItem>
-                <SelectItem value="5">5-point scale</SelectItem>
-                <SelectItem value="10">10-point scale</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2 pt-2">
-          <Checkbox 
-            id="paramRequired" 
-            checked={parameter.required}
-            onCheckedChange={(checked) => 
+        <div className="grid gap-2">
+          <Label htmlFor="paramCategory">Category</Label>
+          <Select
+            value={parameter.category}
+            onValueChange={(value: "technical" | "soft" | "performance" | "goals" | "custom") => 
               setParameter({
                 ...parameter,
-                required: checked === true
+                category: value
               })
             }
-          />
-          <Label htmlFor="paramRequired">Required parameter</Label>
+          >
+            <SelectTrigger id="paramCategory">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="performance">Performance</SelectItem>
+              <SelectItem value="soft">Soft Skills</SelectItem>
+              <SelectItem value="technical">Technical Skills</SelectItem>
+              <SelectItem value="goals">Goal-related</SelectItem>
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+
+        <Accordion type="single" collapsible>
+          <AccordionItem value="advanced">
+            <AccordionTrigger className="text-sm">
+              <div className="flex items-center gap-2">
+                <Settings2 className="h-4 w-4" />
+                Advanced Settings
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 space-y-4">
+              <ParameterScoringForm
+                maxScore={parameter.maxScore}
+                onMaxScoreChange={(score) => setParameter({ ...parameter, maxScore: score })}
+              />
+              
+              <ParameterWeightForm
+                weight={parameter.weight || 0}
+                onWeightChange={(weight) => setParameter({ ...parameter, weight })}
+              />
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="paramRequired" 
+                  checked={parameter.required}
+                  onCheckedChange={(checked) => 
+                    setParameter({
+                      ...parameter,
+                      required: checked === true
+                    })
+                  }
+                />
+                <Label htmlFor="paramRequired">Required parameter</Label>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
         
         <Button 
           type="button" 

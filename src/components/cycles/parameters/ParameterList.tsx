@@ -3,7 +3,7 @@ import { ReviewParameter } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Trash2 } from "lucide-react";
+import { Trash2, BarChart, StarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ParameterListProps {
@@ -29,6 +29,11 @@ export default function ParameterList({ parameters, onDeleteParameter }: Paramet
     );
   };
 
+  const getScoreLabel = (maxScore: number) => {
+    if (maxScore === 0) return "Text feedback only";
+    return `${maxScore}-point scale`;
+  };
+
   if (parameters.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground border rounded-md">
@@ -51,24 +56,38 @@ export default function ParameterList({ parameters, onDeleteParameter }: Paramet
                 key={param.id} 
                 className="flex items-center justify-between p-3 border rounded-md"
               >
-                <div>
-                  <p className="font-medium">{param.name}</p>
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{param.name}</p>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => onDeleteParameter(param.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                  
                   <p className="text-xs text-muted-foreground">{param.description}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  
+                  <div className="flex flex-wrap items-center gap-2">
                     {getCategoryBadge(param.category)}
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <BarChart className="h-3 w-3" />
+                      {getScoreLabel(param.maxScore)}
+                    </Badge>
+                    {param.weight > 0 && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <StarIcon className="h-3 w-3" />
+                        Weight: {param.weight}%
+                      </Badge>
+                    )}
                     {param.required && (
                       <span className="text-xs text-muted-foreground">Required</span>
                     )}
                   </div>
                 </div>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => onDeleteParameter(param.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                </Button>
               </div>
             ))}
           </div>
