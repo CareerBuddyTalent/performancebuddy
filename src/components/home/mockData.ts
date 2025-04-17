@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 
 // Mock data for notifications
@@ -40,56 +39,47 @@ export const teamMembers = [
 export const getTasksMockData = () => [
   { 
     id: 1, 
-    title: "Review for Jane Doe", 
+    title: "Complete Self Review", 
     dueIn: "1 day", 
     type: "Performance", 
-    assignee: { name: "Jane Doe", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
-    action: "Review",
+    assignee: { name: "You", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
+    action: "Start Review",
     iconType: "FileText"
   },
   { 
     id: 2, 
-    title: "Pending feedback for 'Screen Call' interview", 
+    title: "Update Skills Assessment", 
     dueIn: "5 days", 
-    type: "Interview", 
-    assignee: { name: "Franco Delort", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
-    action: "Add feedback",
-    iconType: "MessageSquare"
+    type: "Development", 
+    assignee: { name: "You", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
+    action: "Update",
+    iconType: "TrendingUp"
   },
   { 
     id: 3, 
-    title: "KPI · Monthly revenue ($m)", 
+    title: "Goal Progress Update", 
     dueIn: "11 days", 
-    type: "Performance", 
-    assignee: { name: "Ronald Edgar", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png", initial: "RE" },
-    action: "Take action",
+    type: "Goals", 
+    assignee: { name: "You", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
+    action: "Update",
     iconType: "TrendingUp"
   },
   { 
     id: 4, 
-    title: "(14 Sep - 18 Sep) Annual Leave", 
+    title: "Annual Leave Request (14 Sep - 18 Sep)", 
     dueIn: "25 days", 
     type: "Time Off", 
-    assignee: { name: "Ruchir Gupta", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
-    action: "Approve",
+    assignee: { name: "You", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
+    action: "Submit",
     iconType: "Clock"
   },
   { 
     id: 5, 
-    title: "Requisition · Accountant", 
-    dueIn: "35 days", 
-    type: "Recruitment", 
-    assignee: { name: "Jane Doe", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
-    action: "Approve",
-    iconType: "UserPlus"
-  },
-  { 
-    id: 6, 
-    title: "Pending Upload: Passport", 
+    title: "Upload Missing Documents", 
     dueIn: "35 days", 
     type: "Documents", 
-    assignee: { name: "Wade Wilson", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
-    action: "Take action",
+    assignee: { name: "You", avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png" },
+    action: "Upload",
     iconType: "FileCheck"
   }
 ];

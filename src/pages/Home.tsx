@@ -3,20 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Search, Bell, LayoutGrid, ChevronRight } from "lucide-react";
 
-// Import our components
-import NotificationCard from "@/components/home/NotificationCard";
-import TaskCounters from "@/components/home/TaskCounters";
-import TasksList from "@/components/home/TasksList";
-import TeamMembersSection from "@/components/home/TeamMembersSection";
-import FavoritesSection from "@/components/home/FavoritesSection";
-import SearchDialog from "@/components/home/SearchDialog";
-
-// Import mock data
 import { 
   notifications, 
   teamMembers, 
-  getTasksMockData, 
-  favorites 
+  getTasksMockData 
 } from "@/components/home/mockData";
 
 import { 
@@ -45,7 +35,6 @@ export default function Home() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [layoutGridOpen, setLayoutGridOpen] = useState(false);
 
-  // Role-based access control
   useEffect(() => {
     if (user && !['manager', 'employee'].includes(user.role)) {
       navigate('/dashboard');
@@ -54,20 +43,17 @@ export default function Home() {
 
   if (!user) return null;
 
-  // Task summary counts
   const todoCount = 6;
   const performanceCount = 2;
   const recruitmentCount = 2;
   const hrCount = 2;
 
-  // Handle navigation to different sections
   const handleNavigate = (path: string) => {
     navigate(path);
   };
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-1">Welcome, {user.name}</h1>
@@ -171,11 +157,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main content with sidebar layout */}
       <div className="flex flex-col lg:flex-row gap-6 h-full">
-        {/* Main content area */}
         <div className="flex-1 space-y-6">
-          {/* Featured notifications */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center justify-between">
@@ -198,11 +181,10 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* Task counts */}
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Task Overview</CardTitle>
-              <CardDescription>Your current workload at a glance</CardDescription>
+              <CardTitle className="text-lg">Your Tasks</CardTitle>
+              <CardDescription>Track your pending tasks and actions</CardDescription>
             </CardHeader>
             <CardContent>
               <TaskCounters 
@@ -214,11 +196,10 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          {/* Tasks list */}
           <Card>
             <CardHeader className="pb-0">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Your Tasks</CardTitle>
+                <CardTitle className="text-lg">Action Items</CardTitle>
                 <div>
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList>
@@ -232,7 +213,6 @@ export default function Home() {
               <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              {/* Here we keep the TabsContent inside the same Tabs component it belongs to */}
               <Tabs value={activeTab} className="w-full">
                 <TabsContent value="tasks" className="mt-0">
                   <TasksList tasks={tasks} />
@@ -248,17 +228,11 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Sidebar */}
-        <div className="w-full lg:w-80 space-y-6">
-          {/* Team members section */}
+        <div className="w-full lg:w-80">
           <TeamMembersSection members={teamMembers} />
-
-          {/* Favorites section */}
-          <FavoritesSection favorites={favorites} />
         </div>
       </div>
 
-      {/* Search Dialog */}
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
