@@ -19,7 +19,9 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
         {items.map((item) => (
           <div key={item.path} className="flex items-center">
             {item.icon && (
-              <item.icon className="mr-3 h-4 w-4 text-white/70" />
+              <div className="mr-3 text-white/70">
+                <item.icon size={16} />
+              </div>
             )}
             <span className="text-sm font-medium text-white/70 hover:text-white">
               {item.label}
