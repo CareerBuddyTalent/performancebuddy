@@ -3,6 +3,7 @@ import RatingsGraph from "@/components/RatingsGraph";
 import ReviewProgress from "@/components/ReviewProgress";
 import { PerformanceReview } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardOverviewProps {
   ratingsData: Array<{ name: string; score: number; color: string }>;
@@ -17,6 +18,8 @@ export default function DashboardOverview({
   myReviews, 
   teamReviews 
 }: DashboardOverviewProps) {
+  const isMobile = useIsMobile();
+  
   // Calculate review stats
   const totalReviews = userRole === 'employee' ? myReviews.length : teamReviews.length;
   const completedReviews = userRole === 'employee' 
@@ -32,13 +35,13 @@ export default function DashboardOverview({
     : teamReviews.filter(r => r.status === 'not_started').length;
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-      <Card className="col-span-4 shadow-md border border-purple-100 dark:border-purple-900/30 hover:shadow-lg transition-shadow">
-        <CardHeader>
+    <div className="grid gap-4 sm:gap-6 md:grid-cols-1 lg:grid-cols-7">
+      <Card className="col-span-full lg:col-span-4 shadow-md border border-purple-100 dark:border-purple-900/30 hover:shadow-lg transition-shadow">
+        <CardHeader className={isMobile ? 'p-4' : ''}>
           <CardTitle className="text-xl text-gray-800 dark:text-gray-200">Performance Ratings</CardTitle>
           <CardDescription className="text-gray-500">Average ratings across all review parameters</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className={isMobile ? 'p-4 pt-0' : ''}>
           <RatingsGraph 
             data={ratingsData} 
             title="Performance Ratings" 
@@ -47,12 +50,12 @@ export default function DashboardOverview({
         </CardContent>
       </Card>
       
-      <Card className="col-span-3 shadow-md border border-blue-100 dark:border-blue-900/30 hover:shadow-lg transition-shadow">
-        <CardHeader>
+      <Card className="col-span-full lg:col-span-3 shadow-md border border-blue-100 dark:border-blue-900/30 hover:shadow-lg transition-shadow">
+        <CardHeader className={isMobile ? 'p-4' : ''}>
           <CardTitle className="text-xl text-gray-800 dark:text-gray-200">Review Progress</CardTitle>
           <CardDescription className="text-gray-500">Current review cycle completion status</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className={isMobile ? 'p-4 pt-0' : ''}>
           <ReviewProgress
             totalReviews={totalReviews}
             completedReviews={completedReviews}

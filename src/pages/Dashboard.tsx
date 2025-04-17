@@ -8,12 +8,14 @@ import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
 import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [teamReviews, setTeamReviews] = useState<PerformanceReview[]>([]);
   const [myReviews, setMyReviews] = useState<PerformanceReview[]>([]);
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     if (!user) return;
@@ -81,7 +83,7 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <DashboardStats 
         user={user} 
         myReviews={myReviews} 
@@ -91,13 +93,13 @@ export default function Dashboard() {
       />
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+        <TabsList className="w-full justify-start overflow-x-auto">
+          <TabsTrigger value="overview" className="px-3 py-1.5">Overview</TabsTrigger>
+          <TabsTrigger value="analytics" className="px-3 py-1.5">Analytics</TabsTrigger>
+          <TabsTrigger value="activity" className="px-3 py-1.5">Recent Activity</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value="overview" className="space-y-4 mt-4">
           <DashboardOverview 
             ratingsData={ratingsData} 
             userRole={user.role} 
@@ -106,7 +108,7 @@ export default function Dashboard() {
           />
         </TabsContent>
         
-        <TabsContent value="analytics" className="space-y-4">
+        <TabsContent value="analytics" className="space-y-4 mt-4">
           <AnalyticsContent 
             userRole={user.role} 
             timeframe={timeframe} 
@@ -114,7 +116,7 @@ export default function Dashboard() {
           />
         </TabsContent>
         
-        <TabsContent value="activity" className="space-y-4">
+        <TabsContent value="activity" className="space-y-4 mt-4">
           <TeamActivitySection recentActivity={recentActivity} />
         </TabsContent>
       </Tabs>
