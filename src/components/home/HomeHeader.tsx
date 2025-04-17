@@ -21,9 +21,14 @@ export default function HomeHeader({
 }: HomeHeaderProps) {
   const navigate = useNavigate();
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
+  const menuItems = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Performance', path: '/performance' },
+    { label: 'Goals', path: '/goals' },
+    { label: 'Feedback', path: '/feedback' },
+    { label: 'Team Members', path: '/users' },
+    { label: 'Calendar', path: '/calendar' },
+  ];
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -56,24 +61,11 @@ export default function HomeHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
-              Dashboard
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
-              Performance
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
-              Goals
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
-              Feedback
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('/users')}>
-              Team Members
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigate('/calendar')}>
-              Calendar
-            </DropdownMenuItem>
+            {menuItems.map((item) => (
+              <DropdownMenuItem key={item.path} onClick={() => navigate(item.path)}>
+                {item.label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
