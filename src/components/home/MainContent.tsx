@@ -1,9 +1,8 @@
+
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
-import TaskCounters from "./TaskCounters";
 import TasksList from "./TasksList";
+import TaskCounters from "./TaskCounters";
 import TeamMembersSection from "./TeamMembersSection";
 import NotificationsList from "./NotificationsList";
 import TeamReviewStatus from "./TeamReviewStatus";
@@ -18,7 +17,6 @@ interface MainContentProps {
   hrCount: number;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  handleNavigate: (path: string) => void;
 }
 
 export default function MainContent({
@@ -30,7 +28,6 @@ export default function MainContent({
   hrCount,
   activeTab,
   setActiveTab,
-  handleNavigate,
 }: MainContentProps) {
   const { user } = useAuth();
   const isManager = user?.role === 'manager';
@@ -43,26 +40,11 @@ export default function MainContent({
             teamMembers={teamMembers.map(member => ({
               ...member,
               status: 'not_started',
-              daysOverdue: Math.floor(Math.random() * 10) // Mock data for demonstration
+              daysOverdue: Math.floor(Math.random() * 10)
             }))}
           />
         )}
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center justify-between">
-              <span>Important Updates</span>
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => handleNavigate('/notifications')}>
-                View All <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
-            </CardTitle>
-            <CardDescription>Latest announcements and updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <NotificationsList />
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Your Tasks</CardTitle>
@@ -79,18 +61,26 @@ export default function MainContent({
         </Card>
 
         <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Latest Updates</CardTitle>
+            <CardDescription>Recent announcements and notifications</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NotificationsList />
+          </CardContent>
+        </Card>
+
+        <Card>
           <CardHeader className="pb-0">
             <div className="flex justify-between items-center">
               <CardTitle className="text-lg">Action Items</CardTitle>
-              <div>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList>
-                    <TabsTrigger value="tasks">All</TabsTrigger>
-                    <TabsTrigger value="today">Today</TabsTrigger>
-                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                  <TabsTrigger value="tasks">All</TabsTrigger>
+                  <TabsTrigger value="today">Today</TabsTrigger>
+                  <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
           </CardHeader>
