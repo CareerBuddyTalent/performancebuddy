@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -218,28 +217,33 @@ export default function Home() {
           {/* Tasks list */}
           <Card>
             <CardHeader className="pb-0">
-              <Tabs defaultValue="tasks" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">Your Tasks</CardTitle>
-                  <TabsList>
-                    <TabsTrigger value="tasks">All</TabsTrigger>
-                    <TabsTrigger value="today">Today</TabsTrigger>
-                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                  </TabsList>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">Your Tasks</CardTitle>
+                <div>
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList>
+                      <TabsTrigger value="tasks">All</TabsTrigger>
+                      <TabsTrigger value="today">Today</TabsTrigger>
+                      <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
-                <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
-              </Tabs>
+              </div>
+              <CardDescription className="mt-1">Tasks requiring your attention</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              <TabsContent value="tasks" className="mt-0">
-                <TasksList tasks={tasks} />
-              </TabsContent>
-              <TabsContent value="today" className="mt-0">
-                <TasksList tasks={tasks.filter(task => task.dueIn.includes("1 day"))} />
-              </TabsContent>
-              <TabsContent value="upcoming" className="mt-0">
-                <TasksList tasks={tasks.filter(task => !task.dueIn.includes("1 day"))} />
-              </TabsContent>
+              {/* Here we keep the TabsContent inside the same Tabs component it belongs to */}
+              <Tabs value={activeTab} className="w-full">
+                <TabsContent value="tasks" className="mt-0">
+                  <TasksList tasks={tasks} />
+                </TabsContent>
+                <TabsContent value="today" className="mt-0">
+                  <TasksList tasks={tasks.filter(task => task.dueIn.includes("1 day"))} />
+                </TabsContent>
+                <TabsContent value="upcoming" className="mt-0">
+                  <TasksList tasks={tasks.filter(task => !task.dueIn.includes("1 day"))} />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

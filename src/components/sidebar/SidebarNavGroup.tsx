@@ -25,6 +25,7 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
           >
             {item.icon && (
               <div className="mr-3 text-white/70">
+                {/* Here we create a React element with the icon component, without passing className directly to it */}
                 {React.createElement(item.icon, { size: 16 })}
               </div>
             )}
