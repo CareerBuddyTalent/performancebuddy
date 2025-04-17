@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?
   
   // If roles are specified, check if user has required role
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   
   return <>{children}</>;
@@ -61,8 +61,8 @@ const App = () => (
               
               {/* Protected routes */}
               <Route path="/home" element={
-                <ProtectedRoute>
-                  <PageLayout>
+                <ProtectedRoute roles={["manager", "employee"]}>
+                  <PageLayout allowedRoles={["manager", "employee"]}>
                     <Home />
                   </PageLayout>
                 </ProtectedRoute>

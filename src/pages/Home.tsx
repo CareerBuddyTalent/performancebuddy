@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCompany } from "@/context/CompanyContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -164,6 +163,14 @@ export default function Home() {
   const { user } = useAuth();
   const { currentCompany } = useCompany();
   const [activeTab, setActiveTab] = useState(0);
+  const navigate = useNavigate();
+
+  // Role-based access control
+  useEffect(() => {
+    if (user && !['manager', 'employee'].includes(user.role)) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   if (!user) return null;
 

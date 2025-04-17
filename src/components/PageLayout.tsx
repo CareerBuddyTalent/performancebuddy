@@ -1,5 +1,6 @@
+
 import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import CompanySelector from "@/components/CompanySelector";
@@ -10,12 +11,18 @@ import { Search, Bell, LayoutGrid } from "lucide-react";
 
 interface PageLayoutProps {
   children: ReactNode;
+  allowedRoles?: string[];
 }
 
-export default function PageLayout({ children }: PageLayoutProps) {
+export default function PageLayout({ children, allowedRoles = ['admin', 'manager', 'employee'] }: PageLayoutProps) {
   const location = useLocation();
   const { companies, currentCompany } = useCompany();
   const { user } = useAuth();
+
+  // Check if user has required role
+  if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <SidebarProvider>
