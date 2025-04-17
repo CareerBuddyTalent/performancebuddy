@@ -1,6 +1,6 @@
 
-import { ReactNode } from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
+import { ReactNode, useState } from 'react';
+import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import CompanySelector from "@/components/CompanySelector";
@@ -10,6 +10,12 @@ import { useNotificationContext } from "@/context/NotificationContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, LayoutGrid } from "lucide-react";
 import NotificationPopover from "@/components/dashboard/NotificationPopover";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -18,14 +24,21 @@ interface PageLayoutProps {
 
 export default function PageLayout({ children, allowedRoles = ['admin', 'manager', 'employee'] }: PageLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { companies, currentCompany } = useCompany();
   const { user } = useAuth();
   const { unreadCount } = useNotificationContext();
+  const [layoutGridOpen, setLayoutGridOpen] = useState(false);
 
   // Check if user has required role
   if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setLayoutGridOpen(false);
+  };
 
   return (
     <SidebarProvider>
@@ -40,13 +53,45 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
+              <button 
+                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+                onClick={() => navigate('/home')}
+              >
                 <Search className="h-5 w-5" />
               </button>
               <NotificationPopover />
-              <button className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700">
-                <LayoutGrid className="h-5 w-5" />
-              </button>
+              
+              <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button 
+                    className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    aria-label="Quick Access"
+                  >
+                    <LayoutGrid className="h-5 w-5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => handleNavigate('/home')}>
+                    Home
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
+                    Performance
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
+                    Goals
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
+                    Feedback
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleNavigate('/users')}>
+                    Team Members
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
               <div className="flex items-center gap-2 border-l pl-4 ml-2">
                 {currentCompany && (
                   <CompanySelector 

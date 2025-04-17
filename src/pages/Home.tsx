@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Search, Bell } from "lucide-react";
+import { Search, Bell, LayoutGrid } from "lucide-react";
 
 // Import our refactored components
 import NotificationCard from "@/components/home/NotificationCard";
@@ -19,7 +19,17 @@ import {
   getTasksMockData, 
   favorites 
 } from "@/components/home/mockData";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const { user } = useAuth();
@@ -28,6 +38,7 @@ export default function Home() {
   const tasks = getTasksMockData();
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [layoutGridOpen, setLayoutGridOpen] = useState(false);
 
   // Role-based access control
   useEffect(() => {
@@ -111,6 +122,37 @@ export default function Home() {
               </div>
             </PopoverContent>
           </Popover>
+
+          <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="rounded-full p-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+                aria-label="Quick Access"
+              >
+                <LayoutGrid className="h-5 w-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => handleNavigate('/dashboard')}>
+                Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/performance')}>
+                Performance
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/goals')}>
+                Goals
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/feedback')}>
+                Feedback
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/users')}>
+                Team Members
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/calendar')}>
+                Calendar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
