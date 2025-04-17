@@ -29,10 +29,6 @@ export default function Home() {
   const recruitmentCount = 2;
   const hrCount = 2;
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
-
   return (
     <div className="flex flex-col h-full">
       <HomeHeader 
@@ -51,7 +47,6 @@ export default function Home() {
         hrCount={hrCount}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        handleNavigate={handleNavigate}
       />
 
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
