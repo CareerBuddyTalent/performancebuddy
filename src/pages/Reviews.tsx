@@ -1,41 +1,10 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock parameters data for the self-review form
-const mockParameters = [
-  {
-    id: "1",
-    name: "Technical Skills",
-    description: "Your proficiency in required technical skills for your role"
-  },
-  {
-    id: "2",
-    name: "Communication",
-    description: "Ability to communicate effectively with team members and stakeholders"
-  },
-  {
-    id: "3",
-    name: "Initiative & Innovation",
-    description: "Taking initiative and bringing innovative solutions to challenges"
-  },
-  {
-    id: "4",
-    name: "Collaboration",
-    description: "Working effectively with others to achieve common goals"
-  }
-];
-
-// Mock active cycle data
-const mockActiveCycle = {
-  id: "cycle1",
-  name: "Q1 2024 Performance Review",
-  deadline: "2024-03-31",
-  status: "active"
-};
+import SelfReviewForm from "@/components/reviews/SelfReviewForm";
+import ActiveReviewCycle from "@/components/reviews/ActiveReviewCycle";
+import { mockParameters, mockActiveCycle } from "@/components/reviews/mockReviewData";
 
 export default function Reviews() {
   const { user } = useAuth();
@@ -70,22 +39,10 @@ export default function Reviews() {
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold tracking-tight mb-6">Reviews</h1>
       
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Active Review Cycle</CardTitle>
-          <CardDescription>Current review cycle requiring your input</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">{mockActiveCycle.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                Due by {new Date(mockActiveCycle.deadline).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ActiveReviewCycle 
+        name={mockActiveCycle.name}
+        deadline={mockActiveCycle.deadline}
+      />
       
       <SelfReviewForm 
         cycleId={mockActiveCycle.id}
