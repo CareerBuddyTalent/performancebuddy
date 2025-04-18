@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { supabase } from "@/integrations/supabase/client";
 import { currentUser as defaultUser } from '@/data/mockData';
@@ -11,6 +10,7 @@ export const setupUserSession = (
   setUser: (user: User | null) => void,
   setIsLoading: (loading: boolean) => void
 ): (() => void) => {
+  // Set up auth state change listener
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     async (event, session) => {
       setIsLoading(true);
@@ -42,7 +42,23 @@ export const setupUserSession = (
           console.error('Error setting up user:', error);
         }
       } else {
-        setUser(null);
+        // In dev mode, try to get user from localStorage if no active session
+        if (process.env.NODE_ENV === 'development') {
+          const storedUser = localStorage.getItem('authUser');
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setUser(parsedUser);
+            } catch (e) {
+              console.error('Error parsing stored user:', e);
+              setUser(defaultUser);
+            }
+          } else {
+            setUser(defaultUser);
+          }
+        } else {
+          setUser(null);
+        }
       }
       
       setIsLoading(false);
@@ -56,7 +72,18 @@ export const setupUserSession = (
       
       if (!data.session) {
         if (process.env.NODE_ENV === 'development') {
-          setUser(defaultUser);
+          const storedUser = localStorage.getItem('authUser');
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setUser(parsedUser);
+            } catch (e) {
+              console.error('Error parsing stored user:', e);
+              setUser(defaultUser);
+            }
+          } else {
+            setUser(defaultUser);
+          }
         }
         setIsLoading(false);
         return;

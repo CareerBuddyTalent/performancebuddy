@@ -29,6 +29,10 @@ export function useAuthProvider() {
       
       if (success && loggedInUser) {
         setUser(loggedInUser);
+        // Store user data in localStorage for persistence
+        if (process.env.NODE_ENV === 'development') {
+          localStorage.setItem('authUser', JSON.stringify(loggedInUser));
+        }
         return true;
       }
       
@@ -55,6 +59,10 @@ export function useAuthProvider() {
       
       if (success && newUser) {
         setUser(newUser);
+        // Store user data in localStorage for persistence
+        if (process.env.NODE_ENV === 'development') {
+          localStorage.setItem('authUser', JSON.stringify(newUser));
+        }
         return true;
       }
       
@@ -76,9 +84,10 @@ export function useAuthProvider() {
     try {
       setAuthError(null);
       await logoutUser();
-      if (process.env.NODE_ENV === 'development') {
-        setUser(null);
-      }
+      
+      // Clear user from state and localStorage
+      setUser(null);
+      localStorage.removeItem('authUser');
     } catch (error) {
       setAuthError('An error occurred during logout');
       console.error('Logout error:', error);

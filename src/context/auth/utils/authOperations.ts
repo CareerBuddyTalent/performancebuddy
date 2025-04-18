@@ -13,19 +13,30 @@ export const loginUser = async (email: string, password: string): Promise<{
   error?: string;
 }> => {
   try {
+    // For demo/development mode - use mock data to simplify testing
     if (process.env.NODE_ENV === 'development') {
-      const demoUser = users.find(u => u.email === email && password === 'password123');
+      // Find user with matching email in our mock data
+      const demoUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
-      if (demoUser) {
+      if (demoUser && password === 'password123') {
+        console.log('Demo login successful:', demoUser);
         return { success: true, user: demoUser };
-      } else if (users.some(u => u.email === email)) {
+      } else if (demoUser) {
+        console.log('Demo login failed: Invalid password');
         return { 
           success: false, 
           error: 'Invalid password. For demo accounts, use "password123".' 
         };
+      } else {
+        console.log('Demo login failed: User not found');
+        return {
+          success: false,
+          error: 'User not found. Try one of the demo accounts shown below.'
+        };
       }
     }
     
+    // For production - use Supabase authentication
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -39,7 +50,23 @@ export const loginUser = async (email: string, password: string): Promise<{
       };
     }
     
-    return { success: true };
+    if (!data.user) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    // Build the user object from Supabase response
+    const userRole = data.user.user_metadata.role || 'employee';
+    const userName = data.user.user_metadata.full_name || data.user.email?.split('@')[0] || 'User';
+    
+    const appUser: User = {
+      id: data.user.id,
+      name: userName,
+      email: data.user.email || '',
+      role: userRole as UserRole,
+      profilePicture: data.user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`
+    };
+    
+    return { success: true, user: appUser };
   } catch (error: any) {
     console.error('Login error:', error);
     return { 

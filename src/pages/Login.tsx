@@ -22,7 +22,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const { login, authError, clearAuthError } = useAuth();
+  const { login, authError, clearAuthError, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,6 +31,13 @@ export default function Login() {
     { role: "Manager", email: "jane@example.com", password: "password123" },
     { role: "Admin (CEO)", email: "john@example.com", password: "password123" },
   ];
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   // Clear auth errors when component unmounts or on form change
   useEffect(() => {
@@ -68,7 +75,8 @@ export default function Login() {
         navigate("/dashboard");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +86,7 @@ export default function Login() {
     form.setValue("email", email);
     form.setValue("password", password);
     
+    // Trigger validation
     form.trigger();
   };
 
