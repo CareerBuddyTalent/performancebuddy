@@ -18,7 +18,7 @@ export default function AppSidebar() {
   );
 
   return (
-    <Sidebar className="border-none bg-[#111827] text-white">
+    <Sidebar className="border-none bg-white text-black">
       <SidebarContent className="p-0">
         <SidebarLogo />
 
