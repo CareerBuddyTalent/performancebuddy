@@ -178,6 +178,45 @@ export type Database = {
         }
         Relationships: []
       }
+      question_responses: {
+        Row: {
+          answer: string
+          created_at: string | null
+          id: string
+          question_id: string | null
+          response_id: string | null
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          id?: string
+          question_id?: string | null
+          response_id?: string | null
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          id?: string
+          question_id?: string | null
+          response_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_responses_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "survey_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_skills: {
         Row: {
           created_at: string | null
@@ -209,6 +248,115 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      survey_questions: {
+        Row: {
+          created_at: string | null
+          id: string
+          options: string[] | null
+          order_index: number
+          required: boolean | null
+          survey_id: string | null
+          text: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          options?: string[] | null
+          order_index: number
+          required?: boolean | null
+          survey_id?: string | null
+          text: string
+          type: Database["public"]["Enums"]["question_type"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          options?: string[] | null
+          order_index?: number
+          required?: boolean | null
+          survey_id?: string | null
+          text?: string
+          type?: Database["public"]["Enums"]["question_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          id: string
+          submitted_at: string | null
+          survey_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          submitted_at?: string | null
+          survey_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          submitted_at?: string | null
+          survey_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          start_date: string | null
+          status: string
+          target_audience: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string
+          target_audience?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string
+          target_audience?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -246,6 +394,7 @@ export type Database = {
       }
     }
     Enums: {
+      question_type: "multiple_choice" | "text" | "rating"
       user_role: "admin" | "manager" | "employee"
     }
     CompositeTypes: {
@@ -362,6 +511,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      question_type: ["multiple_choice", "text", "rating"],
       user_role: ["admin", "manager", "employee"],
     },
   },
