@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, LayoutGrid, Home, Target, BarChart, ChartPie, Users, User } from 'lucide-react';
@@ -32,7 +31,7 @@ export default function AppHeader() {
   const getPageTitle = () => {
     const pathname = window.location.pathname;
     if (pathname === '/') return 'Dashboard';
-    return pathname.split('/')[1].replace('-', ' ').replace(/^\w/, c => c.toUpperCase()) || 'Home';
+    return pathname.split('/')[1].replace('-', ' ').replace(/^\w/, c => c.toUpperCase()) || 'Dashboard';
   };
 
   const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
@@ -45,10 +44,11 @@ export default function AppHeader() {
           {getPageTitle()}
         </h1>
       </div>
+      
       <div className="flex items-center gap-4">
         <button 
           className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors dark:hover:bg-gray-800 dark:hover:text-gray-200"
-          onClick={() => navigate('/home')}
+          onClick={() => handleNavigate('/dashboard')}
           aria-label="Search"
         >
           <Search className="h-5 w-5" />
@@ -69,10 +69,6 @@ export default function AppHeader() {
             <DropdownMenuLabel>Quick Access</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => handleNavigate('/home')} className="cursor-pointer">
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavigate('/dashboard')} className="cursor-pointer">
                 <BarChart className="h-4 w-4 mr-2" />
                 Dashboard
@@ -100,12 +96,6 @@ export default function AppHeader() {
                 <DropdownMenuItem onClick={() => handleNavigate('/users')} className="cursor-pointer">
                   <Users className="h-4 w-4 mr-2" />
                   Team Members
-                </DropdownMenuItem>
-              )}
-              {(user?.role === 'admin' || user?.role === 'manager') && (
-                <DropdownMenuItem onClick={() => handleNavigate('/performance')} className="cursor-pointer">
-                  <BarChart className="h-4 w-4 mr-2" />
-                  Performance
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
