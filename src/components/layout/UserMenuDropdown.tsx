@@ -19,6 +19,11 @@ export default function UserMenuDropdown() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   if (!user) return null;
+  
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setUserMenuOpen(false);
+  };
 
   return (
     <DropdownMenu open={userMenuOpen} onOpenChange={setUserMenuOpen}>
@@ -30,7 +35,7 @@ export default function UserMenuDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 p-2">
         <DropdownMenuItem 
-          onClick={() => navigate('/my-profile')} 
+          onClick={() => handleNavigate('/my-profile')} 
           className="cursor-pointer flex items-center gap-2 py-2 focus:bg-accent"
         >
           <Avatar className="h-8 w-8">
@@ -46,7 +51,7 @@ export default function UserMenuDropdown() {
         <DropdownMenuSeparator />
         
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => handleNavigate('/settings')} className="cursor-pointer">
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </DropdownMenuItem>
