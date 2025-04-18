@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
+import Footer from "@/components/layout/Footer";
 import RoleGuard from "@/components/layout/RoleGuard";
 
 interface PageLayoutProps {
@@ -19,6 +20,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
           <div className="flex flex-1 flex-col">
             <AppHeader />
             <main className="flex-1 p-6">{children}</main>
+            <Footer />
           </div>
         </div>
       </SidebarProvider>
