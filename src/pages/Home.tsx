@@ -30,10 +30,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full">
-      <HomeHeader 
-        user={user}
-        setSearchOpen={setSearchOpen}
-      />
+      <HomeHeader user={user} />
 
       <MainContent 
         tasks={tasks}
