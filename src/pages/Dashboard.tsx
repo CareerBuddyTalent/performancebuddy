@@ -4,11 +4,14 @@ import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { reviews, goals, feedbackEntries, users, parameters } from "@/data/mockData";
 import { PerformanceReview } from "@/types";
+import UserPerformanceRanking from "@/components/UserPerformanceRanking";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
 import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
 import EmployeeDashboard from "@/components/dashboard/employee";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Trophy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 
@@ -18,7 +21,7 @@ export default function Dashboard() {
   const [myReviews, setMyReviews] = useState<PerformanceReview[]>([]);
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
   const isMobile = useIsMobile();
-  
+
   useEffect(() => {
     if (!user) return;
 
@@ -26,19 +29,15 @@ export default function Dashboard() {
 
     // Filter reviews based on user role
     if (user.role === 'admin') {
-      // Admin sees all reviews
       setTeamReviews(reviews);
       console.log("Admin dashboard loaded with all reviews");
     } else if (user.role === 'manager') {
-      // Manager sees reviews where they are the reviewer
       setTeamReviews(reviews.filter(review => review.reviewerId === user.id));
       console.log("Manager dashboard loaded with filtered reviews");
     }
     
-    // Set reviews where user is the employee being reviewed
     setMyReviews(reviews.filter(review => review.employeeId === user.id));
     
-    // Show a toast notification based on role
     if (user.role === 'admin') {
       toast.success(`Welcome, Administrator ${user.name}!`);
     } else if (user.role === 'manager') {
@@ -48,59 +47,23 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  // Prepare ratings data for graph
-  const ratingsData = parameters.map(param => {
-    // Calculate average rating for this parameter across all reviews
-    const paramRatings = reviews.flatMap(review => 
-      review.ratings.filter(r => r.parameterId === param.id && r.score > 0)
-    );
+  // Filter users based on role
+  const getRelevantUsers = () => {
+    if (!user) return [];
     
-    const averageScore = paramRatings.length > 0 
-      ? paramRatings.reduce((sum, rating) => sum + rating.score, 0) / paramRatings.length
-      : 0;
-    
-    return {
-      name: param.name,
-      score: parseFloat(averageScore.toFixed(1)),
-      color: '#9B87F5'
-    };
-  });
-
-  // Recent activity logic
-  const recentActivity = [
-    ...reviews.map(review => ({
-      type: 'review',
-      date: review.updatedAt,
-      data: review,
-      message: `Review ${review.status === 'submitted' ? 'submitted' : 'updated'} for ${users.find(u => u.id === review.employeeId)?.name}`
-    })),
-    ...goals.map(goal => ({
-      type: 'goal',
-      date: goal.updatedAt,
-      data: goal,
-      message: `Goal "${goal.title}" ${goal.status === 'completed' ? 'completed' : 'updated'} by ${users.find(u => u.id === goal.userId)?.name}`
-    })),
-    ...feedbackEntries.map(feedback => ({
-      type: 'feedback',
-      date: feedback.createdAt,
-      data: feedback,
-      message: `New feedback provided to ${users.find(u => u.id === feedback.recipientId)?.name}`
-    }))
-  ]
-  .sort((a, b) => b.date.getTime() - a.date.getTime())
-  .slice(0, 5);
-
-  // Handle timeframe change for analytics dashboard
-  const handleTimeframeChange = (newTimeframe: 'week' | 'month' | 'quarter' | 'year') => {
-    setTimeframe(newTimeframe);
+    if (user.role === 'admin') {
+      return users; // All users for admin
+    } else if (user.role === 'manager') {
+      // Only team members for managers
+      return users.filter(u => u.manager === user.name);
+    }
+    return [];
   };
 
   if (!user) {
     console.log("Dashboard - No user found, rendering null");
     return null;
   }
-  
-  console.log("Dashboard - Rendering for user role:", user.role);
   
   // Render employee dashboard for employee users
   if (user.role === 'employee') {
@@ -118,7 +81,7 @@ export default function Dashboard() {
     );
   }
 
-  // Render manager/admin dashboard
+  // Render manager/admin dashboard with top performers
   console.log("Rendering manager/admin dashboard");
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
@@ -130,27 +93,47 @@ export default function Dashboard() {
         users={users}
       />
       
-      <Tabs defaultValue="overview" className="space-y-4">
+      <div className="grid gap-6 md:grid-cols-2">
+        {user.role === 'manager' && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-lg">
+                <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+                Team Top Performers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UserPerformanceRanking users={getRelevantUsers()} limit={5} />
+            </CardContent>
+          </Card>
+        )}
+        
+        {(user.role === 'admin' || user.role === 'manager') && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-lg">
+                <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+                Company Top Performers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UserPerformanceRanking users={users} limit={5} />
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <Tabs defaultValue="analytics" className="space-y-4">
         <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="overview" className="px-3 py-1.5">Overview</TabsTrigger>
           <TabsTrigger value="analytics" className="px-3 py-1.5">Analytics</TabsTrigger>
           <TabsTrigger value="activity" className="px-3 py-1.5">Recent Activity</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="overview" className="space-y-4 mt-4">
-          <DashboardOverview 
-            ratingsData={ratingsData} 
-            userRole={user.role} 
-            myReviews={myReviews} 
-            teamReviews={teamReviews} 
-          />
-        </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4 mt-4">
           <AnalyticsContent 
             userRole={user.role} 
             timeframe={timeframe} 
-            handleTimeframeChange={handleTimeframeChange} 
+            handleTimeframeChange={setTimeframe} 
           />
         </TabsContent>
         
