@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,62 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, MoreHorizontal, Users, X } from "lucide-react";
 import { toast } from "sonner";
-import { Role, RoleMappingProps, Skill } from "@/types";
+import { Skill } from "@/types";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Role, RoleMappingProps } from "./role-mapping/types";
+import { RoleSkillList } from "./role-mapping/RoleSkillList";
 import { AddSkillDialog } from "./role-mapping/AddSkillDialog";
-
-interface RoleSkillsListProps {
-  roleSkills: Skill[];
-  onRemoveSkill: (skillId: string) => void;
-}
-
-function RoleSkillsList({ roleSkills, onRemoveSkill }: RoleSkillsListProps) {
-  if (!roleSkills || roleSkills.length === 0) {
-    return (
-      <div className="py-8 text-center text-muted-foreground">
-        No skills assigned to this role yet.
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-4">
-      {roleSkills.map(skill => (
-        <Card key={skill.id}>
-          <CardHeader className="py-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-lg">{skill.name}</CardTitle>
-                <CardDescription>{skill.description}</CardDescription>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => onRemoveSkill(skill.id)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Beginner</span>
-                <span>Expert</span>
-              </div>
-              <div className="w-full bg-secondary h-2 rounded-full">
-                <div className="bg-primary h-2 rounded-full" style={{ width: `${(skill.levels.length / 5) * 100}%` }}></div>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Expected proficiency: Level {skill.levels.length} - {skill.levels[skill.levels.length - 1].description}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
 
 export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: RoleMappingProps) {
   const [roles, setRoles] = useState<Role[]>(initialRoles);
@@ -74,6 +26,7 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
     skills: []
   });
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleAddRole = () => {
     if (!newRole.title || !newRole.department) {
@@ -96,28 +49,34 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
     toast.success("Role added successfully");
   };
 
-  const handleAddSkillToRole = () => {
-    if (!selectedRole || selectedSkills.length === 0) {
-      toast.error("Please select at least one skill");
-      return;
-    }
-
-    setRoles(roles.map(role => {
-      if (role.id === selectedRole) {
-        // Filter out any duplicate skills
-        const existingSkills = new Set(role.skills);
-        selectedSkills.forEach(skill => existingSkills.add(skill));
-        return {
-          ...role,
-          skills: Array.from(existingSkills)
-        };
+  const handleAddSkillToRole = (skillName: string, proficiency: number) => {
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+      if (!selectedRole) {
+        toast.error("No role selected");
+        setIsSubmitting(false);
+        return;
       }
-      return role;
-    }));
 
-    setSelectedSkills([]);
-    setIsAddSkillDialogOpen(false);
-    toast.success("Skills added to role");
+      // This is a simplified mock implementation - in a real app, you'd call an API
+      // to create the skill and get back the new skill ID
+      const newSkillId = crypto.randomUUID();
+      
+      setRoles(roles.map(role => {
+        if (role.id === selectedRole) {
+          return {
+            ...role,
+            skills: [...role.skills, newSkillId]
+          };
+        }
+        return role;
+      }));
+
+      setIsAddSkillDialogOpen(false);
+      setIsSubmitting(false);
+      toast.success(`Skill "${skillName}" added to role`);
+    }, 500);
   };
 
   const handleRemoveSkillFromRole = (skillId: string) => {
@@ -231,7 +190,7 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
                   </Button>
                 </div>
                 
-                <RoleSkillsList
+                <RoleSkillList
                   roleSkills={roleSkills}
                   onRemoveSkill={handleRemoveSkillFromRole}
                 />
@@ -291,59 +250,12 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
       </Dialog>
 
       {/* Dialog for adding skills to a role */}
-      <Dialog open={isAddSkillDialogOpen} onOpenChange={setIsAddSkillDialogOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Add Skills to Role</DialogTitle>
-            <DialogDescription>
-              Select skills required for this role
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-              {skills.map(skill => {
-                const isSelected = selectedSkills.includes(skill.id);
-                const isAlreadyInRole = roles.find(r => r.id === selectedRole)?.skills.includes(skill.id);
-                
-                return (
-                  <div key={skill.id} className="flex items-start space-x-3">
-                    {/* <Checkbox 
-                      id={`skill-${skill.id}`}
-                      checked={isSelected}
-                      disabled={isAlreadyInRole}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedSkills([...selectedSkills, skill.id]);
-                        } else {
-                          setSelectedSkills(selectedSkills.filter(id => id !== skill.id));
-                        }
-                      }}
-                    /> */}
-                    <div className="grid gap-1.5 leading-none">
-                      {/* <Label 
-                        htmlFor={`skill-${skill.id}`}
-                        className={isAlreadyInRole ? "text-muted-foreground" : ""}
-                      >
-                        {skill.name}
-                        {isAlreadyInRole && <span className="ml-2 text-xs">(Already added)</span>}
-                      </Label> */}
-                      <p className="text-sm text-muted-foreground">
-                        {skill.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddSkillDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddSkillToRole}>Add Selected Skills</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddSkillDialog 
+        open={isAddSkillDialogOpen}
+        onOpenChange={setIsAddSkillDialogOpen}
+        onAddSkill={handleAddSkillToRole}
+        isSubmitting={isSubmitting}
+      />
     </Card>
   );
 }
