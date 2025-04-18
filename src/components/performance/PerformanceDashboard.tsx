@@ -93,8 +93,18 @@ export default function PerformanceDashboard() {
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('quarter');
   const [performanceGoals, setPerformanceGoals] = useState<Goal[]>(initialGoals);
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
-  
-  const isAdmin = user?.role === 'admin';
+
+  if (!user) return null;
+
+  const canManageGoals = hasPermission(user.role, 'manage_team_goals');
+  const canViewAllGoals = hasPermission(user.role, 'view_all_goals');
+  const canManageSettings = hasPermission(user.role, 'manage_settings');
+  const canViewAnalytics = hasPermission(user.role, 'view_analytics');
+
+  // Filter goals based on permissions
+  const filteredGoals = canViewAllGoals 
+    ? performanceGoals 
+    : performanceGoals.filter(goal => goal.userId === user.id);
 
   const handleAddGoal = () => {
     setIsAddGoalOpen(true);
@@ -108,15 +118,22 @@ export default function PerformanceDashboard() {
   };
 
   const handleAddGoalSubmit = (goal: Goal) => {
-    const newGoal = {
-      ...goal,
-      id: uuidv4(),
-      userId: user?.id || 'user1',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    setPerformanceGoals(prev => [...prev, newGoal]);
+    if (canManageGoals) {
+      const newGoal = {
+        ...goal,
+        id: uuidv4(),
+        userId: user?.id || 'user1',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      setPerformanceGoals(prev => [...prev, newGoal]);
+      toast({
+        title: "Goal created",
+        description: "New goal has been created successfully.",
+      });
+      setIsAddGoalOpen(false);
+    }
   };
 
   const handleUpdateGoal = (updatedGoal: Goal) => {
@@ -135,27 +152,32 @@ export default function PerformanceDashboard() {
 
   return (
     <div className="space-y-6">
-      <PerformanceHeader onAddGoal={handleAddGoal} />
-      <PerformanceStats performanceGoals={performanceGoals} />
+      <PerformanceHeader 
+        onAddGoal={canManageGoals ? handleAddGoal : undefined} 
+      />
+      <PerformanceStats performanceGoals={filteredGoals} />
       
       <PerformanceTabs 
-        isAdmin={isAdmin} 
+        canManageSettings={canManageSettings}
+        canViewAnalytics={canViewAnalytics}
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
-        performanceGoals={performanceGoals} 
+        performanceGoals={filteredGoals} 
         timeframe={timeframe}
         handleExport={handleExport}
-        onAddGoal={handleAddGoalSubmit}
-        onUpdateGoal={handleUpdateGoal}
-        onDeleteGoal={handleDeleteGoal}
+        onAddGoal={canManageGoals ? handleAddGoalSubmit : undefined}
+        onUpdateGoal={canManageGoals ? handleUpdateGoal : undefined}
+        onDeleteGoal={canManageGoals ? handleDeleteGoal : undefined}
       />
 
-      <GoalManagement
-        onAddGoal={handleAddGoalSubmit}
-        onUpdateGoal={handleUpdateGoal}
-        isAddGoalOpen={isAddGoalOpen}
-        setIsAddGoalOpen={setIsAddGoalOpen}
-      />
+      {canManageGoals && (
+        <GoalManagement
+          onAddGoal={handleAddGoalSubmit}
+          onUpdateGoal={handleUpdateGoal}
+          isAddGoalOpen={isAddGoalOpen}
+          setIsAddGoalOpen={setIsAddGoalOpen}
+        />
+      )}
     </div>
   );
 }

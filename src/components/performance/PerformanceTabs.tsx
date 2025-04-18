@@ -8,7 +8,8 @@ import PerformanceAnalyticsTab from "./tabs/PerformanceAnalyticsTab";
 import PerformanceSettingsTab from "./tabs/PerformanceSettingsTab";
 
 interface PerformanceTabsProps {
-  isAdmin: boolean;
+  canManageSettings: boolean;
+  canViewAnalytics: boolean;
   activeTab: string;
   setActiveTab: Dispatch<SetStateAction<string>>;
   performanceGoals: Goal[];
@@ -20,7 +21,8 @@ interface PerformanceTabsProps {
 }
 
 export default function PerformanceTabs({
-  isAdmin,
+  canManageSettings,
+  canViewAnalytics,
   activeTab,
   setActiveTab,
   performanceGoals,
@@ -34,9 +36,9 @@ export default function PerformanceTabs({
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
       <TabsList>
         <TabsTrigger value="goals">Goals</TabsTrigger>
-        <TabsTrigger value="rankings">Rankings</TabsTrigger>
-        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-        {isAdmin && <TabsTrigger value="settings">Settings</TabsTrigger>}
+        {canViewAnalytics && <TabsTrigger value="rankings">Rankings</TabsTrigger>}
+        {canViewAnalytics && <TabsTrigger value="analytics">Analytics</TabsTrigger>}
+        {canManageSettings && <TabsTrigger value="settings">Settings</TabsTrigger>}
       </TabsList>
       
       <TabsContent value="goals" className="space-y-4">
@@ -48,15 +50,19 @@ export default function PerformanceTabs({
         />
       </TabsContent>
       
-      <TabsContent value="rankings" className="space-y-4">
-        <PerformanceRankingsTab />
-      </TabsContent>
+      {canViewAnalytics && (
+        <TabsContent value="rankings" className="space-y-4">
+          <PerformanceRankingsTab />
+        </TabsContent>
+      )}
       
-      <TabsContent value="analytics" className="space-y-4">
-        <PerformanceAnalyticsTab />
-      </TabsContent>
+      {canViewAnalytics && (
+        <TabsContent value="analytics" className="space-y-4">
+          <PerformanceAnalyticsTab />
+        </TabsContent>
+      )}
       
-      {isAdmin && (
+      {canManageSettings && (
         <TabsContent value="settings" className="space-y-4">
           <PerformanceSettingsTab />
         </TabsContent>
