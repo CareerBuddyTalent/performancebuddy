@@ -72,17 +72,26 @@ export function useCreateReview({
       return;
     }
     
+    if (!currentUser) {
+      toast.error("You must be logged in to create a review");
+      return;
+    }
+    
     selectedEmployees.forEach(employeeId => {
-      const ratings = selectedCycle.parameters.map(param => ({
-        parameterId: typeof param === 'string' ? param : param.id,
-        score: 0,
-        comment: ""
-      }));
+      // Create parameter ratings for each parameter in the selected cycle
+      const ratings = selectedCycle.parameters.map(param => {
+        const paramId = typeof param === 'string' ? param : param.id;
+        return {
+          parameterId: paramId,
+          score: 0,
+          comment: ""
+        };
+      });
       
       const newReview: PerformanceReview = {
         id: uuidv4(),
         employeeId,
-        reviewerId: currentUser?.id || "",
+        reviewerId: currentUser.id,
         cycleId,
         status: "not_started",
         ratings,

@@ -81,11 +81,9 @@ export default function ReviewForm({
 
   // Filter users based on current user role
   const filteredUsers = currentUser ? 
-    currentUser.role === "manager" 
-      ? mockUsers
-      : currentUser.role === "admin" 
-        ? mockUsers
-        : []
+    currentUser.role === "manager" || currentUser.role === "admin" 
+      ? mockUsers 
+      : []
     : [];
 
   return (
