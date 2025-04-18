@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, LayoutGrid, Home, Target, BarChart, ChartPie, Users, User } from 'lucide-react';
+import { Search, LayoutGrid, Home, Target, BarChart, ChartPie, Users, User, Book } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -76,6 +76,10 @@ export default function AppHeader() {
               <DropdownMenuItem onClick={() => handleNavigate('/goals')} className="cursor-pointer">
                 <Target className="h-4 w-4 mr-2" />
                 Goals
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('/skills')} className="cursor-pointer">
+                <Book className="h-4 w-4 mr-2" />
+                Skills
               </DropdownMenuItem>
               {canAccessPerformance && (
                 <DropdownMenuItem onClick={() => handleNavigate('/performance')} className="cursor-pointer">
