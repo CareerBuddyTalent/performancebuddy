@@ -17,6 +17,7 @@ export const navigationItems: NavigationItem[] = [
   { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
   { path: '/goals', label: 'Goals', icon: Target, roles: ['admin', 'manager', 'employee'] },
   { path: '/surveys', label: 'Surveys', icon: ClipboardList, roles: ['admin', 'manager', 'employee'] },
+  { path: '/reviews', label: 'Reviews', icon: ClipboardList, roles: ['admin', 'manager', 'employee'] },
   { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager'] },
   { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
@@ -33,7 +34,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   // Group navigation items
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/dashboard', '/my-profile', '/users', '/skills', '/goals', '/surveys'].includes(item.path)
+      ['/dashboard', '/my-profile', '/users', '/skills', '/goals', '/surveys', '/reviews'].includes(item.path)
     ),
     
     workNavItems: filteredNavItems.filter(item => 
