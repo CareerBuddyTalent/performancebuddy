@@ -23,4 +23,3 @@ export const adminMenuItems = [
   { label: 'Reviews', path: '/reviews' },
   { label: 'Skills', path: '/review-skills' },
 ];
-

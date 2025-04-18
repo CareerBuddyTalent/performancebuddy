@@ -1,6 +1,6 @@
 
 import { 
-  Home, User, Users, BarChart, Building2, Book
+  Home, User, Users, BarChart, Building2, Book, Target
 } from "lucide-react";
 
 // Define navigation item type
@@ -15,6 +15,7 @@ export interface NavigationItem {
 export const navigationItems: NavigationItem[] = [
   { path: '/home', label: 'Home', icon: Home, roles: ['admin', 'manager', 'employee'] },
   { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
+  { path: '/goals', label: 'Goals', icon: Target, roles: ['admin', 'manager', 'employee'] },
   { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager'] },
   { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
@@ -31,7 +32,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   // Group navigation items
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/home', '/my-profile', '/users', '/skills'].includes(item.path)
+      ['/home', '/my-profile', '/users', '/skills', '/goals'].includes(item.path)
     ),
     
     workNavItems: filteredNavItems.filter(item => 
@@ -43,4 +44,3 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
     )
   };
 };
-
