@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -121,7 +120,7 @@ export default function Dashboard() {
     );
   }
 
-  // Render manager/admin dashboard with top performers
+  // Render manager/admin dashboard
   console.log("Rendering manager/admin dashboard");
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
@@ -133,6 +132,7 @@ export default function Dashboard() {
         users={users}
       />
       
+      {/* Top Performers Section */}
       <div className="grid gap-6 md:grid-cols-2">
         {user.role === 'manager' && (
           <Card>
@@ -148,8 +148,8 @@ export default function Dashboard() {
           </Card>
         )}
         
-        {(user.role === 'admin' || user.role === 'manager') && (
-          <Card>
+        {user.role === 'admin' && (
+          <Card className="md:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center text-lg">
                 <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
@@ -157,7 +157,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <UserPerformanceRanking users={users} limit={5} />
+              <UserPerformanceRanking users={users} limit={10} />
             </CardContent>
           </Card>
         )}
