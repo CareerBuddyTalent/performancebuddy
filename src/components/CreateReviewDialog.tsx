@@ -1,15 +1,13 @@
 
-import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { User, ReviewCycle, PerformanceReview } from "@/types";
 import { users as mockUsers } from "@/data/mockData";
-import { v4 as uuidv4 } from 'uuid';
-import { toast } from "sonner";
 import ReviewTypeSelector from "./reviews/ReviewTypeSelector";
 import CycleSelector from "./reviews/CycleSelector";
 import EmployeeSelector from "./reviews/EmployeeSelector";
 import InitialComments from "./reviews/InitialComments";
+import { useCreateReview } from "@/hooks/use-create-review";
 
 interface CreateReviewDialogProps {
   open: boolean;
@@ -26,97 +24,33 @@ export default function CreateReviewDialog({
   cycles,
   currentUser
 }: CreateReviewDialogProps) {
-  const [activeTab, setActiveTab] = useState<"individual" | "team">("individual");
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [cycleId, setCycleId] = useState("");
-  const [initialComments, setInitialComments] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [selectedCycle, setSelectedCycle] = useState<ReviewCycle | null>(null);
-  
-  // Filter available cycles to only performance review cycles
-  const performanceCycles = cycles.filter(cycle => 
-    cycle.purpose === "performance" || !cycle.purpose
-  );
-  
-  // Reset form when dialog opens
-  useEffect(() => {
-    if (open) {
-      setActiveTab("individual");
-      setSelectedEmployees([]);
-      setCycleId(performanceCycles.length > 0 ? performanceCycles[0].id : "");
-      setInitialComments("");
-      setSelectedCycle(performanceCycles.length > 0 ? performanceCycles[0] : null);
-    }
-  }, [open, performanceCycles]);
+  const {
+    activeTab,
+    setActiveTab,
+    selectedEmployees,
+    setSelectedEmployees,
+    cycleId,
+    setCycleId,
+    initialComments,
+    setInitialComments,
+    selectedCycle,
+    performanceCycles,
+    handleSubmit
+  } = useCreateReview({ 
+    cycles, 
+    currentUser, 
+    onCreateReview, 
+    onClose: () => onOpenChange(false) 
+  });
   
   // Filter users based on current user role
-  useEffect(() => {
-    if (currentUser) {
-      if (currentUser.role === "manager") {
-        setFilteredUsers(
-          mockUsers.filter(u => u.manager === currentUser.name && u.role === "employee")
-        );
-      } else if (currentUser.role === "admin") {
-        setFilteredUsers(mockUsers.filter(u => u.role === "employee"));
-      }
-    }
-  }, [currentUser]);
-  
-  // Update selected cycle when cycleId changes
-  useEffect(() => {
-    const cycle = cycles.find(c => c.id === cycleId);
-    setSelectedCycle(cycle || null);
-  }, [cycleId, cycles]);
-  
-  const handleSubmit = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    
-    if (!cycleId || !selectedCycle) {
-      toast.error("Please select a review cycle");
-      return;
-    }
-
-    if (activeTab === "individual" && selectedEmployees.length !== 1) {
-      toast.error("Please select an employee for individual review");
-      return;
-    }
-
-    if (activeTab === "team" && selectedEmployees.length === 0) {
-      toast.error("Please select at least one team member");
-      return;
-    }
-    
-    // Create reviews for all selected employees
-    selectedEmployees.forEach(employeeId => {
-      const ratings = selectedCycle.parameters.map(param => ({
-        parameterId: typeof param === 'string' ? param : param.id,
-        score: 0,
-        comment: ""
-      }));
-      
-      const newReview: PerformanceReview = {
-        id: uuidv4(),
-        employeeId,
-        reviewerId: currentUser?.id || "",
-        cycleId,
-        status: "not_started",
-        ratings,
-        overallRating: 0,
-        feedback: initialComments,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      onCreateReview(newReview);
-    });
-
-    const message = activeTab === "individual" 
-      ? "Review created successfully" 
-      : `${selectedEmployees.length} team reviews created successfully`;
-    
-    toast.success(message);
-    onOpenChange(false);
-  };
+  const filteredUsers = currentUser ? 
+    currentUser.role === "manager" 
+      ? mockUsers.filter(u => u.manager === currentUser.name && u.role === "employee")
+      : currentUser.role === "admin" 
+        ? mockUsers.filter(u => u.role === "employee")
+        : []
+    : [];
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
