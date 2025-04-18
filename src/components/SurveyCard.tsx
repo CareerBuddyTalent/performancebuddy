@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { useState } from "react";
 import { Survey } from "@/types";
@@ -23,7 +24,7 @@ export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
   // Calculate response rate
   const responseRate = survey.target_audience === 'all' 
     ? Math.round((survey.responses.length / 100) * 100) 
-    : Math.round((survey.responses.length / (survey.audienceIds?.length || 1)) * 100);
+    : Math.round((survey.responses.length / (survey.audience_ids?.length || 1)) * 100);
   
   // Determine status color
   const statusColor = {

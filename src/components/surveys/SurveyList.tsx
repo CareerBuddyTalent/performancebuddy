@@ -61,10 +61,10 @@ export default function SurveyList({
   // Group surveys by status for employee view
   const activeSurveys = filteredSurveys.filter(s => s.status === 'active');
   const completedSurveys = filteredSurveys.filter(s => 
-    s.status === 'closed' && s.responses.some(r => r.userId === user.id)
+    s.status === 'closed' && s.responses.some(r => r.user_id === user.id)
   );
   const pendingSurveys = filteredSurveys.filter(s => 
-    s.status === 'active' && !s.responses.some(r => r.userId === user.id)
+    s.status === 'active' && !s.responses.some(r => r.user_id === user.id)
   );
 
   return (

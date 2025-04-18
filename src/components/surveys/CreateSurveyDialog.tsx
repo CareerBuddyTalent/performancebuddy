@@ -56,15 +56,20 @@ export default function CreateSurveyDialog({ open, onClose, onCreateSurvey }: Cr
 
       if (surveyError) throw surveyError;
 
+      // Prepare questions with required properties
+      const questionRecords = questions.map(q => ({
+        survey_id: survey.id,
+        text: q.text || '',
+        type: q.type || 'text',
+        options: q.options,
+        required: q.required === undefined ? true : q.required,
+        order_index: q.order_index || 0
+      }));
+
       // Insert questions
       const { error: questionsError } = await supabase
         .from('survey_questions')
-        .insert(
-          questions.map(q => ({
-            ...q,
-            survey_id: survey.id
-          }))
-        );
+        .insert(questionRecords);
 
       if (questionsError) throw questionsError;
 

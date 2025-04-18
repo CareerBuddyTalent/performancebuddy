@@ -14,27 +14,39 @@ const sampleSurveys: Survey[] = [
     questions: [
       {
         id: "q1",
+        survey_id: "1",
         text: "How satisfied are you with your current role?",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 0,
+        created_at: new Date()
       },
       {
         id: "q2",
+        survey_id: "1",
         text: "Do you feel your work is recognized and valued?",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 1,
+        created_at: new Date()
       },
       {
         id: "q3",
+        survey_id: "1",
         text: "What would improve your work experience?",
         type: "text",
-        required: false
+        required: false,
+        order_index: 2,
+        created_at: new Date()
       }
     ],
-    targetAudience: "all",
+    target_audience: "all",
     status: "active",
-    startDate: new Date(2025, 3, 1),
-    endDate: new Date(2025, 3, 15),
+    creator_id: "user1",
+    start_date: new Date(2025, 3, 1),
+    end_date: new Date(2025, 3, 15),
+    created_at: new Date(),
+    updated_at: new Date(),
     responses: []
   },
   {
@@ -44,50 +56,98 @@ const sampleSurveys: Survey[] = [
     questions: [
       {
         id: "q1",
+        survey_id: "2",
         text: "My manager provides clear direction and expectations",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 0,
+        created_at: new Date()
       },
       {
         id: "q2",
+        survey_id: "2",
         text: "My manager gives useful feedback on my work",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 1,
+        created_at: new Date()
       },
       {
         id: "q3",
+        survey_id: "2",
         text: "My manager supports my professional development",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 2,
+        created_at: new Date()
       }
     ],
-    targetAudience: "department",
-    audienceIds: ["engineering", "product"],
+    target_audience: "department",
+    audience_ids: ["engineering", "product"],
     status: "closed",
-    startDate: new Date(2025, 1, 1),
-    endDate: new Date(2025, 1, 15),
+    creator_id: "user1",
+    start_date: new Date(2025, 1, 1),
+    end_date: new Date(2025, 1, 15),
+    created_at: new Date(),
+    updated_at: new Date(),
     responses: [
       {
         id: "r1",
-        surveyId: "2",
-        userId: "user1",
+        survey_id: "2",
+        user_id: "user1",
         answers: [
-          { questionId: "q1", answer: 4 },
-          { questionId: "q2", answer: 5 },
-          { questionId: "q3", answer: 3 }
+          { 
+            id: "a1",
+            response_id: "r1",
+            question_id: "q1", 
+            answer: "4",
+            created_at: new Date()
+          },
+          { 
+            id: "a2",
+            response_id: "r1",
+            question_id: "q2", 
+            answer: "5",
+            created_at: new Date()
+          },
+          { 
+            id: "a3",
+            response_id: "r1",
+            question_id: "q3", 
+            answer: "3",
+            created_at: new Date()
+          }
         ],
-        submittedAt: new Date(2025, 1, 10)
+        submitted_at: new Date(2025, 1, 10)
       },
       {
         id: "r2",
-        surveyId: "2",
-        userId: "user2",
+        survey_id: "2",
+        user_id: "user2",
         answers: [
-          { questionId: "q1", answer: 3 },
-          { questionId: "q2", answer: 4 },
-          { questionId: "q3", answer: 4 }
+          { 
+            id: "a4",
+            response_id: "r2",
+            question_id: "q1", 
+            answer: "3",
+            created_at: new Date()
+          },
+          { 
+            id: "a5",
+            response_id: "r2",
+            question_id: "q2", 
+            answer: "4",
+            created_at: new Date()
+          },
+          { 
+            id: "a6",
+            response_id: "r2",
+            question_id: "q3", 
+            answer: "4",
+            created_at: new Date()
+          }
         ],
-        submittedAt: new Date(2025, 1, 12)
+        submitted_at: new Date(2025, 1, 12)
       }
     ]
   },
@@ -98,22 +158,31 @@ const sampleSurveys: Survey[] = [
     questions: [
       {
         id: "q1",
+        survey_id: "3",
         text: "How productive do you feel working remotely?",
         type: "rating",
-        required: true
+        required: true,
+        order_index: 0,
+        created_at: new Date()
       },
       {
         id: "q2",
+        survey_id: "3",
         text: "Do you have the tools you need to work effectively remotely?",
         type: "multiple_choice",
         options: ["Yes, completely", "Mostly, with some gaps", "No, missing essential tools"],
-        required: true
+        required: true,
+        order_index: 1,
+        created_at: new Date()
       }
     ],
-    targetAudience: "all",
+    target_audience: "all",
     status: "draft",
-    startDate: new Date(2025, 4, 1),
-    endDate: new Date(2025, 4, 15),
+    creator_id: "user1",
+    start_date: new Date(2025, 4, 1),
+    end_date: new Date(2025, 4, 15),
+    created_at: new Date(),
+    updated_at: new Date(),
     responses: []
   }
 ];
@@ -130,6 +199,9 @@ export default function Surveys() {
         id: String(surveys.length + 1),
         questions: [],
         responses: [],
+        creator_id: "user1",
+        created_at: new Date(),
+        updated_at: new Date()
       } as Survey;
       
       setSurveys([...surveys, survey]);

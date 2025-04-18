@@ -6,6 +6,7 @@ export interface Survey {
   creator_id: string;
   status: 'draft' | 'active' | 'closed';
   target_audience: 'all' | 'department' | 'team';
+  audience_ids?: string[]; // Changed from audienceIds to match convention
   start_date: Date;
   end_date: Date;
   created_at: Date;
@@ -28,7 +29,7 @@ export interface SurveyQuestion {
 export interface SurveyResponse {
   id: string;
   survey_id: string;
-  user_id: string;
+  user_id: string; // Changed from userId to user_id
   submitted_at: Date;
   answers: QuestionResponse[];
 }
