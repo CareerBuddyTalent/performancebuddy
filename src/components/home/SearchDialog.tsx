@@ -145,33 +145,31 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] p-0">
-        {open && ( // Only render Command when the dialog is open
-          <Command className="rounded-lg border shadow-md">
-            <CommandInput 
-              placeholder="Search for tasks, users, reports..."
-              value={query}
-              onValueChange={handleSearch}
-              autoFocus
-            />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              {searchResults.length > 0 && (
-                <CommandGroup heading="Results">
-                  {searchResults.map((item) => (
-                    <CommandItem 
-                      key={item.id}
-                      onSelect={() => handleSelect(item)}
-                      className="flex items-center cursor-pointer"
-                    >
-                      {item.icon}
-                      <span>{item.name}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
-            </CommandList>
-          </Command>
-        )}
+        <Command className="rounded-lg border shadow-md">
+          <CommandInput 
+            placeholder="Search for tasks, users, reports..."
+            value={query}
+            onValueChange={handleSearch}
+            autoFocus={open}
+          />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            {searchResults.length > 0 && (
+              <CommandGroup heading="Results">
+                {searchResults.map((item) => (
+                  <CommandItem 
+                    key={item.id}
+                    onSelect={() => handleSelect(item)}
+                    className="flex items-center cursor-pointer"
+                  >
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
       </DialogContent>
     </Dialog>
   );
