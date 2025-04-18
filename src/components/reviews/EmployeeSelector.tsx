@@ -56,11 +56,11 @@ export default function EmployeeSelector({
                 id={user.id}
                 checked={selectedEmployees.includes(user.id)}
                 onCheckedChange={(checked) => {
-                  onSelectionChange(
-                    checked 
-                      ? [...selectedEmployees, user.id]
-                      : selectedEmployees.filter(id => id !== user.id)
-                  );
+                  if (checked) {
+                    onSelectionChange([...selectedEmployees, user.id]);
+                  } else {
+                    onSelectionChange(selectedEmployees.filter(id => id !== user.id));
+                  }
                 }}
               />
               <label

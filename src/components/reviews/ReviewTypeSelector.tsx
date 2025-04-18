@@ -18,6 +18,8 @@ export default function ReviewTypeSelector({ activeTab, onTabChange }: ReviewTyp
           <TabsTrigger value="individual">Individual Review</TabsTrigger>
           <TabsTrigger value="team">Team Review</TabsTrigger>
         </TabsList>
+        <TabsContent value="individual" />
+        <TabsContent value="team" />
       </Tabs>
     </div>
   );
