@@ -1,29 +1,66 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"; 
 import { Button } from "@/components/ui/button";
-import { Skill } from "@/types";
-import { Users, Plus, MoreHorizontal, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Plus, MoreHorizontal, Users, X } from "lucide-react";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Role, RoleMappingProps, Skill } from "@/types";
+import { AddSkillDialog } from "./role-mapping/AddSkillDialog";
 
-interface Role {
-  id: string;
-  title: string;
-  department: string;
-  skills: string[];
+interface RoleSkillsListProps {
+  roleSkills: Skill[];
+  onRemoveSkill: (skillId: string) => void;
 }
 
-interface RoleMappingProps {
-  roles: Role[];
-  skills: Skill[];
-  filteredSkills: Skill[];
+function RoleSkillsList({ roleSkills, onRemoveSkill }: RoleSkillsListProps) {
+  if (!roleSkills || roleSkills.length === 0) {
+    return (
+      <div className="py-8 text-center text-muted-foreground">
+        No skills assigned to this role yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {roleSkills.map(skill => (
+        <Card key={skill.id}>
+          <CardHeader className="py-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-lg">{skill.name}</CardTitle>
+                <CardDescription>{skill.description}</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => onRemoveSkill(skill.id)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Beginner</span>
+                <span>Expert</span>
+              </div>
+              <div className="w-full bg-secondary h-2 rounded-full">
+                <div className="bg-primary h-2 rounded-full" style={{ width: `${(skill.levels.length / 5) * 100}%` }}></div>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Expected proficiency: Level {skill.levels.length} - {skill.levels[skill.levels.length - 1].description}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: RoleMappingProps) {
@@ -110,7 +147,7 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
         skills.find(s => s.id === skillId)
       ).filter(Boolean) as Skill[]
     : [];
-  
+
   return (
     <Card>
       <CardHeader>
@@ -194,48 +231,10 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
                   </Button>
                 </div>
                 
-                <div className="grid gap-4">
-                  {roleSkills.length > 0 ? (
-                    roleSkills.map(skill => (
-                      <Card key={skill.id}>
-                        <CardHeader className="py-4">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <CardTitle className="text-lg">{skill.name}</CardTitle>
-                              <CardDescription>{skill.description}</CardDescription>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8" 
-                              onClick={() => handleRemoveSkillFromRole(skill.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Beginner</span>
-                              <span>Expert</span>
-                            </div>
-                            <div className="w-full bg-secondary h-2 rounded-full">
-                              <div className="bg-primary h-2 rounded-full" style={{ width: `${(skill.levels.length / 5) * 100}%` }}></div>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Expected proficiency: Level {skill.levels.length} - {skill.levels[skill.levels.length - 1].description}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="py-8 text-center text-muted-foreground">
-                      No skills assigned to this role yet. Click "Add Skills" to get started.
-                    </div>
-                  )}
-                </div>
+                <RoleSkillsList
+                  roleSkills={roleSkills}
+                  onRemoveSkill={handleRemoveSkillFromRole}
+                />
               </div>
             ) : (
               <div className="flex items-center justify-center h-[400px] border border-dashed rounded-lg">
@@ -309,7 +308,7 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
                 
                 return (
                   <div key={skill.id} className="flex items-start space-x-3">
-                    <Checkbox 
+                    {/* <Checkbox 
                       id={`skill-${skill.id}`}
                       checked={isSelected}
                       disabled={isAlreadyInRole}
@@ -320,15 +319,15 @@ export function RoleMapping({ roles: initialRoles, skills, filteredSkills }: Rol
                           setSelectedSkills(selectedSkills.filter(id => id !== skill.id));
                         }
                       }}
-                    />
+                    /> */}
                     <div className="grid gap-1.5 leading-none">
-                      <Label 
+                      {/* <Label 
                         htmlFor={`skill-${skill.id}`}
                         className={isAlreadyInRole ? "text-muted-foreground" : ""}
                       >
                         {skill.name}
                         {isAlreadyInRole && <span className="ml-2 text-xs">(Already added)</span>}
-                      </Label>
+                      </Label> */}
                       <p className="text-sm text-muted-foreground">
                         {skill.description}
                       </p>
