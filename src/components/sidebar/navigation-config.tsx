@@ -1,6 +1,9 @@
 
 import { 
-  BarChart, Building2, ClipboardList
+  LayoutDashboard, // More descriptive dashboard icon
+  LineChart, // Better performance visualization
+  Users2, // More modern people icon
+  ClipboardCheck // Better surveys representation
 } from "lucide-react";
 
 // Define navigation item type
@@ -13,11 +16,30 @@ export interface NavigationItem {
 
 // Define the navigation items with role-based access
 export const navigationItems: NavigationItem[] = [
-  { path: '/dashboard', label: 'Dashboard', icon: BarChart, roles: ['admin', 'manager', 'employee'] },
-  { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager', 'employee'] },
-  { path: '/users', label: 'People', icon: ClipboardList, roles: ['admin', 'manager'] },
-  { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
-  { path: '/surveys', label: 'Surveys', icon: ClipboardList, roles: ['admin', 'manager', 'employee'] },
+  { 
+    path: '/dashboard', 
+    label: 'Dashboard', 
+    icon: LayoutDashboard, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
+  { 
+    path: '/performance', 
+    label: 'Performance', 
+    icon: LineChart, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
+  { 
+    path: '/users', 
+    label: 'People', 
+    icon: Users2, 
+    roles: ['admin', 'manager'] 
+  },
+  { 
+    path: '/surveys', 
+    label: 'Surveys', 
+    icon: ClipboardCheck, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
 ];
 
 // Helper function to get navigation items by group
