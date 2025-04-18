@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { User, ReviewCycle, PerformanceReview } from "@/types";
-import { users as mockUsers } from "@/data/mockData";
 import ReviewTypeSelector from "./ReviewTypeSelector";
 import CycleSelector from "./CycleSelector";
 import EmployeeSelector from "./EmployeeSelector";
@@ -41,12 +40,21 @@ export default function ReviewForm({
     onClose
   });
 
+  // Mock users for testing
+  const mockUsers = [
+    { id: "user1", name: "John Doe", role: "employee", position: "Developer" },
+    { id: "user2", name: "Jane Smith", role: "employee", position: "Designer" },
+    { id: "user3", name: "Bob Johnson", role: "employee", position: "Product Manager" },
+    { id: "user4", name: "Alice Williams", role: "employee", position: "Marketing" },
+    { id: "user5", name: "Charlie Brown", role: "employee", position: "Sales" }
+  ];
+
   // Filter users based on current user role
   const filteredUsers = currentUser ? 
     currentUser.role === "manager" 
-      ? mockUsers.filter(u => u.manager === currentUser.name && u.role === "employee")
+      ? mockUsers
       : currentUser.role === "admin" 
-        ? mockUsers.filter(u => u.role === "employee")
+        ? mockUsers
         : []
     : [];
 
