@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import GoalListHeader from "../goals/GoalListHeader";
 import GoalTableWrapper from "../goals/GoalTableWrapper";
 
-interface PerformanceGoalsTabProps {
+interface PerformanceGoalsTabProps { 
   goals: Goal[];
   onAddGoal?: (goal: Goal) => void;
   onUpdateGoal?: (goal: Goal) => void;
@@ -20,13 +20,8 @@ export default function PerformanceGoalsTab({
   onDeleteGoal 
 }: PerformanceGoalsTabProps) {
   const { user } = useAuth();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
-
-  const handleOpenSettings = () => {
-    setIsSettingsOpen(true);
-  };
 
   const handleUpdateStatus = (goalId: string, status: string) => {
     const goal = goals.find(g => g.id === goalId);
@@ -52,11 +47,7 @@ export default function PerformanceGoalsTab({
 
   return (
     <Card>
-      <GoalListHeader 
-        canEdit={canEdit}
-        onAddGoal={undefined} // Remove the add goal functionality
-        onOpenSettings={handleOpenSettings}
-      />
+      <GoalListHeader canEdit={canEdit} />
       
       <GoalTableWrapper 
         goals={goals}
@@ -65,8 +56,6 @@ export default function PerformanceGoalsTab({
         onUpdateStatus={handleUpdateStatus}
         onUpdateProgress={handleUpdateProgress}
         canEdit={canEdit}
-        isSettingsOpen={isSettingsOpen}
-        setIsSettingsOpen={setIsSettingsOpen}
       />
     </Card>
   );

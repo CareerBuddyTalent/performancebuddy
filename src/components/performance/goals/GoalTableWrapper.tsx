@@ -2,9 +2,6 @@
 import { Goal } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import PerformanceGoalTable from "../PerformanceGoalTable";
-import GoalFormDialog from "../GoalFormDialog";
-import GoalSettingsDialog from "../GoalSettingsDialog";
-import { useState } from "react";
 
 interface GoalTableWrapperProps {
   goals: Goal[];
@@ -13,8 +10,6 @@ interface GoalTableWrapperProps {
   onUpdateStatus?: (goalId: string, status: string) => void;
   onUpdateProgress?: (goalId: string, progress: number) => void;
   canEdit: boolean;
-  isSettingsOpen: boolean;
-  setIsSettingsOpen: (open: boolean) => void;
 }
 
 export default function GoalTableWrapper({
@@ -24,8 +19,6 @@ export default function GoalTableWrapper({
   onUpdateStatus,
   onUpdateProgress,
   canEdit,
-  isSettingsOpen,
-  setIsSettingsOpen
 }: GoalTableWrapperProps) {
   return (
     <CardContent>
@@ -35,11 +28,6 @@ export default function GoalTableWrapper({
         onDeleteGoal={onDeleteGoal}
         onUpdateStatus={onUpdateStatus}
         onUpdateProgress={onUpdateProgress}
-      />
-
-      <GoalSettingsDialog
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
       />
     </CardContent>
   );
