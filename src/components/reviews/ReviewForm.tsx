@@ -7,6 +7,7 @@ import CycleSelector from "./CycleSelector";
 import EmployeeSelector from "./EmployeeSelector";
 import InitialComments from "./InitialComments";
 import { useCreateReview } from "@/hooks/use-create-review";
+import { toast } from "sonner";
 
 interface ReviewFormProps {
   onCreateReview: (review: PerformanceReview) => void;
@@ -86,8 +87,29 @@ export default function ReviewForm({
       : []
     : [];
 
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!cycleId) {
+      toast.error("Please select a review cycle");
+      return;
+    }
+
+    if (activeTab === "individual" && selectedEmployees.length !== 1) {
+      toast.error("Please select an employee for individual review");
+      return;
+    }
+
+    if (activeTab === "team" && selectedEmployees.length === 0) {
+      toast.error("Please select at least one team member");
+      return;
+    }
+
+    handleSubmit(e);
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onFormSubmit}>
       <div className="space-y-4 mt-4">
         <ReviewTypeSelector
           activeTab={activeTab}

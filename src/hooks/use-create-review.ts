@@ -77,6 +77,8 @@ export function useCreateReview({
       return;
     }
     
+    let reviewsCreated = 0;
+    
     selectedEmployees.forEach(employeeId => {
       // Create parameter ratings for each parameter in the selected cycle
       const ratings = selectedCycle.parameters.map(param => {
@@ -102,11 +104,12 @@ export function useCreateReview({
       };
       
       onCreateReview(newReview);
+      reviewsCreated++;
     });
 
     const message = activeTab === "individual" 
       ? "Review created successfully" 
-      : `${selectedEmployees.length} team reviews created successfully`;
+      : `${reviewsCreated} team reviews created successfully`;
     
     toast.success(message);
     onClose();
