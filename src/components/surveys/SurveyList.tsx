@@ -1,24 +1,52 @@
 
 import { useState } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Survey } from "@/types";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import SurveyGrid from "./SurveyGrid";
 import EmployeeSurveyTabs from "./EmployeeSurveyTabs";
 import SurveyFilters from "./SurveyFilters";
 import SurveyActions from "./SurveyActions";
+import CreateSurveyDialog from "./CreateSurveyDialog";
 
 interface SurveyListProps {
   surveys: Survey[];
   onCreateSurvey: (survey: Partial<Survey>) => void;
+  isLoading?: boolean;
+  error?: string;
 }
 
-export default function SurveyList({ surveys, onCreateSurvey }: SurveyListProps) {
+export default function SurveyList({ 
+  surveys, 
+  onCreateSurvey, 
+  isLoading = false, 
+  error 
+}: SurveyListProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);
 
   if (!user) return null;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-muted-foreground">Loading surveys...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="my-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
 
   const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
 

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Survey } from "@/types";
@@ -119,16 +120,22 @@ const sampleSurveys: Survey[] = [
 
 export default function Surveys() {
   const [surveys, setSurveys] = useState(sampleSurveys);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
   
   const handleCreateSurvey = (newSurvey: Partial<Survey>) => {
-    const survey = {
-      ...newSurvey,
-      id: String(surveys.length + 1),
-      questions: [],
-      responses: [],
-    } as Survey;
-    
-    setSurveys([...surveys, survey]);
+    try {
+      const survey = {
+        ...newSurvey,
+        id: String(surveys.length + 1),
+        questions: [],
+        responses: [],
+      } as Survey;
+      
+      setSurveys([...surveys, survey]);
+    } catch (err) {
+      setError("Failed to create survey. Please try again.");
+    }
   };
   
   return (
@@ -138,6 +145,8 @@ export default function Surveys() {
       <SurveyList 
         surveys={surveys}
         onCreateSurvey={handleCreateSurvey}
+        isLoading={isLoading}
+        error={error}
       />
     </div>
   );
