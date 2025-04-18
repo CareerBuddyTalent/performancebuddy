@@ -40,13 +40,43 @@ export default function ReviewForm({
     onClose
   });
 
-  // Mock users for testing
-  const mockUsers = [
-    { id: "user1", name: "John Doe", role: "employee", position: "Developer" },
-    { id: "user2", name: "Jane Smith", role: "employee", position: "Designer" },
-    { id: "user3", name: "Bob Johnson", role: "employee", position: "Product Manager" },
-    { id: "user4", name: "Alice Williams", role: "employee", position: "Marketing" },
-    { id: "user5", name: "Charlie Brown", role: "employee", position: "Sales" }
+  // Mock users for testing - updated to include all required User properties
+  const mockUsers: User[] = [
+    { 
+      id: "user1", 
+      name: "John Doe", 
+      email: "john@example.com",
+      role: "employee", 
+      position: "Developer" 
+    },
+    { 
+      id: "user2", 
+      name: "Jane Smith", 
+      email: "jane@example.com",
+      role: "employee", 
+      position: "Designer" 
+    },
+    { 
+      id: "user3", 
+      name: "Bob Johnson", 
+      email: "bob@example.com",
+      role: "employee", 
+      position: "Product Manager" 
+    },
+    { 
+      id: "user4", 
+      name: "Alice Williams", 
+      email: "alice@example.com",
+      role: "employee", 
+      position: "Marketing" 
+    },
+    { 
+      id: "user5", 
+      name: "Charlie Brown", 
+      email: "charlie@example.com",
+      role: "employee", 
+      position: "Sales" 
+    }
   ];
 
   // Filter users based on current user role
