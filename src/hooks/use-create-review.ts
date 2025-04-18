@@ -32,9 +32,14 @@ export function useCreateReview({
   useEffect(() => {
     setActiveTab("individual");
     setSelectedEmployees([]);
-    setCycleId(performanceCycles.length > 0 ? performanceCycles[0].id : "");
+    if (performanceCycles.length > 0) {
+      setCycleId(performanceCycles[0].id);
+      setSelectedCycle(performanceCycles[0]);
+    } else {
+      setCycleId("");
+      setSelectedCycle(null);
+    }
     setInitialComments("");
-    setSelectedCycle(performanceCycles.length > 0 ? performanceCycles[0] : null);
   }, [performanceCycles]);
 
   // Update selected cycle when cycleId changes
