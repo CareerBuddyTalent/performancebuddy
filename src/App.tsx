@@ -60,19 +60,11 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 
                 {/* Protected routes */}
-                <Route path="/home" element={
-                  <ProtectedRoute roles={["manager", "employee"]}>
-                    <PageLayout allowedRoles={["manager", "employee"]}>
-                      <Home />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <PageLayout>
@@ -96,8 +88,6 @@ const App = () => (
                     </PageLayout>
                   </ProtectedRoute>
                 } />
-                
-                {/* Remove the Feedback route which was for the Roadmap */}
                 
                 <Route path="/skills" element={
                   <ProtectedRoute>
