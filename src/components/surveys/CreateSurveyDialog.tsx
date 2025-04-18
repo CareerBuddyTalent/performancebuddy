@@ -6,11 +6,11 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Survey, SurveyQuestion } from "@/types";
 import AddQuestionForm from "./AddQuestionForm";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 interface CreateSurveyDialogProps {
   open: boolean;
@@ -28,66 +28,46 @@ interface CreateSurveyForm {
 export default function CreateSurveyDialog({ open, onClose, onCreateSurvey }: CreateSurveyDialogProps) {
   const [questions, setQuestions] = useState<Partial<SurveyQuestion>[]>([]);
   const [currentTab, setCurrentTab] = useState('details');
+  const { user } = useAuth();
   const form = useForm<CreateSurveyForm>();
 
   const onSubmit = async (data: CreateSurveyForm) => {
     if (questions.length === 0) {
-      toast({
-        title: "Error",
-        description: "Please add at least one question to the survey.",
-        variant: "destructive"
-      });
+      toast.error("Please add at least one question to the survey.");
       return;
     }
 
     try {
-      // Insert survey
-      const { data: survey, error: surveyError } = await supabase
-        .from('surveys')
-        .insert({
-          title: data.title,
-          description: data.description,
-          start_date: data.startDate,
-          end_date: data.endDate,
-          status: 'draft'
-        })
-        .select()
-        .single();
-
-      if (surveyError) throw surveyError;
-
-      // Prepare questions with required properties
-      const questionRecords = questions.map(q => ({
-        survey_id: survey.id,
-        text: q.text || '',
-        type: q.type || 'text',
-        options: q.options,
-        required: q.required === undefined ? true : q.required,
-        order_index: q.order_index || 0
-      }));
-
-      // Insert questions
-      const { error: questionsError } = await supabase
-        .from('survey_questions')
-        .insert(questionRecords);
-
-      if (questionsError) throw questionsError;
-
-      toast({
-        title: "Success",
-        description: "Survey created successfully."
-      });
+      // Create a new survey using the onCreateSurvey callback function
+      const newSurvey: Partial<Survey> = {
+        title: data.title,
+        description: data.description,
+        start_date: new Date(data.startDate),
+        end_date: new Date(data.endDate),
+        status: 'draft',
+        creator_id: user?.id,
+        target_audience: 'all',
+        questions: questions.map((q, index) => ({
+          id: crypto.randomUUID(),
+          survey_id: '',  // Will be set by the parent component
+          text: q.text || '',
+          type: q.type || 'text',
+          options: q.options,
+          required: q.required !== undefined ? q.required : true,
+          order_index: index,
+          created_at: new Date()
+        }))
+      };
       
+      onCreateSurvey(newSurvey);
+      
+      toast.success("Survey created successfully");
       onClose();
       form.reset();
       setQuestions([]);
     } catch (error) {
       console.error('Error creating survey:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create survey. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to create survey. Please try again.");
     }
   };
 
