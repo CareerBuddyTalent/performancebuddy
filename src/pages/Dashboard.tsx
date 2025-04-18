@@ -15,6 +15,46 @@ import { Trophy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 
+// Mock data for recent activity
+const recentActivity = [
+  {
+    type: "review",
+    date: new Date(2025, 3, 16),
+    data: { reviewId: "r123" },
+    message: "Alex Chen completed a performance review for Sarah Johnson",
+    user: {
+      name: "Alex Chen",
+      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
+    }
+  },
+  {
+    type: "goal",
+    date: new Date(2025, 3, 15),
+    data: { goalId: "g456" },
+    message: "Marcus Wong set a new quarterly goal: Improve team velocity by 15%",
+    user: {
+      name: "Marcus Wong",
+      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
+    }
+  },
+  {
+    type: "feedback",
+    date: new Date(2025, 3, 14),
+    data: { feedbackId: "f789" },
+    message: "Emily Davis provided positive feedback for the product team",
+    user: {
+      name: "Emily Davis",
+      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
+    }
+  },
+  {
+    type: "system",
+    date: new Date(2025, 3, 12),
+    data: { cycleId: "c101" },
+    message: "Q2 Performance Review cycle has been initiated by the system",
+  }
+];
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [teamReviews, setTeamReviews] = useState<PerformanceReview[]>([]);
