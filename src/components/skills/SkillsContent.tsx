@@ -7,12 +7,13 @@ import { RoleMapping } from "./RoleMapping";
 import { RoleSkillsMapping } from "./RoleSkillsMapping";
 import { DevelopmentPlans } from "./DevelopmentPlans";
 import { SkillsAnalytics } from "./SkillsAnalytics";
+import { Skill } from "@/types";
 
 interface SkillsContentProps {
   categories: string[];
   showAddSkillDialog: boolean;
   onAddSkillClick: () => void;
-  skills: any[];
+  skills: Skill[];
   plans: any[];
   onCreatePlan: (plan: any) => void;
 }
@@ -26,6 +27,28 @@ export function SkillsContent({
   onCreatePlan
 }: SkillsContentProps) {
   const [activeTab, setActiveTab] = useState("skills");
+
+  // Mock data for RoleMapping component
+  const mockRoles = [
+    { 
+      id: "1", 
+      title: "Frontend Developer", 
+      department: "Engineering",
+      skills: ["1", "2"] 
+    },
+    { 
+      id: "2", 
+      title: "Backend Developer", 
+      department: "Engineering",
+      skills: ["3", "4"] 
+    }
+  ];
+  
+  // Create a filtered version of skills for RoleMapping
+  const filteredSkills = skills.map(skill => ({
+    ...skill,
+    id: skill.id || crypto.randomUUID()
+  }));
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -51,7 +74,11 @@ export function SkillsContent({
       </TabsContent>
       
       <TabsContent value="role-mapping">
-        <RoleMapping />
+        <RoleMapping 
+          roles={mockRoles}
+          skills={skills}
+          filteredSkills={filteredSkills}
+        />
       </TabsContent>
       
       <TabsContent value="role-skills">
@@ -62,7 +89,7 @@ export function SkillsContent({
         <DevelopmentPlans 
           plans={plans}
           skills={skills}
-          onOpenCreatePlanDialog={onCreatePlan}
+          onOpenCreatePlanDialog={() => onCreatePlan({})}
         />
       </TabsContent>
       
