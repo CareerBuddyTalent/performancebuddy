@@ -1,6 +1,6 @@
 
 import { 
-  User, Users, BarChart, Building2, Book, Target
+  User, Users, BarChart, Building2, Book, Target, ClipboardList
 } from "lucide-react";
 
 // Define navigation item type
@@ -16,6 +16,7 @@ export const navigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: BarChart, roles: ['admin', 'manager', 'employee'] },
   { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
   { path: '/goals', label: 'Goals', icon: Target, roles: ['admin', 'manager', 'employee'] },
+  { path: '/surveys', label: 'Surveys', icon: ClipboardList, roles: ['admin', 'manager', 'employee'] },
   { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager'] },
   { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
@@ -32,7 +33,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   // Group navigation items
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/dashboard', '/my-profile', '/users', '/skills', '/goals'].includes(item.path)
+      ['/dashboard', '/my-profile', '/users', '/skills', '/goals', '/surveys'].includes(item.path)
     ),
     
     workNavItems: filteredNavItems.filter(item => 
