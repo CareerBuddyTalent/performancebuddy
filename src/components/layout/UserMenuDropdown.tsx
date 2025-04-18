@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Settings, BarChart } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { 
@@ -17,8 +17,6 @@ export default function UserMenuDropdown() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  
-  const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
 
   if (!user) return null;
 
@@ -52,12 +50,6 @@ export default function UserMenuDropdown() {
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </DropdownMenuItem>
-          {canAccessPerformance && (
-            <DropdownMenuItem onClick={() => navigate('/performance')} className="cursor-pointer">
-              <BarChart className="h-4 w-4 mr-2" />
-              Performance
-            </DropdownMenuItem>
-          )}
         </DropdownMenuGroup>
         
         <DropdownMenuSeparator />

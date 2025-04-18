@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";  // Don't change the import path here
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CompanyProvider } from "./context/CompanyContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import PageLayout from "./components/PageLayout";
@@ -26,10 +26,10 @@ import CompanyManagement from "./pages/CompanyManagement";
 import NotFound from "./pages/NotFound";
 import Performance from "@/pages/Performance";
 import MyProfile from "@/pages/MyProfile";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
-// Protected route component
 const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
   const { user, isLoading } = useAuth();
   
@@ -41,7 +41,6 @@ const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?
     return <Navigate to="/login" replace />;
   }
   
-  // If roles are specified, check if user has required role
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -49,7 +48,6 @@ const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?
   return <>{children}</>;
 };
 
-// Main app component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -64,7 +62,6 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 
-                {/* Protected routes */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <PageLayout>
@@ -165,6 +162,14 @@ const App = () => (
                   <ProtectedRoute roles={["admin", "manager"]}>
                     <PageLayout allowedRoles={["admin", "manager"]}>
                       <Performance />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <PageLayout>
+                      <Settings />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
