@@ -2,15 +2,14 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, ReviewCycle, PerformanceReview } from "@/types";
 import { users as mockUsers } from "@/data/mockData";
 import { v4 as uuidv4 } from 'uuid';
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import ReviewTypeSelector from "./reviews/ReviewTypeSelector";
+import CycleSelector from "./reviews/CycleSelector";
+import EmployeeSelector from "./reviews/EmployeeSelector";
+import InitialComments from "./reviews/InitialComments";
 
 interface CreateReviewDialogProps {
   open: boolean;
@@ -130,90 +129,30 @@ export default function CreateReviewDialog({
             </DialogDescription>
           </DialogHeader>
           
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "individual" | "team")} className="mt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="individual">Individual Review</TabsTrigger>
-              <TabsTrigger value="team">Team Review</TabsTrigger>
-            </TabsList>
+          <ReviewTypeSelector
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
             
-            <div className="mt-4">
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label>Review Cycle</Label>
-                  <Select
-                    value={cycleId}
-                    onValueChange={setCycleId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a review cycle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {performanceCycles.map(cycle => (
-                        <SelectItem key={cycle.id} value={cycle.id}>
-                          {cycle.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <div className="mt-4 space-y-4">
+            <CycleSelector
+              cycles={cycles}
+              selectedCycleId={cycleId}
+              onCycleChange={setCycleId}
+            />
 
-                <div className="grid gap-2">
-                  <Label>{activeTab === "individual" ? "Employee" : "Select Team Members"}</Label>
-                  {activeTab === "individual" ? (
-                    <Select
-                      value={selectedEmployees[0] || ""}
-                      onValueChange={(value) => setSelectedEmployees([value])}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an employee" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredUsers.map(user => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name} - {user.position || user.department || "No position"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="border rounded-md p-4 space-y-2 max-h-[200px] overflow-y-auto">
-                      {filteredUsers.map(user => (
-                        <div key={user.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={user.id}
-                            checked={selectedEmployees.includes(user.id)}
-                            onCheckedChange={(checked) => {
-                              setSelectedEmployees(prev => 
-                                checked 
-                                  ? [...prev, user.id]
-                                  : prev.filter(id => id !== user.id)
-                              );
-                            }}
-                          />
-                          <label
-                            htmlFor={user.id}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {user.name} - {user.position || user.department || "No position"}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label>Initial Comments (Optional)</Label>
-                  <Textarea
-                    placeholder="Add any initial comments or instructions for the review"
-                    value={initialComments}
-                    onChange={(e) => setInitialComments(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </div>
-          </Tabs>
+            <EmployeeSelector
+              type={activeTab}
+              employees={filteredUsers}
+              selectedEmployees={selectedEmployees}
+              onSelectionChange={setSelectedEmployees}
+            />
+            
+            <InitialComments
+              value={initialComments}
+              onChange={setInitialComments}
+            />
+          </div>
           
           <DialogFooter className="mt-6">
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
