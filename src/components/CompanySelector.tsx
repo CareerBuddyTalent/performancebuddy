@@ -9,6 +9,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -72,36 +73,38 @@ export default function CompanySelector({
       <PopoverContent className="w-[200px] p-0 bg-white border-gray-200 shadow-lg">
         <Command className="bg-white">
           <CommandInput placeholder="Search company..." className="text-gray-700" />
-          <CommandEmpty className="text-gray-500">No company found.</CommandEmpty>
-          <CommandGroup className="text-gray-700">
-            {companies.map((company) => (
-              <CommandItem
-                key={company.id}
-                value={company.id}
-                onSelect={() => {
-                  onCompanyChange(company.id);
-                  setOpen(false);
-                }}
-                className="text-gray-800 hover:bg-gray-100"
-              >
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={company.logoUrl} alt={company.name} />
-                    <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                      {company.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{company.name}</span>
-                </div>
-                <Check
-                  className={cn(
-                    "ml-auto h-4 w-4",
-                    selectedCompanyId === company.id ? "opacity-100 text-green-500" : "opacity-0"
-                  )}
-                />
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandEmpty className="text-gray-500">No company found.</CommandEmpty>
+            <CommandGroup className="text-gray-700">
+              {companies.map((company) => (
+                <CommandItem
+                  key={company.id}
+                  value={company.id}
+                  onSelect={() => {
+                    onCompanyChange(company.id);
+                    setOpen(false);
+                  }}
+                  className="text-gray-800 hover:bg-gray-100"
+                >
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={company.logoUrl} alt={company.name} />
+                      <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                        {company.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{company.name}</span>
+                  </div>
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      selectedCompanyId === company.id ? "opacity-100 text-green-500" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
