@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { Goal } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "@/hooks/use-toast";
+import { hasPermission } from "@/types/performance-permissions";
 import PerformanceHeader from "./dashboard/PerformanceHeader";
 import PerformanceStats from "./dashboard/PerformanceStats";
 import PerformanceTabs from "./PerformanceTabs";
