@@ -78,26 +78,10 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/goals" element={
+                <Route path="/performance" element={
                   <ProtectedRoute>
                     <PageLayout>
-                      <EmployeeGoals />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/skills" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Skills />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/surveys" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Surveys />
+                      <Performance />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
@@ -118,38 +102,6 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/reviews" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Reviews />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/self-review" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <SelfReview />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/review-skills" element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <PageLayout allowedRoles={["admin"]}>
-                      <ReviewSkills />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/cycles" element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
-                    <PageLayout>
-                      <PerformanceCycles />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
                 <Route path="/companies" element={
                   <ProtectedRoute roles={["admin"]}>
                     <PageLayout>
@@ -158,18 +110,18 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/performance" element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
-                    <PageLayout allowedRoles={["admin", "manager"]}>
-                      <Performance />
-                    </PageLayout>
-                  </ProtectedRoute>
-                } />
-                
                 <Route path="/settings" element={
                   <ProtectedRoute>
                     <PageLayout>
                       <Settings />
+                    </PageLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/surveys" element={
+                  <ProtectedRoute>
+                    <PageLayout>
+                      <Surveys />
                     </PageLayout>
                   </ProtectedRoute>
                 } />
