@@ -12,14 +12,18 @@ interface GoalStatusCellProps {
 }
 
 export function GoalStatusCell({ status, canEdit, onUpdateStatus }: GoalStatusCellProps) {
+  // Ensure status is a string to prevent the 'replace' error
+  const safeStatus = status || 'not_started';
+  const displayStatus = safeStatus.replace('_', ' ');
+  
   return (
     <TableCell>
       {canEdit ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2">
-              <Badge variant={status === 'completed' ? 'default' : 'secondary'}>
-                {status.replace('_', ' ')}
+              <Badge variant={safeStatus === 'completed' ? 'default' : 'secondary'}>
+                {displayStatus}
               </Badge>
               <ChevronDown className="h-4 w-4" />
             </Button>
@@ -37,8 +41,8 @@ export function GoalStatusCell({ status, canEdit, onUpdateStatus }: GoalStatusCe
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Badge variant={status === 'completed' ? 'default' : 'secondary'}>
-          {status.replace('_', ' ')}
+        <Badge variant={safeStatus === 'completed' ? 'default' : 'secondary'}>
+          {displayStatus}
         </Badge>
       )}
     </TableCell>
