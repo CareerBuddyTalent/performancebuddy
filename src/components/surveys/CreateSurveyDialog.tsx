@@ -1,0 +1,130 @@
+
+import { useForm } from "react-hook-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { Survey } from "@/types";
+
+interface CreateSurveyDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onCreateSurvey: (survey: Partial<Survey>) => void;
+}
+
+interface CreateSurveyForm {
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+export default function CreateSurveyDialog({ open, onClose, onCreateSurvey }: CreateSurveyDialogProps) {
+  const form = useForm<CreateSurveyForm>();
+
+  const onSubmit = (data: CreateSurveyForm) => {
+    const newSurvey: Partial<Survey> = {
+      title: data.title,
+      description: data.description,
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
+      status: 'draft',
+      targetAudience: 'all',
+      questions: [],
+      responses: []
+    };
+
+    onCreateSurvey(newSurvey);
+    toast({
+      title: "Survey Created",
+      description: "New survey has been created successfully.",
+    });
+    onClose();
+    form.reset();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Create New Survey</DialogTitle>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter survey title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter survey description" 
+                      className="min-h-[100px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Survey</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

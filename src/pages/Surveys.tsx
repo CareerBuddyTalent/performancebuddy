@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Survey } from "@/types";
 import { Plus, Search, BarChart4 } from "lucide-react";
 import SurveyCard from "@/components/SurveyCard";
+import CreateSurveyDialog from "@/components/surveys/CreateSurveyDialog";
 
 // Sample survey data
 const sampleSurveys: Survey[] = [
@@ -127,11 +127,15 @@ export default function Surveys() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);
+  const [surveys, setSurveys] = useState(sampleSurveys);
   
   if (!user) return null;
+
+  const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
   
   // Filter surveys based on role, search query, and status
-  const filteredSurveys = sampleSurveys.filter(survey => {
+  const filteredSurveys = surveys.filter(survey => {
     const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           survey.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || survey.status === statusFilter;
@@ -147,6 +151,17 @@ export default function Surveys() {
   const pendingSurveys = filteredSurveys.filter(s => 
     s.status === 'active' && !s.responses.some(r => r.userId === user.id)
   );
+  
+  const handleCreateSurvey = (newSurvey: Partial<Survey>) => {
+    const survey = {
+      ...newSurvey,
+      id: String(surveys.length + 1),
+      questions: [],
+      responses: [],
+    } as Survey;
+    
+    setSurveys([...surveys, survey]);
+  };
   
   return (
     <div className="space-y-6">
@@ -186,13 +201,13 @@ export default function Surveys() {
             </Select>
           )}
         </div>
-        {user.role !== 'employee' && (
+        {canCreateSurvey && (
           <div className="flex gap-2">
             <Button variant="outline">
               <BarChart4 className="mr-2 h-4 w-4" />
               Analytics
             </Button>
-            <Button>
+            <Button onClick={() => setIsCreateSurveyOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Create Survey
             </Button>
@@ -270,6 +285,14 @@ export default function Surveys() {
             </div>
           )}
         </div>
+      )}
+      
+      {canCreateSurvey && (
+        <CreateSurveyDialog
+          open={isCreateSurveyOpen}
+          onClose={() => setIsCreateSurveyOpen(false)}
+          onCreateSurvey={handleCreateSurvey}
+        />
       )}
     </div>
   );
