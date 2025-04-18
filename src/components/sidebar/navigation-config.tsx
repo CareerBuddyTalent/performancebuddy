@@ -1,6 +1,6 @@
 
 import { 
-  User, Users, BarChart, Building2, Book, Target, ClipboardList
+  BarChart, Building2, ClipboardList
 } from "lucide-react";
 
 // Define navigation item type
@@ -14,9 +14,8 @@ export interface NavigationItem {
 // Define the navigation items with role-based access
 export const navigationItems: NavigationItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: BarChart, roles: ['admin', 'manager', 'employee'] },
-  { path: '/my-profile', label: 'My Profile', icon: User, roles: ['admin', 'manager', 'employee'] },
   { path: '/performance', label: 'Performance', icon: BarChart, roles: ['admin', 'manager', 'employee'] },
-  { path: '/users', label: 'People', icon: Users, roles: ['admin', 'manager'] },
+  { path: '/users', label: 'People', icon: ClipboardList, roles: ['admin', 'manager'] },
   { path: '/companies', label: 'Organisation', icon: Building2, roles: ['admin'] },
   { path: '/surveys', label: 'Surveys', icon: ClipboardList, roles: ['admin', 'manager', 'employee'] },
 ];
@@ -31,7 +30,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   // Group navigation items
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/dashboard', '/my-profile', '/users', '/surveys', '/performance'].includes(item.path)
+      ['/dashboard', '/performance', '/users', '/surveys'].includes(item.path)
     ),
     
     workNavItems: [],
@@ -41,4 +40,3 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
     )
   };
 };
-
