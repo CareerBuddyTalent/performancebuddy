@@ -1,12 +1,8 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { Survey } from "@/types";
-import CreateSurveyDialog from "@/components/surveys/CreateSurveyDialog";
-import SurveyFilters from "@/components/surveys/SurveyFilters";
-import SurveyActions from "@/components/surveys/SurveyActions";
-import EmployeeSurveyTabs from "@/components/surveys/EmployeeSurveyTabs";
-import SurveyGrid from "@/components/surveys/SurveyGrid";
+import SurveyHeader from "@/components/surveys/SurveyHeader";
+import SurveyList from "@/components/surveys/SurveyList";
 
 // Sample survey data
 const sampleSurveys: Survey[] = [
@@ -122,33 +118,7 @@ const sampleSurveys: Survey[] = [
 ];
 
 export default function Surveys() {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);
   const [surveys, setSurveys] = useState(sampleSurveys);
-  
-  if (!user) return null;
-
-  const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
-  
-  // Filter surveys based on role, search query, and status
-  const filteredSurveys = surveys.filter(survey => {
-    const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          survey.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || survey.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-  
-  // Group surveys by status for employee view
-  const activeSurveys = filteredSurveys.filter(s => s.status === 'active');
-  const completedSurveys = filteredSurveys.filter(s => 
-    s.status === 'closed' && s.responses.some(r => r.userId === user.id)
-  );
-  const pendingSurveys = filteredSurveys.filter(s => 
-    s.status === 'active' && !s.responses.some(r => r.userId === user.id)
-  );
   
   const handleCreateSurvey = (newSurvey: Partial<Survey>) => {
     const survey = {
@@ -163,52 +133,12 @@ export default function Surveys() {
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {user.role === 'employee' ? 'Engagement Surveys' : 'Survey Management'}
-        </h1>
-        <p className="text-muted-foreground">
-          {user.role === 'employee' 
-            ? 'Provide feedback through engagement surveys' 
-            : 'Create and manage employee engagement surveys'}
-        </p>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <SurveyFilters
-          searchQuery={searchQuery}
-          statusFilter={statusFilter}
-          onSearchChange={setSearchQuery}
-          onStatusChange={setStatusFilter}
-          showStatusFilter={user.role !== 'employee'}
-        />
-        {canCreateSurvey && (
-          <SurveyActions onCreateClick={() => setIsCreateSurveyOpen(true)} />
-        )}
-      </div>
-      
+      <SurveyHeader />
       <Separator />
-      
-      {user.role === 'employee' ? (
-        <EmployeeSurveyTabs
-          pendingSurveys={pendingSurveys}
-          completedSurveys={completedSurveys}
-          activeSurveys={activeSurveys}
-        />
-      ) : (
-        <SurveyGrid 
-          surveys={filteredSurveys} 
-          emptyMessage="No surveys matching your filters."
-        />
-      )}
-      
-      {canCreateSurvey && (
-        <CreateSurveyDialog
-          open={isCreateSurveyOpen}
-          onClose={() => setIsCreateSurveyOpen(false)}
-          onCreateSurvey={handleCreateSurvey}
-        />
-      )}
+      <SurveyList 
+        surveys={surveys}
+        onCreateSurvey={handleCreateSurvey}
+      />
     </div>
   );
 }
