@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { users } from '@/data/mockData';
@@ -28,6 +27,7 @@ export function useAuthProvider() {
       const { success, user: loggedInUser, error } = await loginUser(email, password);
       
       if (success && loggedInUser) {
+        console.log("Login successful for user:", loggedInUser);
         setUser(loggedInUser);
         // Store user data in localStorage for persistence
         if (process.env.NODE_ENV === 'development') {
@@ -37,13 +37,14 @@ export function useAuthProvider() {
       }
       
       if (error) {
+        console.error("Login error:", error);
         setAuthError(error);
       }
       
       return false;
     } catch (error) {
-      setAuthError('An unexpected error occurred during login');
       console.error('Login error:', error);
+      setAuthError('An unexpected error occurred during login');
       return false;
     } finally {
       setIsLoading(false);
@@ -95,6 +96,7 @@ export function useAuthProvider() {
   };
 
   const switchRole = (role: UserRole) => {
+    console.log("Switching to role:", role);
     const roleUsers = {
       employee: users.find(u => u.role === 'employee'),
       manager: users.find(u => u.role === 'manager'),
@@ -102,7 +104,13 @@ export function useAuthProvider() {
     };
 
     const userForRole = roleUsers[role] || users[0];
+    console.log("User for role:", userForRole);
     setUser(userForRole);
+    
+    // Update localStorage to persist the role change
+    if (process.env.NODE_ENV === 'development' && userForRole) {
+      localStorage.setItem('authUser', JSON.stringify(userForRole));
+    }
   };
 
   const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
