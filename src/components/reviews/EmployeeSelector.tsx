@@ -29,11 +29,15 @@ export default function EmployeeSelector({
             <SelectValue placeholder="Select an employee" />
           </SelectTrigger>
           <SelectContent>
-            {employees.map(user => (
-              <SelectItem key={user.id} value={user.id}>
-                {user.name} - {user.position || user.department || "No position"}
-              </SelectItem>
-            ))}
+            {employees.length > 0 ? (
+              employees.map(user => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.name} - {user.position || user.department || "No position"}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no-employees" disabled>No employees available</SelectItem>
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -44,27 +48,31 @@ export default function EmployeeSelector({
     <div className="grid gap-2">
       <Label>Select Team Members</Label>
       <div className="border rounded-md p-4 space-y-2 max-h-[200px] overflow-y-auto">
-        {employees.map(user => (
-          <div key={user.id} className="flex items-center space-x-2">
-            <Checkbox
-              id={user.id}
-              checked={selectedEmployees.includes(user.id)}
-              onCheckedChange={(checked) => {
-                onSelectionChange(
-                  checked 
-                    ? [...selectedEmployees, user.id]
-                    : selectedEmployees.filter(id => id !== user.id)
-                );
-              }}
-            />
-            <label
-              htmlFor={user.id}
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {user.name} - {user.position || user.department || "No position"}
-            </label>
-          </div>
-        ))}
+        {employees.length > 0 ? (
+          employees.map(user => (
+            <div key={user.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={user.id}
+                checked={selectedEmployees.includes(user.id)}
+                onCheckedChange={(checked) => {
+                  onSelectionChange(
+                    checked 
+                      ? [...selectedEmployees, user.id]
+                      : selectedEmployees.filter(id => id !== user.id)
+                  );
+                }}
+              />
+              <label
+                htmlFor={user.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {user.name} - {user.position || user.department || "No position"}
+              </label>
+            </div>
+          ))
+        ) : (
+          <div className="text-sm text-muted-foreground py-2">No team members available</div>
+        )}
       </div>
     </div>
   );

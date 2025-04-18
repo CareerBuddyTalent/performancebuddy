@@ -43,6 +43,11 @@ export function useCreateReview({
     setSelectedCycle(cycle || null);
   }, [cycleId, cycles]);
 
+  // When tab changes, reset selected employees
+  useEffect(() => {
+    setSelectedEmployees([]);
+  }, [activeTab]);
+
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     

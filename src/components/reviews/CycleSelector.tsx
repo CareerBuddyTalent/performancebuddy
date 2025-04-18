@@ -26,11 +26,15 @@ export default function CycleSelector({ cycles, selectedCycleId, onCycleChange }
           <SelectValue placeholder="Select a review cycle" />
         </SelectTrigger>
         <SelectContent>
-          {performanceCycles.map(cycle => (
-            <SelectItem key={cycle.id} value={cycle.id}>
-              {cycle.name}
-            </SelectItem>
-          ))}
+          {performanceCycles.length > 0 ? (
+            performanceCycles.map(cycle => (
+              <SelectItem key={cycle.id} value={cycle.id}>
+                {cycle.name}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="no-cycles" disabled>No review cycles available</SelectItem>
+          )}
         </SelectContent>
       </Select>
     </div>

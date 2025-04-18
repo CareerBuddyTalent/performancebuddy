@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import Skills from "@/pages/Skills";
 import CreateReviewDialog from "@/components/CreateReviewDialog";
 import ManageCyclesDialog from "@/components/performance/ManageCyclesDialog";
 import GoalSettingsDialog from "@/components/performance/GoalSettingsDialog";
+import { reviewCycles } from "@/data/mockData";
 
 export default function Performance() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -85,7 +87,7 @@ export default function Performance() {
           open={isCreateReviewOpen}
           onOpenChange={setIsCreateReviewOpen}
           onCreateReview={handleCreateReview}
-          cycles={[]} // Will be populated with actual cycles data
+          cycles={reviewCycles} 
           currentUser={user}
         />
       )}
