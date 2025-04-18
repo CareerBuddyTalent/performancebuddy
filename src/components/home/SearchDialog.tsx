@@ -109,6 +109,13 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
       href: "/documents",
       icon: <FileCheck className="h-4 w-4 mr-2" />
     },
+    {
+      id: "page-2",
+      name: "Settings",
+      type: "page",
+      href: "/my-profile",
+      icon: <FileCheck className="h-4 w-4 mr-2" />
+    }
   ];
 
   // Update search results based on query
@@ -142,6 +149,15 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
     }
   }, [open]);
 
+  // If dialog is not open, don't render the command component
+  if (!open) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[550px] p-0" />
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] p-0">
@@ -150,7 +166,7 @@ export default function SearchDialog({ open, onOpenChange }: SearchDialogProps) 
             placeholder="Search for tasks, users, reports..."
             value={query}
             onValueChange={handleSearch}
-            autoFocus={open}
+            autoFocus
           />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
