@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "react-router-dom";
@@ -31,15 +30,17 @@ export default function UserManagement() {
 
   const isAdmin = user?.role === "admin";
   
-  // Update filtered users when company selection changes
   useEffect(() => {
-    const companyUsers = selectedCompanyId 
-      ? users.filter(user => user.companyId === selectedCompanyId)
-      : users;
+    let companyUsers = users;
+    
+    if (isAdmin && selectedCompanyId) {
+      companyUsers = users.filter(user => user.companyId === selectedCompanyId);
+    } else if (!isAdmin) {
+      companyUsers = users.filter(user => user.companyId === user?.companyId);
+    }
     
     setFilteredUsers(companyUsers);
     
-    // Extract unique departments from the filtered users
     const depts = Array.from(
       new Set(
         companyUsers
@@ -49,21 +50,18 @@ export default function UserManagement() {
     );
     setDepartments(depts);
     
-    // Update URL with selected company
-    if (selectedCompanyId) {
+    if (isAdmin && selectedCompanyId) {
       setSearchParams({ company: selectedCompanyId });
     } else {
       setSearchParams({});
     }
-  }, [selectedCompanyId, users, setSearchParams]);
+  }, [selectedCompanyId, users, isAdmin, user?.companyId, setSearchParams]);
 
-  // Handle company change
   const handleCompanyChange = (companyId: string) => {
     setSelectedCompanyId(companyId);
   };
   
   const handleAddUser = (newUser: User) => {
-    // Assign the selected company to the new user
     const userWithCompany = {
       ...newUser,
       companyId: selectedCompanyId,
@@ -106,13 +104,15 @@ export default function UserManagement() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="w-full sm:w-64">
-            <CompanySelector
-              companies={companies}
-              selectedCompanyId={selectedCompanyId}
-              onCompanyChange={handleCompanyChange}
-            />
-          </div>
+          {isAdmin && (
+            <div className="w-full sm:w-64">
+              <CompanySelector
+                companies={companies}
+                selectedCompanyId={selectedCompanyId}
+                onCompanyChange={handleCompanyChange}
+              />
+            </div>
+          )}
           {(isAdmin || user?.role === "manager") && (
             <Button onClick={() => setShowAddUserDialog(true)}>
               <PlusCircle className="mr-2 h-4 w-4" />

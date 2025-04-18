@@ -27,7 +27,6 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
     item.roles.includes(userRole)
   );
   
-  // Group navigation items
   return {
     mainNavItems: filteredNavItems.filter(item => 
       ['/dashboard', '/performance', '/users', '/surveys'].includes(item.path)

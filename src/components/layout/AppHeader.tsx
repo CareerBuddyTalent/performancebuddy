@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, LayoutGrid, Home, Target, BarChart, ChartPie, Users, User, Book } from 'lucide-react';
+import { Search, LayoutGrid, Target, BarChart, ChartPie, Users, User, Book } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -36,6 +35,7 @@ export default function AppHeader() {
   };
 
   const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
+  const isAdmin = user?.role === 'admin';
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6 shadow-sm">
@@ -107,8 +107,8 @@ export default function AppHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
         
-        <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
-          {currentCompany && (
+        {isAdmin && currentCompany && (
+          <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
             <CompanySelector 
               companies={companies} 
               selectedCompanyId={currentCompany.id} 
@@ -119,8 +119,8 @@ export default function AppHeader() {
                 }
               }} 
             />
-          )}
-        </div>
+          </div>
+        )}
         
         <UserMenuDropdown />
       </div>
