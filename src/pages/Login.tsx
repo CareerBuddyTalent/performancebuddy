@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,35 +11,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { users } from "@/data/mockData";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: z.string().min(1, { message: "Password is required" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const { login, authError, clearAuthError, user } = useAuth();
+  const { login, authError, clearAuthError } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const demoCredentials = [
-    { role: "Employee", email: "bob@example.com", password: "password123" },
-    { role: "Manager", email: "jane@example.com", password: "password123" },
-    { role: "Admin (CEO)", email: "john@example.com", password: "password123" },
-  ];
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
-
-  // Clear auth errors when component unmounts or on form change
+  // Clear auth errors when component unmounts
   useEffect(() => {
     return () => {
       clearAuthError();
@@ -68,26 +55,28 @@ export default function Login() {
     setIsLoading(true);
     
     try {
+      console.log("Login attempt with:", data.email);
       const success = await login(data.email, data.password);
       
       if (success) {
-        toast.success("Login successful!");
+        toast.success(`Logged in successfully!`);
         navigate("/dashboard");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      toast.error("Login failed. Please try again.");
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fillDemoCredentials = (email: string, password: string) => {
-    form.setValue("email", email);
-    form.setValue("password", password);
-    
-    // Trigger validation
-    form.trigger();
+  // Find demo users by role
+  const demoEmployee = users.find(u => u.role === 'employee');
+  const demoManager = users.find(u => u.role === 'manager');
+  const demoAdmin = users.find(u => u.role === 'admin');
+
+  const fillDemoCredentials = (email: string) => {
+    form.setValue('email', email);
+    form.setValue('password', 'password123');
   };
 
   return (
@@ -96,7 +85,7 @@ export default function Login() {
         <Card className="w-full">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-primary">PerformPath</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
+            <CardDescription>Log in to your account</CardDescription>
           </CardHeader>
           <CardContent>
             {authError && (
@@ -145,42 +134,67 @@ export default function Login() {
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? "Logging in..." : "Log in"}
                 </Button>
               </form>
             </Form>
-          </CardContent>
-          <CardFooter className="flex flex-col">
-            <div className="text-sm text-muted-foreground mb-4">
-              <p className="mb-2 font-medium">Demo Credentials:</p>
-              <div className="space-y-2">
-                {demoCredentials.map((cred, index) => (
-                  <div key={index} className="flex items-center justify-between border p-2 rounded-md">
-                    <div>
-                      <span className="font-medium">{cred.role}:</span> {cred.email}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => fillDemoCredentials(cred.email, cred.password)}
-                    >
-                      Use
-                    </Button>
-                  </div>
-                ))}
+
+            <div className="mt-6 space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t"></span>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Demo Accounts</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2">
+                {demoEmployee && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fillDemoCredentials(demoEmployee.email)}
+                    className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                  >
+                    Employee
+                  </Button>
+                )}
+                
+                {demoManager && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fillDemoCredentials(demoManager.email)}
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    Manager
+                  </Button>
+                )}
+                
+                {demoAdmin && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fillDemoCredentials(demoAdmin.email)}
+                    className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700"
+                  >
+                    Admin
+                  </Button>
+                )}
               </div>
             </div>
-            <div className="text-center">
-              <p>Don't have an account? {" "}
-                <Link 
-                  to="/signup" 
-                  className="text-primary hover:underline"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-2">
+            <p className="text-sm text-center text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+            <p className="text-xs text-center text-muted-foreground">
+              For demo accounts, use password: <code className="bg-muted px-1 py-0.5 rounded">password123</code>
+            </p>
           </CardFooter>
         </Card>
       </div>

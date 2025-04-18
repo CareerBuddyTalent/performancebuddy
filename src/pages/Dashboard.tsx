@@ -10,6 +10,7 @@ import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
 import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
 import EmployeeDashboard from "@/components/dashboard/employee";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -21,17 +22,30 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
 
+    console.log("Dashboard - Current user role:", user.role);
+
     // Filter reviews based on user role
     if (user.role === 'admin') {
       // Admin sees all reviews
       setTeamReviews(reviews);
+      console.log("Admin dashboard loaded with all reviews");
     } else if (user.role === 'manager') {
       // Manager sees reviews where they are the reviewer
       setTeamReviews(reviews.filter(review => review.reviewerId === user.id));
+      console.log("Manager dashboard loaded with filtered reviews");
     }
     
     // Set reviews where user is the employee being reviewed
     setMyReviews(reviews.filter(review => review.employeeId === user.id));
+    
+    // Show a toast notification based on role
+    if (user.role === 'admin') {
+      toast.success(`Welcome, Administrator ${user.name}!`);
+    } else if (user.role === 'manager') {
+      toast.success(`Welcome, Manager ${user.name}!`);
+    } else {
+      toast.success(`Welcome, ${user.name}!`);
+    }
   }, [user]);
 
   // Prepare ratings data for graph
@@ -81,10 +95,16 @@ export default function Dashboard() {
     setTimeframe(newTimeframe);
   };
 
-  if (!user) return null;
+  if (!user) {
+    console.log("Dashboard - No user found, rendering null");
+    return null;
+  }
+  
+  console.log("Dashboard - Rendering for user role:", user.role);
   
   // Render employee dashboard for employee users
   if (user.role === 'employee') {
+    console.log("Rendering employee dashboard");
     return (
       <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
         <EmployeeDashboard 
@@ -99,6 +119,7 @@ export default function Dashboard() {
   }
 
   // Render manager/admin dashboard
+  console.log("Rendering manager/admin dashboard");
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       <DashboardStats 

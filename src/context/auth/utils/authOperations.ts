@@ -13,13 +13,15 @@ export const loginUser = async (email: string, password: string): Promise<{
   error?: string;
 }> => {
   try {
+    console.log("Attempting login for:", email);
+    
     // For demo/development mode - use mock data to simplify testing
     if (process.env.NODE_ENV === 'development') {
       // Find user with matching email in our mock data
       const demoUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       if (demoUser && password === 'password123') {
-        console.log('Demo login successful:', demoUser);
+        console.log('Demo login successful for:', demoUser);
         return { success: true, user: demoUser };
       } else if (demoUser) {
         console.log('Demo login failed: Invalid password');

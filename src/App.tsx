@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,26 +28,9 @@ import NotFound from "./pages/NotFound";
 import Performance from "@/pages/Performance";
 import MyProfile from "@/pages/MyProfile";
 import Settings from "@/pages/Settings";
+import RoleGuard from "@/components/layout/RoleGuard";
 
 const queryClient = new QueryClient();
-
-const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <>{children}</>;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -63,67 +47,51 @@ const App = () => (
                 <Route path="/signup" element={<Signup />} />
                 
                 <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Dashboard />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout>
+                    <Dashboard />
+                  </PageLayout>
                 } />
                 
                 <Route path="/my-profile" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <MyProfile />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout>
+                    <MyProfile />
+                  </PageLayout>
                 } />
                 
                 <Route path="/performance" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Performance />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout>
+                    <Performance />
+                  </PageLayout>
                 } />
                 
                 <Route path="/users" element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
-                    <PageLayout allowedRoles={["admin", "manager"]}>
-                      <UserManagement />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout allowedRoles={["admin", "manager"]}>
+                    <UserManagement />
+                  </PageLayout>
                 } />
                 
                 <Route path="/user/:userId" element={
-                  <ProtectedRoute roles={["admin", "manager"]}>
-                    <PageLayout allowedRoles={["admin", "manager"]}>
-                      <UserDetail />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout allowedRoles={["admin", "manager"]}>
+                    <UserDetail />
+                  </PageLayout>
                 } />
                 
                 <Route path="/companies" element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <PageLayout>
-                      <CompanyManagement />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout allowedRoles={["admin"]}>
+                    <CompanyManagement />
+                  </PageLayout>
                 } />
                 
                 <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Settings />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout>
+                    <Settings />
+                  </PageLayout>
                 } />
                 
                 <Route path="/surveys" element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Surveys />
-                    </PageLayout>
-                  </ProtectedRoute>
+                  <PageLayout>
+                    <Surveys />
+                  </PageLayout>
                 } />
                 
                 <Route path="*" element={<NotFound />} />
