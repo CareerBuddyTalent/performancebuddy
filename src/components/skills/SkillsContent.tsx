@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SkillsCatalog } from "./SkillsCatalog";
@@ -7,6 +6,7 @@ import { RoleMapping } from "./RoleMapping";
 import { RoleSkillsMapping } from "./RoleSkillsMapping";
 import { DevelopmentPlans } from "./DevelopmentPlans";
 import { SkillsAnalytics } from "./SkillsAnalytics";
+import { SkillsReport } from "./SkillsReport";
 import { Skill } from "@/types";
 
 interface SkillsContentProps {
@@ -52,13 +52,14 @@ export function SkillsContent({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-      <TabsList className="grid grid-cols-4 md:grid-cols-6 lg:w-[600px]">
+      <TabsList className="grid grid-cols-4 md:grid-cols-7 lg:w-[700px]">
         <TabsTrigger value="skills">Skills</TabsTrigger>
         <TabsTrigger value="career-paths">Career Paths</TabsTrigger>
         <TabsTrigger value="role-mapping">Role Mapping</TabsTrigger>
         <TabsTrigger value="role-skills">Role Skills</TabsTrigger>
         <TabsTrigger value="development">Development Plans</TabsTrigger>
         <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <TabsTrigger value="report">Report</TabsTrigger>
       </TabsList>
       
       <TabsContent value="skills">
@@ -95,6 +96,10 @@ export function SkillsContent({
       
       <TabsContent value="analytics">
         <SkillsAnalytics />
+      </TabsContent>
+      
+      <TabsContent value="report">
+        <SkillsReport />
       </TabsContent>
     </Tabs>
   );
