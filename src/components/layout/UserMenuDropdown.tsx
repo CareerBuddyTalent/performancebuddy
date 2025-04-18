@@ -31,7 +31,10 @@ export default function UserMenuDropdown() {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 p-2">
-        <div className="flex items-center gap-2 p-2">
+        <DropdownMenuItem 
+          onClick={() => navigate('/my-profile')} 
+          className="cursor-pointer flex items-center gap-2 py-2 focus:bg-accent"
+        >
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.profilePicture} alt={user.name} />
             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
@@ -40,15 +43,11 @@ export default function UserMenuDropdown() {
             <p className="text-sm font-medium">{user.name}</p>
             <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
           </div>
-        </div>
+        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigate('/my-profile')} className="cursor-pointer">
-            <User className="h-4 w-4 mr-2" />
-            My Profile
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
             <Settings className="h-4 w-4 mr-2" />
             Settings
