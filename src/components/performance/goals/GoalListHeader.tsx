@@ -1,17 +1,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 
 interface GoalListHeaderProps {
   canEdit: boolean;
-  onAddGoal: () => void;
+  onAddGoal?: () => void;
   onOpenSettings: () => void;
 }
 
 export default function GoalListHeader({ 
   canEdit, 
-  onAddGoal, 
   onOpenSettings 
 }: GoalListHeaderProps) {
   return (
@@ -25,16 +24,10 @@ export default function GoalListHeader({
       
       <div className="flex items-center gap-2">
         {canEdit && (
-          <>
-            <Button variant="outline" size="sm" onClick={onOpenSettings}>
-              <Settings className="h-4 w-4 mr-2" />
-              Configure
-            </Button>
-            <Button size="sm" onClick={onAddGoal}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Goal
-            </Button>
-          </>
+          <Button variant="outline" size="sm" onClick={onOpenSettings}>
+            <Settings className="h-4 w-4 mr-2" />
+            Configure
+          </Button>
         )}
       </div>
     </CardHeader>

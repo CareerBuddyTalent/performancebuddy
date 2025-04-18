@@ -24,13 +24,6 @@ export default function PerformanceGoalsTab({
   
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
 
-  const handleAddGoal = () => {
-    if (onAddGoal) {
-      // This will be handled by the GoalManagement component in the parent
-      onAddGoal({} as Goal);
-    }
-  };
-
   const handleOpenSettings = () => {
     setIsSettingsOpen(true);
   };
@@ -61,7 +54,7 @@ export default function PerformanceGoalsTab({
     <Card>
       <GoalListHeader 
         canEdit={canEdit}
-        onAddGoal={handleAddGoal}
+        onAddGoal={undefined} // Remove the add goal functionality
         onOpenSettings={handleOpenSettings}
       />
       

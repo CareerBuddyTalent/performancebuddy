@@ -1,21 +1,23 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { hasPermission } from "@/types/performance-permissions";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 import PerformanceDashboard from "@/components/performance/PerformanceDashboard";
 import EmployeeGoals from "@/pages/EmployeeGoals";
 import Reviews from "@/pages/Reviews";
 import Skills from "@/pages/Skills";
 import CreateReviewDialog from "@/components/CreateReviewDialog";
+import ManageCyclesDialog from "@/components/performance/ManageCyclesDialog";
+import GoalSettingsDialog from "@/components/performance/GoalSettingsDialog";
 
 export default function Performance() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isCreateReviewOpen, setIsCreateReviewOpen] = useState(false);
+  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
   const { user } = useAuth();
   
   if (!user) return null;
@@ -30,10 +32,20 @@ export default function Performance() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Performance Management</h1>
         {(user.role === 'manager' || user.role === 'admin') && (
-          <Button onClick={() => setIsCreateReviewOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Review
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setIsConfigureOpen(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Configure
+            </Button>
+            <Button onClick={() => setIsCreateReviewOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Review
+            </Button>
+          </div>
         )}
       </div>
 
@@ -77,7 +89,11 @@ export default function Performance() {
           currentUser={user}
         />
       )}
+
+      <GoalSettingsDialog 
+        open={isConfigureOpen} 
+        onOpenChange={setIsConfigureOpen} 
+      />
     </div>
   );
 }
-
