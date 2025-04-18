@@ -3,6 +3,7 @@ import { User } from "@/types";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect } from "react";
 
 interface EmployeeSelectorProps {
   type: "individual" | "team";
@@ -17,6 +18,12 @@ export default function EmployeeSelector({
   selectedEmployees, 
   onSelectionChange 
 }: EmployeeSelectorProps) {
+  
+  // Reset selection when type changes
+  useEffect(() => {
+    // Clear selection when switching between individual and team
+    onSelectionChange([]);
+  }, [type, onSelectionChange]);
   
   if (type === "individual") {
     return (

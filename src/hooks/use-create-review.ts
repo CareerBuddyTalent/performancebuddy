@@ -48,10 +48,11 @@ export function useCreateReview({
     setSelectedCycle(cycle || null);
   }, [cycleId, cycles]);
 
-  // When tab changes, reset selected employees
-  useEffect(() => {
-    setSelectedEmployees([]);
-  }, [activeTab]);
+  // Set activeTab and handle switching between individual and team reviews
+  const handleTabChange = (tab: "individual" | "team") => {
+    setActiveTab(tab);
+    setSelectedEmployees([]); // Clear selected employees when switching tabs
+  };
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -104,7 +105,7 @@ export function useCreateReview({
 
   return {
     activeTab,
-    setActiveTab,
+    setActiveTab: handleTabChange,
     selectedEmployees,
     setSelectedEmployees,
     cycleId,
