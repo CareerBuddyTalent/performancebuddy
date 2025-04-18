@@ -1,5 +1,4 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,20 +29,10 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="account" className="w-full">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="email">Email</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="account" className="mt-4">
-          <AccountSettingsForm />
-        </TabsContent>
-        
-        <TabsContent value="email" className="mt-4">
-          <EmailSettingsForm />
-        </TabsContent>
-      </Tabs>
+      <div className="grid gap-6 md:grid-cols-2">
+        <AccountSettingsForm />
+        <EmailSettingsForm />
+      </div>
     </div>
   );
 }
