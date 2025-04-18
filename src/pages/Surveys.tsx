@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Survey } from "@/types";
-import { Plus, Search, BarChart4 } from "lucide-react";
-import SurveyCard from "@/components/SurveyCard";
 import CreateSurveyDialog from "@/components/surveys/CreateSurveyDialog";
+import SurveyFilters from "@/components/surveys/SurveyFilters";
+import SurveyActions from "@/components/surveys/SurveyActions";
+import EmployeeSurveyTabs from "@/components/surveys/EmployeeSurveyTabs";
+import SurveyGrid from "@/components/surveys/SurveyGrid";
 
 // Sample survey data
 const sampleSurveys: Survey[] = [
@@ -177,114 +175,31 @@ export default function Surveys() {
       </div>
       
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex flex-1 items-center gap-4 max-w-md">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search surveys..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          {user.role !== 'employee' && (
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+        <SurveyFilters
+          searchQuery={searchQuery}
+          statusFilter={statusFilter}
+          onSearchChange={setSearchQuery}
+          onStatusChange={setStatusFilter}
+          showStatusFilter={user.role !== 'employee'}
+        />
         {canCreateSurvey && (
-          <div className="flex gap-2">
-            <Button variant="outline">
-              <BarChart4 className="mr-2 h-4 w-4" />
-              Analytics
-            </Button>
-            <Button onClick={() => setIsCreateSurveyOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Survey
-            </Button>
-          </div>
+          <SurveyActions onCreateClick={() => setIsCreateSurveyOpen(true)} />
         )}
       </div>
       
       <Separator />
       
       {user.role === 'employee' ? (
-        <Tabs defaultValue="pending" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="pending">
-              Pending ({pendingSurveys.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({completedSurveys.length})
-            </TabsTrigger>
-            <TabsTrigger value="all">
-              All Surveys ({activeSurveys.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="pending" className="space-y-4">
-            {pendingSurveys.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {pendingSurveys.map(survey => (
-                  <SurveyCard key={survey.id} survey={survey} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex justify-center py-8">
-                <p className="text-muted-foreground">No pending surveys found.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="completed" className="space-y-4">
-            {completedSurveys.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {completedSurveys.map(survey => (
-                  <SurveyCard key={survey.id} survey={survey} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex justify-center py-8">
-                <p className="text-muted-foreground">No completed surveys found.</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="all" className="space-y-4">
-            {activeSurveys.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {activeSurveys.map(survey => (
-                  <SurveyCard key={survey.id} survey={survey} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex justify-center py-8">
-                <p className="text-muted-foreground">No active surveys available.</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        <EmployeeSurveyTabs
+          pendingSurveys={pendingSurveys}
+          completedSurveys={completedSurveys}
+          activeSurveys={activeSurveys}
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredSurveys.length > 0 ? (
-            filteredSurveys.map(survey => (
-              <SurveyCard key={survey.id} survey={survey} />
-            ))
-          ) : (
-            <div className="col-span-full flex justify-center py-8">
-              <p className="text-muted-foreground">No surveys matching your filters.</p>
-            </div>
-          )}
-        </div>
+        <SurveyGrid 
+          surveys={filteredSurveys} 
+          emptyMessage="No surveys matching your filters."
+        />
       )}
       
       {canCreateSurvey && (
