@@ -14,7 +14,6 @@ export default function Home() {
   const navigate = useNavigate();
   const tasks = getTasksMockData();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [layoutGridOpen, setLayoutGridOpen] = useState(false);
 
   useEffect(() => {
     if (user && !['manager', 'employee'].includes(user.role)) {
@@ -33,8 +32,6 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <HomeHeader 
         user={user}
-        layoutGridOpen={layoutGridOpen}
-        setLayoutGridOpen={setLayoutGridOpen}
         setSearchOpen={setSearchOpen}
       />
 
