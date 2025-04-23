@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -26,7 +25,6 @@ export default function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Clear auth errors when component unmounts
   useEffect(() => {
     return () => {
       clearAuthError();
@@ -41,7 +39,6 @@ export default function Login() {
     },
   });
 
-  // Clear auth errors when form values change
   useEffect(() => {
     const subscription = form.watch(() => {
       if (authError) {
@@ -69,7 +66,6 @@ export default function Login() {
     }
   };
 
-  // Find demo users by role
   const demoEmployee = users.find(u => u.role === 'employee');
   const demoManager = users.find(u => u.role === 'manager');
   const demoAdmin = users.find(u => u.role === 'admin');
@@ -84,7 +80,13 @@ export default function Login() {
       <div className="w-full max-w-md px-4">
         <Card className="w-full">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-primary">PerformPath</CardTitle>
+            <div className="flex justify-center mb-2">
+              <img 
+                src="/lovable-uploads/5f7f5cab-6e48-4d4e-b4a2-edee8cc1cbc4.png" 
+                alt="CareerBuddy" 
+                className="h-8"
+              />
+            </div>
             <CardDescription>Log in to your account</CardDescription>
           </CardHeader>
           <CardContent>
