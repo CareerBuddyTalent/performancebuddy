@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -8,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -29,7 +28,6 @@ export default function Signup() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Clear auth errors when component unmounts
   useEffect(() => {
     return () => {
       clearAuthError();
@@ -46,7 +44,6 @@ export default function Signup() {
     },
   });
 
-  // Clear auth errors when form values change
   useEffect(() => {
     const subscription = form.watch(() => {
       if (authError) {
@@ -78,7 +75,13 @@ export default function Signup() {
       <div className="w-full max-w-md px-4">
         <Card className="w-full">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-primary">PerformPath</CardTitle>
+            <div className="flex justify-center mb-2">
+              <img 
+                src="/lovable-uploads/5f7f5cab-6e48-4d4e-b4a2-edee8cc1cbc4.png" 
+                alt="CareerBuddy" 
+                className="h-8"
+              />
+            </div>
             <CardDescription>Create your account</CardDescription>
           </CardHeader>
           <CardContent>
