@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Survey, SurveyQuestion } from "@/types";
 import AddQuestionForm from "./AddQuestionForm";
 import { useAuth } from "@/context/AuthContext";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CreateSurveyDialogProps {
   open: boolean;
@@ -31,7 +33,15 @@ export default function CreateSurveyDialog({ open, onClose, onCreateSurvey }: Cr
   const { user } = useAuth();
   const form = useForm<CreateSurveyForm>();
 
+  // Check if user has permission to create surveys
+  const canCreateSurvey = user?.role === 'admin' || user?.role === 'manager';
+
   const onSubmit = async (data: CreateSurveyForm) => {
+    if (!canCreateSurvey) {
+      toast.error("You don't have permission to create surveys");
+      return;
+    }
+
     if (questions.length === 0) {
       toast.error("Please add at least one question to the survey.");
       return;
@@ -72,8 +82,36 @@ export default function CreateSurveyDialog({ open, onClose, onCreateSurvey }: Cr
   };
 
   const handleAddQuestion = (question: Partial<SurveyQuestion>) => {
+    if (!canCreateSurvey) {
+      toast.error("You don't have permission to add questions");
+      return;
+    }
     setQuestions([...questions, question]);
   };
+
+  // Show permission error if user doesn't have the right role
+  if (!canCreateSurvey) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create New Survey</DialogTitle>
+          </DialogHeader>
+          
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You don't have permission to create surveys. Only administrators and managers can create surveys.
+            </AlertDescription>
+          </Alert>
+          
+          <DialogFooter>
+            <Button onClick={onClose}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

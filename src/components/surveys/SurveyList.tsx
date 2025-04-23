@@ -48,6 +48,7 @@ export default function SurveyList({
     );
   }
 
+  // Only allow admin and manager roles to create surveys
   const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
 
   // Filter surveys based on search query and status
@@ -95,13 +96,11 @@ export default function SurveyList({
         />
       )}
 
-      {canCreateSurvey && (
-        <CreateSurveyDialog
-          open={isCreateSurveyOpen}
-          onClose={() => setIsCreateSurveyOpen(false)}
-          onCreateSurvey={onCreateSurvey}
-        />
-      )}
+      <CreateSurveyDialog
+        open={isCreateSurveyOpen}
+        onClose={() => setIsCreateSurveyOpen(false)}
+        onCreateSurvey={onCreateSurvey}
+      />
     </div>
   );
 }
