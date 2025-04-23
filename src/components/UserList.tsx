@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { User } from "@/types";
-import { Table, TableHeader, TableBody, TableHead, TableRow } from "@/components/ui/table";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { UserTableRow } from "./users/list/UserTableRow";
 import { UserEditDialog } from "./users/list/UserEditDialog";
