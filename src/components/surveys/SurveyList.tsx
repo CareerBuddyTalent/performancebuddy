@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -48,10 +47,8 @@ export default function SurveyList({
     );
   }
 
-  // Only allow admin and manager roles to create surveys
   const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
 
-  // Filter surveys based on search query and status
   const filteredSurveys = surveys.filter(survey => {
     const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          survey.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -59,7 +56,6 @@ export default function SurveyList({
     return matchesSearch && matchesStatus;
   });
 
-  // Group surveys by status for employee view
   const activeSurveys = filteredSurveys.filter(s => s.status === 'active');
   const completedSurveys = filteredSurveys.filter(s => 
     s.status === 'closed' && s.responses.some(r => r.user_id === user.id)
@@ -78,9 +74,7 @@ export default function SurveyList({
           onStatusChange={setStatusFilter}
           showStatusFilter={user.role !== 'employee'}
         />
-        {canCreateSurvey && (
-          <SurveyActions onCreateClick={() => setIsCreateSurveyOpen(true)} />
-        )}
+        <SurveyActions onCreateClick={() => setIsCreateSurveyOpen(true)} />
       </div>
 
       {user.role === 'employee' ? (
