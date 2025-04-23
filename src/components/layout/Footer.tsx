@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <Copyright className="h-4 w-4" />
-          <span>{new Date().getFullYear()} PerformPath. All rights reserved.</span>
+          <span>{new Date().getFullYear()} CareerBuddy. All rights reserved.</span>
         </div>
         <nav>
           <ul className="flex items-center gap-6">
