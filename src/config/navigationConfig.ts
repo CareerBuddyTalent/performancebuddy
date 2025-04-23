@@ -1,3 +1,4 @@
+
 export const homeMenuItems = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Performance', path: '/performance' },
@@ -12,4 +13,13 @@ export const employeeMenuItems = [
   { label: 'My Goals', path: '/goals' },
   { label: 'My Performance', path: '/performance' },
   { label: 'My Profile', path: '/my-profile' },
+];
+
+export const adminMenuItems = [
+  { label: 'Dashboard', path: '/dashboard' },
+  { label: 'User Management', path: '/users' },
+  { label: 'Performance', path: '/performance' },
+  { label: 'Organization', path: '/companies' },
+  { label: 'Reviews', path: '/reviews' },
+  { label: 'Skills', path: '/review-skills' },
 ];
