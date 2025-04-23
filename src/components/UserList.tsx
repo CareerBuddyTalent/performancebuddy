@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User } from "@/types";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
@@ -25,7 +24,6 @@ export default function UserList({ users, onUpdateUser, departments }: UserListP
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   
-  // Filter users based on search query
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -47,7 +45,6 @@ export default function UserList({ users, onUpdateUser, departments }: UserListP
   };
   
   const handleViewUserDetails = (userId: string) => {
-    // Navigate to user details page (to be implemented)
     navigate(`/user/${userId}`);
   };
   
@@ -141,7 +138,6 @@ export default function UserList({ users, onUpdateUser, departments }: UserListP
         </TableBody>
       </Table>
       
-      {/* Edit User Dialog */}
       {editingUser && (
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
           <DialogContent>
@@ -183,7 +179,6 @@ export default function UserList({ users, onUpdateUser, departments }: UserListP
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Roles</SelectLabel>
-                        <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="manager">Manager</SelectItem>
                         <SelectItem value="employee">Employee</SelectItem>
                       </SelectGroup>
