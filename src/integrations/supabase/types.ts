@@ -76,24 +76,296 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          industry: string | null
+          location: string | null
           logo_url: string | null
           name: string
+          size: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          industry?: string | null
+          location?: string | null
           logo_url?: string | null
           name: string
+          size?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          industry?: string | null
+          location?: string | null
           logo_url?: string | null
           name?: string
+          size?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      company_import_urls: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          import_id: string
+          linkedin_url: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          import_id: string
+          linkedin_url: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          import_id?: string
+          linkedin_url?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_import_urls_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_import_urls_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "company_imports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_imports: {
+        Row: {
+          created_at: string
+          error_details: Json | null
+          failed_imports: number
+          id: string
+          processed_urls: number
+          status: string
+          successful_imports: number
+          total_urls: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_details?: Json | null
+          failed_imports?: number
+          id?: string
+          processed_urls?: number
+          status?: string
+          successful_imports?: number
+          total_urls?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_details?: Json | null
+          failed_imports?: number
+          id?: string
+          processed_urls?: number
+          status?: string
+          successful_imports?: number
+          total_urls?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      company_managers: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_managers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_import_urls: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          import_id: string
+          job_id: string | null
+          job_title: string | null
+          job_url: string
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          import_id: string
+          job_id?: string | null
+          job_title?: string | null
+          job_url: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          import_id?: string
+          job_id?: string | null
+          job_title?: string | null
+          job_url?: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_import_urls_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "job_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_import_urls_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_imports: {
+        Row: {
+          created_at: string
+          failed_imports: number
+          id: string
+          processed_urls: number
+          source: string | null
+          status: string
+          successful_imports: number
+          total_urls: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_imports?: number
+          id?: string
+          processed_urls?: number
+          source?: string | null
+          status?: string
+          successful_imports?: number
+          total_urls?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_imports?: number
+          id?: string
+          processed_urls?: number
+          source?: string | null
+          status?: string
+          successful_imports?: number
+          total_urls?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          application_url: string | null
+          company: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          requirements: string[] | null
+          salary_range: string[] | null
+          scraped_at: string
+          source: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          application_url?: string | null
+          company: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string[] | null
+          salary_range?: string[] | null
+          scraped_at?: string
+          source: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          application_url?: string | null
+          company?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          requirements?: string[] | null
+          salary_range?: string[] | null
+          scraped_at?: string
+          source?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -384,12 +656,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_count: {
+        Args: { x: number }
+        Returns: number
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
       is_admin: {
         Args: { user_id: string }
+        Returns: boolean
+      }
+      is_company_admin: {
+        Args: { company_id: string }
+        Returns: boolean
+      }
+      user_manages_company: {
+        Args: { company_id: string }
         Returns: boolean
       }
     }

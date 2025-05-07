@@ -1,19 +1,29 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
 import { SignupForm } from "@/components/auth/signup/SignupForm";
+import { Spinner } from "@/components/ui/spinner";
 import type { SignupFormValues } from "@/components/auth/signup/schema";
 
 export default function Signup() {
-  const { signup, authError, clearAuthError } = useAuth();
+  const { signup, authError, clearAuthError, user, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const [signupInProgress, setSignupInProgress] = useState(false);
+  
+  const from = (location.state as any)?.from || "/dashboard";
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !isLoading) {
+      navigate(from, { replace: true });
+    }
+  }, [user, isLoading, navigate, from]);
 
   useEffect(() => {
     return () => {
@@ -22,7 +32,7 @@ export default function Signup() {
   }, [clearAuthError]);
 
   const handleSubmit = async (data: SignupFormValues) => {
-    setIsLoading(true);
+    setSignupInProgress(true);
     try {
       const success = await signup(data.email, data.password, data.name, data.role);
       if (success) {
@@ -32,9 +42,28 @@ export default function Signup() {
     } catch (err) {
       console.error(err);
     } finally {
-      setIsLoading(false);
+      setSignupInProgress(false);
     }
   };
+
+  // Don't render the signup form if already logged in or still checking auth status
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <Spinner size="lg" />
+            <p className="mt-4 text-muted-foreground">Verifying authentication...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If user is already logged in, don't render form (handled by useEffect redirect)
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/40">
@@ -59,7 +88,7 @@ export default function Signup() {
             )}
             <SignupForm
               onSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={signupInProgress}
               authError={authError}
               clearAuthError={clearAuthError}
             />

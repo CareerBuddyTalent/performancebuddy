@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { User, UserRole } from '@/types';
 import { users } from '@/data/mockData';
-import { setupUserSession } from './utils/userSession';
+import { supabase } from "@/integrations/supabase/client";
 import { 
   loginUser, 
   signupUser, 
@@ -11,12 +12,105 @@ import {
 
 export function useAuthProvider() {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<any | null>(null); // Store full session object
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = setupUserSession(setUser, setIsLoading);
-    return unsubscribe;
+    // Set up auth state listener FIRST (prevent missed events)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession ? "session exists" : "no session");
+        
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          const authUser: User = {
+            id: currentSession.user.id,
+            name: currentSession.user.user_metadata.full_name || 
+                  currentSession.user.email?.split('@')[0] || 
+                  'User',
+            email: currentSession.user.email || '',
+            role: (currentSession.user.user_metadata.role || 'employee') as UserRole,
+            profilePicture: currentSession.user.user_metadata.avatar_url,
+          };
+          
+          setUser(authUser);
+          
+          // Store session for development if needed
+          if (process.env.NODE_ENV === 'development') {
+            localStorage.setItem('authUser', JSON.stringify(authUser));
+          }
+        } else {
+          // Only in development, check localStorage for a stored user
+          if (process.env.NODE_ENV === 'development') {
+            const storedUser = localStorage.getItem('authUser');
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+              } catch (e) {
+                console.error('Error parsing stored user:', e);
+                setUser(null);
+              }
+            } else {
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      console.log("Initial session check:", initialSession ? "session exists" : "no session");
+      
+      setSession(initialSession);
+      
+      if (initialSession?.user) {
+        const authUser: User = {
+          id: initialSession.user.id,
+          name: initialSession.user.user_metadata.full_name || 
+                initialSession.user.email?.split('@')[0] || 
+                'User',
+          email: initialSession.user.email || '',
+          role: (initialSession.user.user_metadata.role || 'employee') as UserRole,
+          profilePicture: initialSession.user.user_metadata.avatar_url,
+        };
+        
+        setUser(authUser);
+        
+        // Store user for development mode persistence
+        if (process.env.NODE_ENV === 'development') {
+          localStorage.setItem('authUser', JSON.stringify(authUser));
+        }
+      } else if (process.env.NODE_ENV === 'development') {
+        // Try localStorage in development mode if no active session
+        const storedUser = localStorage.getItem('authUser');
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (e) {
+            console.error('Error parsing stored user:', e);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      
+      setIsLoading(false);
+    });
+
+    // Clean up subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -29,7 +123,8 @@ export function useAuthProvider() {
       if (success && loggedInUser) {
         console.log("Login successful for user:", loggedInUser);
         setUser(loggedInUser);
-        // Store user data in localStorage for persistence
+        
+        // Store user data in localStorage for development persistence
         if (process.env.NODE_ENV === 'development') {
           localStorage.setItem('authUser', JSON.stringify(loggedInUser));
         }
@@ -137,6 +232,7 @@ export function useAuthProvider() {
 
   return {
     user,
+    session,
     login,
     signup,
     logout,
