@@ -199,6 +199,29 @@ export function useAuthProvider() {
     }
   };
 
+  // Implementing the missing switchRole function
+  const switchRole = useCallback((role: UserRole) => {
+    if (!user) return;
+    
+    setAuthState(prev => {
+      if (!prev.user) return prev;
+      
+      const updatedUser = {
+        ...prev.user,
+        role
+      };
+      
+      return {
+        ...prev,
+        user: updatedUser
+      };
+    });
+    
+    // Optional: Update the role in database if needed
+    // This is just updating the local state for now
+    console.log(`Switched role to: ${role} for user: ${user.email}`);
+  }, [user]);
+
   const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
     try {
       if (!user) return false;
@@ -227,6 +250,7 @@ export function useAuthProvider() {
     login,
     signup,
     logout,
+    switchRole,
     isLoading,
     requestReview,
     authError,
