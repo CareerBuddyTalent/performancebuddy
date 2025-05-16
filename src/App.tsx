@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,6 +26,7 @@ const UserDetail = lazy(() => import('./pages/UserDetail'));
 const CompanyManagement = lazy(() => import('./pages/CompanyManagement'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Surveys = lazy(() => import('./pages/Surveys'));
+const Documentation = lazy(() => import('./pages/Documentation'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Define interface for ErrorBoundary props
@@ -139,6 +141,12 @@ const App = () => {
                         <Route path="/surveys" element={
                           <PageLayout>
                             <Surveys />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/documentation" element={
+                          <PageLayout>
+                            <Documentation />
                           </PageLayout>
                         } />
                         
