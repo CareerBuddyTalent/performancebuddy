@@ -21,5 +21,6 @@ export const supabaseClient = createClient(
   }
 );
 
-// Export for convenience
+// Export both as default and named export for backward compatibility
+export const supabase = supabaseClient;
 export default supabaseClient;
