@@ -14,7 +14,6 @@ export const loginUser = async (email: string, password: string): Promise<{
   try {
     console.log("Attempting login for:", email);
     
-    // For production - use Supabase authentication
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -134,7 +133,7 @@ export const requestReview = async (
     
     // In production, we would create a DB record here
     const { error } = await supabase
-      .from('review_requests' as any) // Using 'as any' to temporarily bypass TypeScript limitations
+      .from('review_requests')
       .insert({
         id: uuidv4(),
         employee_id: userId,

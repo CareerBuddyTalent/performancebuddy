@@ -199,10 +199,11 @@ export function useAuthProvider() {
     }
   };
 
-  // Implementing the missing switchRole function
-  const switchRole = useCallback((role: UserRole) => {
+  // Implementing the switchRole function to update user role both in state and optionally in database
+  const switchRole = useCallback(async (role: UserRole) => {
     if (!user) return;
     
+    // Update local state first for immediate UI feedback
     setAuthState(prev => {
       if (!prev.user) return prev;
       
@@ -218,8 +219,21 @@ export function useAuthProvider() {
     });
     
     // Optional: Update the role in database if needed
-    // This is just updating the local state for now
-    console.log(`Switched role to: ${role} for user: ${user.email}`);
+    try {
+      // This updates the user_roles table with the new role
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ role })
+        .eq('user_id', user.id);
+        
+      if (error) {
+        console.error('Error updating user role in database:', error);
+      } else {
+        console.log(`Successfully updated role to: ${role} for user: ${user.email}`);
+      }
+    } catch (error) {
+      console.error('Error in switchRole function:', error);
+    }
   }, [user]);
 
   const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {

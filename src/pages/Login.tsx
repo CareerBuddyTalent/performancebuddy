@@ -50,6 +50,11 @@ export default function Login() {
         toast.success("Logged in successfully!");
         analytics.track('login', { email: data.email });
         navigate(from, { replace: true });
+      } else {
+        // If login returns false but no authError is set, show a generic message
+        if (!authError) {
+          setSystemError("Failed to log in. Please check your credentials.");
+        }
       }
     } catch (err) {
       console.error(err);
