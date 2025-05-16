@@ -3,6 +3,10 @@
  * Utility functions for testing components and features
  */
 
+// Add React import to be used in testing
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 /**
  * Test if a component renders without crashing
  * 
@@ -13,7 +17,7 @@
 export const testComponentRender = (Component: React.ComponentType<any>, props = {}) => {
   try {
     const element = document.createElement('div');
-    ReactDOM.render(<Component {...props} />, element);
+    ReactDOM.render(React.createElement(Component, props), element);
     ReactDOM.unmountComponentAtNode(element);
     return true;
   } catch (error) {
@@ -61,7 +65,3 @@ export const checkAccessibility = () => {
     issues,
   };
 };
-
-// Add React import to be used in testing
-import React from 'react';
-import ReactDOM from 'react-dom';
