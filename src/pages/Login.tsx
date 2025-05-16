@@ -11,22 +11,28 @@ import { Spinner } from "@/components/ui/spinner";
 import type { LoginFormValues } from "@/components/auth/login/schema";
 
 export default function Login() {
-  const { login, authError, clearAuthError, user, isLoading } = useAuth();
+  const { login, authError, clearAuthError, user, session, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loginInProgress, setLoginInProgress] = useState(false);
   
+  // Get the intended destination from location state or default to dashboard
   const from = (location.state as any)?.from || "/dashboard";
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && !isLoading) {
+    // Check both session and user (for development mode)
+    const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
+    
+    if (isAuthenticated && !isLoading) {
+      console.log("Login - User already authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, navigate, from]);
+  }, [user, session, isLoading, navigate, from]);
 
   useEffect(() => {
     return () => {
+      // Clean up auth errors when component unmounts
       clearAuthError();
     };
   }, [clearAuthError]);
@@ -62,9 +68,21 @@ export default function Login() {
     );
   }
 
+  // Check both session and user (for development mode)
+  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
+  
   // If user is already logged in, don't render form (handled by useEffect redirect)
-  if (user) {
-    return null;
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <Spinner size="lg" />
+            <p className="mt-4 text-muted-foreground">You are already logged in. Redirecting...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

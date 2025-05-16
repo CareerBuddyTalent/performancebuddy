@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import type { SignupFormValues } from "@/components/auth/signup/schema";
 
 export default function Signup() {
-  const { signup, authError, clearAuthError, user, isLoading } = useAuth();
+  const { signup, authError, clearAuthError, user, session, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [signupInProgress, setSignupInProgress] = useState(false);
@@ -20,13 +20,18 @@ export default function Signup() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && !isLoading) {
+    // Check both session and user (for development mode)
+    const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
+    
+    if (isAuthenticated && !isLoading) {
+      console.log("Signup - User already authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
-  }, [user, isLoading, navigate, from]);
+  }, [user, session, isLoading, navigate, from]);
 
   useEffect(() => {
     return () => {
+      // Clean up auth errors when component unmounts
       clearAuthError();
     };
   }, [clearAuthError]);
@@ -60,9 +65,21 @@ export default function Signup() {
     );
   }
 
+  // Check both session and user (for development mode)
+  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
+  
   // If user is already logged in, don't render form (handled by useEffect redirect)
-  if (user) {
-    return null;
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <Spinner size="lg" />
+            <p className="mt-4 text-muted-foreground">You are already logged in. Redirecting...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

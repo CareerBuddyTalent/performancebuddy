@@ -10,15 +10,16 @@ interface RoleGuardProps {
 }
 
 export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
-  const { user, isLoading } = useAuth();
+  const { user, session, isLoading } = useAuth();
   const location = useLocation();
 
   // For debugging purposes
   useEffect(() => {
     console.log("RoleGuard - Current user:", user);
+    console.log("RoleGuard - Current session:", session ? "exists" : "null");
     console.log("RoleGuard - Allowed roles:", allowedRoles);
     console.log("RoleGuard - Is loading:", isLoading);
-  }, [user, allowedRoles, isLoading]);
+  }, [user, session, allowedRoles, isLoading]);
 
   // Show loading state while authentication is being checked
   if (isLoading) {
@@ -30,15 +31,18 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
     );
   }
 
+  // Prioritize checking session for production, fall back to user check for development
+  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
+  
   // If user is not authenticated, redirect to login
-  if (!user) {
+  if (!isAuthenticated) {
     console.log("RoleGuard - User not authenticated, redirecting to login");
     // Store the current path to redirect back after login
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   // Check if user has required role
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
     console.log(`RoleGuard - User role ${user.role} not in allowed roles, redirecting to dashboard`);
     return <Navigate to="/dashboard" replace />;
   }
