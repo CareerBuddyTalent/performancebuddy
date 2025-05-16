@@ -13,6 +13,7 @@ export interface AuthContextType {
   requestReview: (managerId: string, comments?: string) => Promise<boolean>;
   authError: string | null;
   clearAuthError: () => void;
+  isAuthenticated: boolean; // Added for clearer authentication state checks
 }
 
 export interface AuthState {
@@ -20,4 +21,5 @@ export interface AuthState {
   session: Session | null;
   isLoading: boolean;
   authError: string | null;
+  isAuthenticated: boolean; // Added to simplify auth state checks
 }

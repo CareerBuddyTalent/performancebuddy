@@ -16,11 +16,12 @@ export function useAuthProvider() {
     user: null,
     session: null,
     isLoading: true,
-    authError: null
+    authError: null,
+    isAuthenticated: false
   });
 
   // Destructure for cleaner usage throughout the component
-  const { user, session, isLoading, authError } = authState;
+  const { user, session, isLoading, authError, isAuthenticated } = authState;
 
   // Set up auth state listener
   useEffect(() => {
@@ -39,7 +40,8 @@ export function useAuthProvider() {
                   'User',
             email: currentSession.user.email || '',
             role: (currentSession.user.user_metadata.role || 'employee') as UserRole,
-            profilePicture: currentSession.user.user_metadata.avatar_url,
+            profilePicture: currentSession.user.user_metadata.avatar_url || 
+                           `https://ui-avatars.com/api/?name=${encodeURIComponent(currentSession.user.email?.split('@')[0] || 'User')}&background=random`,
           };
           
           // Update both session and user in a single state update
@@ -47,7 +49,8 @@ export function useAuthProvider() {
             ...prev,
             user: authUser,
             session: currentSession,
-            isLoading: false
+            isLoading: false,
+            isAuthenticated: true
           }));
           
           // Store session for development if needed
@@ -64,7 +67,8 @@ export function useAuthProvider() {
                   ...prev,
                   user: JSON.parse(storedUser),
                   session: null,
-                  isLoading: false
+                  isLoading: false,
+                  isAuthenticated: true // Development mode considers local storage as authenticated
                 }));
               } catch (e) {
                 console.error('Error parsing stored user:', e);
@@ -72,7 +76,8 @@ export function useAuthProvider() {
                   ...prev,
                   user: null,
                   session: null,
-                  isLoading: false
+                  isLoading: false,
+                  isAuthenticated: false
                 }));
               }
             } else {
@@ -80,7 +85,8 @@ export function useAuthProvider() {
                 ...prev,
                 user: null,
                 session: null,
-                isLoading: false
+                isLoading: false,
+                isAuthenticated: false
               }));
             }
           } else {
@@ -88,7 +94,8 @@ export function useAuthProvider() {
               ...prev,
               user: null,
               session: null,
-              isLoading: false
+              isLoading: false,
+              isAuthenticated: false
             }));
           }
         }
@@ -107,14 +114,16 @@ export function useAuthProvider() {
                 'User',
           email: initialSession.user.email || '',
           role: (initialSession.user.user_metadata.role || 'employee') as UserRole,
-          profilePicture: initialSession.user.user_metadata.avatar_url,
+          profilePicture: initialSession.user.user_metadata.avatar_url || 
+                         `https://ui-avatars.com/api/?name=${encodeURIComponent(initialSession.user.email?.split('@')[0] || 'User')}&background=random`,
         };
         
         setAuthState(prev => ({
           ...prev,
           user: authUser,
           session: initialSession,
-          isLoading: false
+          isLoading: false,
+          isAuthenticated: true
         }));
         
         // Store user for development mode persistence
@@ -129,26 +138,30 @@ export function useAuthProvider() {
             setAuthState(prev => ({
               ...prev,
               user: JSON.parse(storedUser),
-              isLoading: false
+              isLoading: false,
+              isAuthenticated: true // Development mode considers local storage as authenticated
             }));
           } catch (e) {
             console.error('Error parsing stored user:', e);
             setAuthState(prev => ({
               ...prev,
               user: null,
-              isLoading: false
+              isLoading: false,
+              isAuthenticated: false
             }));
           }
         } else {
           setAuthState(prev => ({
             ...prev,
-            isLoading: false
+            isLoading: false,
+            isAuthenticated: false
           }));
         }
       } else {
         setAuthState(prev => ({
           ...prev,
-          isLoading: false
+          isLoading: false,
+          isAuthenticated: false
         }));
       }
     });
@@ -235,6 +248,14 @@ export function useAuthProvider() {
       // Clear user from state and localStorage
       // Session will be cleared by onAuthStateChange listener
       localStorage.removeItem('authUser');
+      
+      // Explicitly set authenticated state to false
+      setAuthState(prev => ({
+        ...prev,
+        user: null,
+        session: null,
+        isAuthenticated: false
+      }));
     } catch (error) {
       setAuthError('An error occurred during logout');
       console.error('Logout error:', error);
@@ -254,7 +275,8 @@ export function useAuthProvider() {
     
     setAuthState(prev => ({
       ...prev,
-      user: userForRole
+      user: userForRole,
+      isAuthenticated: true
     }));
     
     // Update localStorage to persist the role change
@@ -295,6 +317,7 @@ export function useAuthProvider() {
     isLoading,
     requestReview,
     authError,
-    clearAuthError
+    clearAuthError,
+    isAuthenticated
   };
 }

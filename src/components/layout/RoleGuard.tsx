@@ -10,29 +10,28 @@ interface RoleGuardProps {
 }
 
 export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
-  const { user, session, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   // For debugging purposes
   useEffect(() => {
     console.log("RoleGuard - Current user:", user);
-    console.log("RoleGuard - Current session:", session ? "exists" : "null");
+    console.log("RoleGuard - Is authenticated:", isAuthenticated);
     console.log("RoleGuard - Allowed roles:", allowedRoles);
     console.log("RoleGuard - Is loading:", isLoading);
-  }, [user, session, allowedRoles, isLoading]);
+  }, [user, isAuthenticated, allowedRoles, isLoading]);
 
   // Show loading state while authentication is being checked
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Spinner size="lg" />
-        <span className="ml-2 text-muted-foreground">Verifying access...</span>
+        <div className="flex items-center space-x-2">
+          <Spinner size="lg" />
+          <span className="ml-2 text-muted-foreground">Verifying access...</span>
+        </div>
       </div>
     );
   }
-
-  // Prioritize checking session for production, fall back to user check for development
-  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
   
   // If user is not authenticated, redirect to login
   if (!isAuthenticated) {

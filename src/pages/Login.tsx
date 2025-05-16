@@ -11,7 +11,7 @@ import { Spinner } from "@/components/ui/spinner";
 import type { LoginFormValues } from "@/components/auth/login/schema";
 
 export default function Login() {
-  const { login, authError, clearAuthError, user, session, isLoading } = useAuth();
+  const { login, authError, clearAuthError, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loginInProgress, setLoginInProgress] = useState(false);
@@ -21,14 +21,11 @@ export default function Login() {
 
   // Redirect if already logged in
   useEffect(() => {
-    // Check both session and user (for development mode)
-    const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
-    
     if (isAuthenticated && !isLoading) {
       console.log("Login - User already authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
-  }, [user, session, isLoading, navigate, from]);
+  }, [isAuthenticated, isLoading, navigate, from]);
 
   useEffect(() => {
     return () => {
@@ -68,9 +65,6 @@ export default function Login() {
     );
   }
 
-  // Check both session and user (for development mode)
-  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
-  
   // If user is already logged in, don't render form (handled by useEffect redirect)
   if (isAuthenticated) {
     return (

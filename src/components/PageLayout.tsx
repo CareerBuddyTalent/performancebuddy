@@ -14,7 +14,7 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ children, allowedRoles = ['admin', 'manager', 'employee'] }: PageLayoutProps) {
-  const { isLoading, session, user } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
 
   // Show a loading indicator while checking authentication
   if (isLoading) {
@@ -28,9 +28,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
     );
   }
 
-  // If not loading but no session/user, RoleGuard will handle the redirect
-  const isAuthenticated = session || (process.env.NODE_ENV === 'development' && user);
-  
+  // If not loading but not authenticated, RoleGuard will handle the redirect
   if (!isAuthenticated) {
     return (
       <RoleGuard allowedRoles={allowedRoles}>
