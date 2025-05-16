@@ -6,7 +6,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import RoleGuard from "@/components/layout/RoleGuard";
 import { useAuth } from "@/context/AuthContext";
-import { Spinner } from "@/components/ui/spinner";
+import { GlobalLoading } from "@/components/ui/global-loading";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -18,14 +18,7 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
 
   // Show a loading indicator while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center space-y-4">
-          <Spinner size="lg" />
-          <p className="text-muted-foreground">Loading application...</p>
-        </div>
-      </div>
-    );
+    return <GlobalLoading message="Loading application..." fullScreen />;
   }
 
   // If not loading but not authenticated, RoleGuard will handle the redirect

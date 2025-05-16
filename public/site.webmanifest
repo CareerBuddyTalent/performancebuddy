@@ -1,16 +1,24 @@
 
 {
-  "name": "CareerBuddy",
+  "name": "CareerBuddy - Employee Success Platform",
   "short_name": "CareerBuddy",
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "64x64",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/lovable-uploads/5f7f5cab-6e48-4d4e-b4a2-edee8cc1cbc4.png",
+      "sizes": "192x192",
+      "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#4f46e5",
   "background_color": "#ffffff",
   "display": "standalone",
-  "start_url": "/"
+  "start_url": "/",
+  "description": "Streamline performance management and employee development",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "business", "hr"]
 }

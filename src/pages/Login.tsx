@@ -7,7 +7,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 import { LoginForm } from "@/components/auth/login/LoginForm";
-import { Spinner } from "@/components/ui/spinner";
+import { GlobalLoading } from "@/components/ui/global-loading";
+import { ErrorState } from "@/components/ui/error-state";
+import { useAnalytics } from "@/context/AnalyticsContext";
+import analytics from "@/services/analytics";
 import type { LoginFormValues } from "@/components/auth/login/schema";
 
 export default function Login() {
@@ -15,6 +18,8 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loginInProgress, setLoginInProgress] = useState(false);
+  const { trackEvent } = useAnalytics();
+  const [systemError, setSystemError] = useState<string | null>(null);
   
   // Get the intended destination from location state or default to dashboard
   const from = (location.state as any)?.from || "/dashboard";
@@ -28,55 +33,59 @@ export default function Login() {
   }, [isAuthenticated, isLoading, navigate, from]);
 
   useEffect(() => {
+    // Clean up auth errors when component unmounts
     return () => {
-      // Clean up auth errors when component unmounts
       clearAuthError();
     };
   }, [clearAuthError]);
 
   const handleSubmit = async (data: LoginFormValues) => {
     setLoginInProgress(true);
+    setSystemError(null);
     
     try {
       const success = await login(data.email, data.password);
       
       if (success) {
         toast.success("Logged in successfully!");
+        analytics.track('login', { email: data.email });
         navigate(from, { replace: true });
       }
     } catch (err) {
       console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown login error";
+      setSystemError(errorMessage);
+      analytics.error(`Login error: ${errorMessage}`);
     } finally {
       setLoginInProgress(false);
     }
   };
 
-  // Don't render the login form if already logged in or still checking auth status
-  if (isLoading) {
+  const retryAfterError = () => {
+    setSystemError(null);
+  };
+
+  // Handle system-level errors
+  if (systemError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/40">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Spinner size="lg" />
-            <p className="mt-4 text-muted-foreground">Verifying authentication...</p>
-          </CardContent>
-        </Card>
+        <ErrorState 
+          title="Login Error" 
+          message={systemError} 
+          retry={retryAfterError} 
+        />
       </div>
     );
   }
 
+  // Don't render the login form if already logged in or still checking auth status
+  if (isLoading) {
+    return <GlobalLoading message="Verifying authentication..." fullScreen />;
+  }
+
   // If user is already logged in, don't render form (handled by useEffect redirect)
   if (isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/40">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Spinner size="lg" />
-            <p className="mt-4 text-muted-foreground">You are already logged in. Redirecting...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <GlobalLoading message="You are already logged in. Redirecting..." fullScreen />;
   }
 
   return (

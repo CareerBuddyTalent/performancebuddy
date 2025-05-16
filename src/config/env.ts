@@ -22,6 +22,10 @@ interface EnvConfig {
   // External services
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
+  
+  // App metadata
+  BUILD_TIME: string;
+  BUILD_COMMIT: string;
 }
 
 // Debugging to help identify environment variable issues
@@ -48,6 +52,10 @@ const env: EnvConfig = {
   // External services - using the Supabase project values
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+  
+  // App metadata - for debugging and support
+  BUILD_TIME: import.meta.env.VITE_BUILD_TIME || new Date().toISOString(),
+  BUILD_COMMIT: import.meta.env.VITE_BUILD_COMMIT || 'dev',
 };
 
 // Convenience function to check if we're in production

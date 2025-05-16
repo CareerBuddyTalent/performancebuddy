@@ -33,6 +33,8 @@ jobs:
           VITE_APP_VERSION: ${{ github.sha }}
           VITE_APP_NAME: "CareerBuddy"
           VITE_ENABLE_ANALYTICS: "false"
+          VITE_BUILD_TIME: ${{ github.event.repository.updated_at }}
+          VITE_BUILD_COMMIT: ${{ github.sha }}
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -63,4 +65,3 @@ jobs:
         # with:
         #   args: deploy --dir=dist --prod
         #   secrets: '{"NETLIFY_AUTH_TOKEN":"${{ secrets.NETLIFY_AUTH_TOKEN }}","NETLIFY_SITE_ID":"${{ secrets.NETLIFY_SITE_ID }}"}'
-
