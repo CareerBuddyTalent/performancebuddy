@@ -1,5 +1,5 @@
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, memo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from "@/context/AuthContext";
 import { Spinner } from "@/components/ui/spinner";
@@ -9,16 +9,18 @@ interface RoleGuardProps {
   allowedRoles: string[];
 }
 
-export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
+function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   // For debugging purposes
   useEffect(() => {
-    console.log("RoleGuard - Current user:", user);
-    console.log("RoleGuard - Is authenticated:", isAuthenticated);
-    console.log("RoleGuard - Allowed roles:", allowedRoles);
-    console.log("RoleGuard - Is loading:", isLoading);
+    if (import.meta.env.DEV) {
+      console.log("RoleGuard - Current user:", user);
+      console.log("RoleGuard - Is authenticated:", isAuthenticated);
+      console.log("RoleGuard - Allowed roles:", allowedRoles);
+      console.log("RoleGuard - Is loading:", isLoading);
+    }
   }, [user, isAuthenticated, allowedRoles, isLoading]);
 
   // Show loading state while authentication is being checked
@@ -47,6 +49,11 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
   }
 
   // User is authenticated and has required role
-  console.log("RoleGuard - Access granted");
+  if (import.meta.env.DEV) {
+    console.log("RoleGuard - Access granted");
+  }
   return <>{children}</>;
 }
+
+// Use memo to prevent unnecessary re-renders
+export default memo(RoleGuard);
