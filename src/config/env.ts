@@ -24,6 +24,14 @@ interface EnvConfig {
   SUPABASE_ANON_KEY: string;
 }
 
+// Debugging to help identify environment variable issues
+console.log('Environment variables debug:', {
+  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'not set',
+  MODE: import.meta.env.MODE || 'not set',
+  DEV: import.meta.env.DEV ? 'true' : 'false',
+  PROD: import.meta.env.PROD ? 'true' : 'false',
+});
+
 // Get environment variables with fallbacks
 const env: EnvConfig = {
   // App information
@@ -37,7 +45,7 @@ const env: EnvConfig = {
   // Feature flags
   ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
   
-  // External services - using the existing Supabase config
+  // External services - using the Supabase project values
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
 };
