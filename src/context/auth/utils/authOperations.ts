@@ -1,7 +1,6 @@
 
 import { User, UserRole } from '@/types';
 import { supabase } from "@/integrations/supabase/client";
-import { users } from '@/data/mockData';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -14,29 +13,6 @@ export const loginUser = async (email: string, password: string): Promise<{
 }> => {
   try {
     console.log("Attempting login for:", email);
-    
-    // For demo/development mode - use mock data to simplify testing
-    if (process.env.NODE_ENV === 'development') {
-      // Find user with matching email in our mock data
-      const demoUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (demoUser && password === 'password123') {
-        console.log('Demo login successful for:', demoUser);
-        return { success: true, user: demoUser };
-      } else if (demoUser) {
-        console.log('Demo login failed: Invalid password');
-        return { 
-          success: false, 
-          error: 'Invalid password. For demo accounts, use "password123".' 
-        };
-      } else {
-        console.log('Demo login failed: User not found');
-        return {
-          success: false,
-          error: 'User not found. Try one of the demo accounts shown below.'
-        };
-      }
-    }
     
     // For production - use Supabase authentication
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -57,18 +33,16 @@ export const loginUser = async (email: string, password: string): Promise<{
     }
     
     // Build the user object from Supabase response
-    const userRole = data.user.user_metadata.role || 'employee';
-    const userName = data.user.user_metadata.full_name || data.user.email?.split('@')[0] || 'User';
-    
-    const appUser: User = {
+    // The full user object will be built by the auth state listener
+    const authUser: User = {
       id: data.user.id,
-      name: userName,
+      name: data.user.user_metadata.full_name || data.user.email?.split('@')[0] || 'User',
       email: data.user.email || '',
-      role: userRole as UserRole,
-      profilePicture: data.user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random`
+      role: 'employee', // Default role, will be updated by auth state listener
+      profilePicture: data.user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.email?.split('@')[0] || 'User')}&background=random`
     };
     
-    return { success: true, user: appUser };
+    return { success: true, user: authUser };
   } catch (error: any) {
     console.error('Login error:', error);
     return { 
@@ -111,29 +85,21 @@ export const signupUser = async (
       };
     }
     
-    // Send welcome email
-    try {
-      await supabase.functions.invoke('send-welcome-email', {
-        body: { name, email }
-      });
-    } catch (emailError) {
-      console.error('Error sending welcome email:', emailError);
-      // Don't return false here, as the signup was successful
+    // The trigger we set up will create a profile and assign the default role
+    
+    if (!data.user) {
+      return { success: false, error: 'Failed to create user' };
     }
     
-    if (process.env.NODE_ENV === 'development') {
-      const newUser: User = {
-        id: data.user?.id || '',
-        name,
-        email,
-        role,
-        profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
-      };
-      users.push(newUser);
-      return { success: true, user: newUser };
-    }
+    const newUser: User = {
+      id: data.user.id,
+      name,
+      email,
+      role,
+      profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
+    };
     
-    return { success: true };
+    return { success: true, user: newUser };
   } catch (error: any) {
     console.error('Signup error:', error);
     return { 
@@ -167,34 +133,20 @@ export const requestReview = async (
     if (!userId) return false;
     
     // In production, we would create a DB record here
-    if (process.env.NODE_ENV === 'production') {
-      // Fix: Use a more generic method to insert data when the table may not be in the type system
-      const { error } = await supabase
-        .from('review_requests' as any) // Using 'as any' to temporarily bypass TypeScript limitations
-        .insert({
-          id: uuidv4(),
-          employee_id: userId,
-          manager_id: managerId,
-          comments: comments || '',
-          status: 'pending',
-          created_at: new Date().toISOString() // Fix: Convert Date to string
-        });
-
-      if (error) {
-        console.error('Error requesting review:', error);
-        return false;
-      }
-    } else {
-      // Simulate API delay in development
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // For development, we'll just log this
-      console.log('Review requested with:', {
+    const { error } = await supabase
+      .from('review_requests' as any) // Using 'as any' to temporarily bypass TypeScript limitations
+      .insert({
+        id: uuidv4(),
         employee_id: userId,
         manager_id: managerId,
         comments: comments || '',
-        status: 'pending'
+        status: 'pending',
+        created_at: new Date().toISOString()
       });
+
+    if (error) {
+      console.error('Error requesting review:', error);
+      return false;
     }
     
     return true;

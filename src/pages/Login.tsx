@@ -100,7 +100,7 @@ export default function Login() {
                 className="h-8"
               />
             </div>
-            <CardDescription>Log in to your account</CardDescription>
+            <CardDescription className="text-lg font-medium">Log in to your account</CardDescription>
           </CardHeader>
           <CardContent>
             {authError && (

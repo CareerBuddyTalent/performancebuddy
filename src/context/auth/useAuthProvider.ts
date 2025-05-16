@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User, UserRole } from '@/types';
-import { users } from '@/data/mockData';
 import { supabase } from "@/integrations/supabase/client";
 import { AuthState } from './types';
 import { 
@@ -29,75 +28,72 @@ export function useAuthProvider() {
     
     // Set up auth state listener FIRST to prevent missed events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession ? "session exists" : "no session");
         
         if (currentSession?.user) {
-          const authUser: User = {
-            id: currentSession.user.id,
-            name: currentSession.user.user_metadata.full_name || 
-                  currentSession.user.email?.split('@')[0] || 
-                  'User',
-            email: currentSession.user.email || '',
-            role: (currentSession.user.user_metadata.role || 'employee') as UserRole,
-            profilePicture: currentSession.user.user_metadata.avatar_url || 
-                           `https://ui-avatars.com/api/?name=${encodeURIComponent(currentSession.user.email?.split('@')[0] || 'User')}&background=random`,
-          };
-          
-          // Update both session and user in a single state update
-          setAuthState(prev => ({
-            ...prev,
-            user: authUser,
-            session: currentSession,
-            isLoading: false,
-            isAuthenticated: true
-          }));
-          
-          // Store session for development if needed
-          if (process.env.NODE_ENV === 'development') {
-            localStorage.setItem('authUser', JSON.stringify(authUser));
-          }
-        } else {
-          // In development, check localStorage for a stored user
-          if (process.env.NODE_ENV === 'development') {
-            const storedUser = localStorage.getItem('authUser');
-            if (storedUser) {
-              try {
-                setAuthState(prev => ({
-                  ...prev,
-                  user: JSON.parse(storedUser),
-                  session: null,
-                  isLoading: false,
-                  isAuthenticated: true // Development mode considers local storage as authenticated
-                }));
-              } catch (e) {
-                console.error('Error parsing stored user:', e);
-                setAuthState(prev => ({
-                  ...prev,
-                  user: null,
-                  session: null,
-                  isLoading: false,
-                  isAuthenticated: false
-                }));
-              }
-            } else {
-              setAuthState(prev => ({
-                ...prev,
-                user: null,
-                session: null,
-                isLoading: false,
-                isAuthenticated: false
-              }));
+          try {
+            // Get user role from user_roles table
+            const { data: userRole, error: roleError } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', currentSession.user.id)
+              .single();
+
+            if (roleError && roleError.code !== 'PGRST116') {
+              console.error("Error fetching user role:", roleError);
             }
-          } else {
+
+            // Get user profile data from profiles table
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('name, email, department, position, profile_picture')
+              .eq('id', currentSession.user.id)
+              .single();
+
+            if (profileError && profileError.code !== 'PGRST116') {
+              console.error("Error fetching user profile:", profileError);
+            }
+
+            const role = userRole?.role || 'employee';
+            const name = profileData?.name || currentSession.user.user_metadata.full_name || currentSession.user.email?.split('@')[0] || 'User';
+
+            const authUser: User = {
+              id: currentSession.user.id,
+              name: name,
+              email: currentSession.user.email || '',
+              role: role as UserRole,
+              profilePicture: profileData?.profile_picture || 
+                             currentSession.user.user_metadata.avatar_url || 
+                             `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
+              department: profileData?.department,
+              position: profileData?.position
+            };
+            
+            // Update both session and user in a single state update
             setAuthState(prev => ({
               ...prev,
-              user: null,
-              session: null,
+              user: authUser,
+              session: currentSession,
               isLoading: false,
-              isAuthenticated: false
+              isAuthenticated: true
+            }));
+          } catch (error) {
+            console.error("Error setting up authenticated user:", error);
+            setAuthState(prev => ({
+              ...prev,
+              isLoading: false
             }));
           }
+        } else {
+          // No session, clear the authentication state
+          setAuthState(prev => ({
+            ...prev,
+            user: null,
+            session: null,
+            isLoading: false,
+            isAuthenticated: false
+          }));
         }
       }
     );
@@ -106,64 +102,14 @@ export function useAuthProvider() {
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       console.log("Initial session check:", initialSession ? "session exists" : "no session");
       
-      if (initialSession?.user) {
-        const authUser: User = {
-          id: initialSession.user.id,
-          name: initialSession.user.user_metadata.full_name || 
-                initialSession.user.email?.split('@')[0] || 
-                'User',
-          email: initialSession.user.email || '',
-          role: (initialSession.user.user_metadata.role || 'employee') as UserRole,
-          profilePicture: initialSession.user.user_metadata.avatar_url || 
-                         `https://ui-avatars.com/api/?name=${encodeURIComponent(initialSession.user.email?.split('@')[0] || 'User')}&background=random`,
-        };
-        
-        setAuthState(prev => ({
-          ...prev,
-          user: authUser,
-          session: initialSession,
-          isLoading: false,
-          isAuthenticated: true
-        }));
-        
-        // Store user for development mode persistence
-        if (process.env.NODE_ENV === 'development') {
-          localStorage.setItem('authUser', JSON.stringify(authUser));
-        }
-      } else if (process.env.NODE_ENV === 'development') {
-        // Try localStorage in development mode if no active session
-        const storedUser = localStorage.getItem('authUser');
-        if (storedUser) {
-          try {
-            setAuthState(prev => ({
-              ...prev,
-              user: JSON.parse(storedUser),
-              isLoading: false,
-              isAuthenticated: true // Development mode considers local storage as authenticated
-            }));
-          } catch (e) {
-            console.error('Error parsing stored user:', e);
-            setAuthState(prev => ({
-              ...prev,
-              user: null,
-              isLoading: false,
-              isAuthenticated: false
-            }));
-          }
-        } else {
-          setAuthState(prev => ({
-            ...prev,
-            isLoading: false,
-            isAuthenticated: false
-          }));
-        }
-      } else {
+      if (!initialSession) {
         setAuthState(prev => ({
           ...prev,
           isLoading: false,
           isAuthenticated: false
         }));
       }
+      // If session exists, the onAuthStateChange handler will set the user
     });
 
     // Clean up subscription on unmount
@@ -187,12 +133,7 @@ export function useAuthProvider() {
       
       if (success && loggedInUser) {
         console.log("Login successful for user:", loggedInUser);
-        
         // Session will be updated by onAuthStateChange listener
-        
-        if (process.env.NODE_ENV === 'development') {
-          localStorage.setItem('authUser', JSON.stringify(loggedInUser));
-        }
         return true;
       }
       
@@ -219,10 +160,6 @@ export function useAuthProvider() {
       
       if (success && newUser) {
         // Session will be updated by onAuthStateChange listener
-        
-        if (process.env.NODE_ENV === 'development') {
-          localStorage.setItem('authUser', JSON.stringify(newUser));
-        }
         return true;
       }
       
@@ -262,29 +199,6 @@ export function useAuthProvider() {
     }
   };
 
-  const switchRole = (role: UserRole) => {
-    console.log("Switching to role:", role);
-    const roleUsers = {
-      employee: users.find(u => u.role === 'employee'),
-      manager: users.find(u => u.role === 'manager'),
-      admin: users.find(u => u.role === 'admin')
-    };
-
-    const userForRole = roleUsers[role] || users[0];
-    console.log("User for role:", userForRole);
-    
-    setAuthState(prev => ({
-      ...prev,
-      user: userForRole,
-      isAuthenticated: true
-    }));
-    
-    // Update localStorage to persist the role change
-    if (process.env.NODE_ENV === 'development' && userForRole) {
-      localStorage.setItem('authUser', JSON.stringify(userForRole));
-    }
-  };
-
   const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
     try {
       if (!user) return false;
@@ -313,7 +227,6 @@ export function useAuthProvider() {
     login,
     signup,
     logout,
-    switchRole,
     isLoading,
     requestReview,
     authError,
