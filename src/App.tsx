@@ -1,5 +1,5 @@
 
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,12 +12,24 @@ import { AnalyticsProvider } from "./context/AnalyticsContext";
 import { GlobalLoading } from "@/components/ui/global-loading";
 import { ErrorState } from "@/components/ui/error-state";
 import PageLayout from "./components/PageLayout";
+import React from 'react';
 import analytics from './services/analytics';
 
-// Initialize analytics
-useEffect(() => {
-  analytics.initialize();
-}, []);
+// Lazy-loaded components
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const MyProfile = lazy(() => import('./pages/MyProfile'));
+const Performance = lazy(() => import('./pages/Performance'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const UserDetail = lazy(() => import('./pages/UserDetail'));
+const CompanyManagement = lazy(() => import('./pages/CompanyManagement'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Surveys = lazy(() => import('./pages/Surveys'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Initialize analytics on app start - moved into the App component
+// Removing the incorrect useEffect outside of a component
 
 // Error boundary component
 class ErrorBoundary extends React.Component {
@@ -48,19 +60,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Lazy-loaded components
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const MyProfile = lazy(() => import('./pages/MyProfile'));
-const Performance = lazy(() => import('./pages/Performance'));
-const UserManagement = lazy(() => import('./pages/UserManagement'));
-const UserDetail = lazy(() => import('./pages/UserDetail'));
-const CompanyManagement = lazy(() => import('./pages/CompanyManagement'));
-const Settings = lazy(() => import('./pages/Settings'));
-const Surveys = lazy(() => import('./pages/Surveys'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -71,82 +70,89 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CompanyProvider>
-          <NotificationProvider>
-            <BrowserRouter>
-              <AnalyticsProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <Suspense fallback={<GlobalLoading fullScreen message="Loading application..." />}>
-                    <Routes>
-                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/signup" element={<Signup />} />
-                      
-                      <Route path="/dashboard" element={
-                        <PageLayout>
-                          <Dashboard />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/my-profile" element={
-                        <PageLayout>
-                          <MyProfile />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/performance" element={
-                        <PageLayout>
-                          <Performance />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/users" element={
-                        <PageLayout allowedRoles={["admin", "manager"]}>
-                          <UserManagement />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/user/:userId" element={
-                        <PageLayout allowedRoles={["admin", "manager"]}>
-                          <UserDetail />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/companies" element={
-                        <PageLayout allowedRoles={["admin"]}>
-                          <CompanyManagement />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/settings" element={
-                        <PageLayout>
-                          <Settings />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="/surveys" element={
-                        <PageLayout>
-                          <Surveys />
-                        </PageLayout>
-                      } />
-                      
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </TooltipProvider>
-              </AnalyticsProvider>
-            </BrowserRouter>
-          </NotificationProvider>
-        </CompanyProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  // Initialize analytics when the App component mounts
+  React.useEffect(() => {
+    analytics.initialize();
+  }, []);
+  
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <CompanyProvider>
+            <NotificationProvider>
+              <BrowserRouter>
+                <AnalyticsProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <Suspense fallback={<GlobalLoading fullScreen message="Loading application..." />}>
+                      <Routes>
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        
+                        <Route path="/dashboard" element={
+                          <PageLayout>
+                            <Dashboard />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/my-profile" element={
+                          <PageLayout>
+                            <MyProfile />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/performance" element={
+                          <PageLayout>
+                            <Performance />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/users" element={
+                          <PageLayout allowedRoles={["admin", "manager"]}>
+                            <UserManagement />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/user/:userId" element={
+                          <PageLayout allowedRoles={["admin", "manager"]}>
+                            <UserDetail />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/companies" element={
+                          <PageLayout allowedRoles={["admin"]}>
+                            <CompanyManagement />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/settings" element={
+                          <PageLayout>
+                            <Settings />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="/surveys" element={
+                          <PageLayout>
+                            <Surveys />
+                          </PageLayout>
+                        } />
+                        
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </TooltipProvider>
+                </AnalyticsProvider>
+              </BrowserRouter>
+            </NotificationProvider>
+          </CompanyProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

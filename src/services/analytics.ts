@@ -1,76 +1,79 @@
 
-import env from "@/config/env";
+import env from '@/config/env';
 
-type EventName = 
-  | 'page_view'
-  | 'login'
-  | 'signup'
+// Define allowed event names to enforce type safety
+export type EventName = 
+  | 'page_view' 
+  | 'login' 
+  | 'signup' 
   | 'logout'
-  | 'review_created'
-  | 'goal_created'
-  | 'survey_completed'
-  | 'error_encountered';
+  | 'user_identified'
+  | 'review_requested'
+  | 'access_denied'
+  | 'error';
 
-type EventProperties = Record<string, string | number | boolean | null>;
-
-class AnalyticsService {
-  private enabled = env.ENABLE_ANALYTICS;
-  private userId: string | null = null;
-  private sessionId: string = this.generateSessionId();
-
-  constructor() {
-    console.log(`Analytics ${this.enabled ? 'enabled' : 'disabled'}`);
-  }
-
-  private generateSessionId(): string {
-    return Math.random().toString(36).substring(2, 15);
-  }
-
-  initialize(userId?: string) {
-    if (userId) {
-      this.userId = userId;
-      this.track('user_identified', { user_id: userId });
-    }
-  }
-
-  setUser(userId: string | null) {
-    this.userId = userId;
-  }
-
-  track(eventName: EventName, properties: EventProperties = {}) {
-    if (!this.enabled) return;
-
-    // Add common properties
-    const eventData = {
-      ...properties,
-      timestamp: new Date().toISOString(),
-      session_id: this.sessionId,
-      user_id: this.userId,
-      app_version: env.APP_VERSION,
-      url: window.location.pathname,
-    };
-
-    // In a real app, this would send to an analytics service
-    // For now, just log to console in development
-    if (env.isDev) {
-      console.log(`[Analytics] ${eventName}`, eventData);
-    } else {
-      // In production, this would send to an actual analytics service
-      // analytics.send(eventName, eventData);
-    }
-  }
-
-  pageView(pageName: string) {
-    this.track('page_view', { page_name: pageName });
-  }
-
-  error(errorMessage: string, errorCode?: string) {
-    this.track('error_encountered', { 
-      error_message: errorMessage,
-      error_code: errorCode || 'unknown'
-    });
-  }
+// Interface for analytics service
+interface AnalyticsService {
+  initialize: () => void;
+  pageView: (pageName: string) => void;
+  track: (eventName: EventName, properties?: Record<string, any>) => void;
+  setUser: (userId: string | null) => void;
+  error: (message: string) => void;
 }
 
-export const analytics = new AnalyticsService();
+const analytics: AnalyticsService = {
+  initialize: () => {
+    if (!env.ENABLE_ANALYTICS) {
+      console.info('Analytics disabled');
+      return;
+    }
+    
+    console.info('Analytics initialized');
+    
+    // In a real app, you would initialize your analytics service here
+    // Example: mixpanel.init(env.MIXPANEL_TOKEN);
+  },
+  
+  setUser: (userId: string | null) => {
+    if (!env.ENABLE_ANALYTICS) return;
+    
+    if (userId) {
+      console.info(`Analytics: User identified ${userId}`);
+      // In a real app: mixpanel.identify(userId);
+      analytics.track('user_identified', { userId });
+    } else {
+      console.info('Analytics: User reset');
+      // In a real app: mixpanel.reset();
+    }
+  },
+  
+  pageView: (pageName: string) => {
+    if (!env.ENABLE_ANALYTICS) return;
+    
+    console.info(`Analytics: Page view ${pageName}`);
+    // In a real app: mixpanel.track('page_view', { page: pageName });
+  },
+  
+  track: (eventName: EventName, properties: Record<string, any> = {}) => {
+    if (!env.ENABLE_ANALYTICS) return;
+    
+    // In development, log to console
+    if (env.NODE_ENV === 'development') {
+      console.info(`Analytics: ${eventName}`, properties);
+    }
+    
+    // In a real app: mixpanel.track(eventName, properties);
+  },
+  
+  error: (message: string) => {
+    if (!env.ENABLE_ANALYTICS) return;
+    
+    console.error(`Analytics: Error ${message}`);
+    analytics.track('error', { message });
+    
+    // In a real app, you might want to send this to an error reporting service
+    // Example: Sentry.captureException(new Error(message));
+  }
+};
+
 export default analytics;
