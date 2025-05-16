@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -28,18 +27,20 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Surveys = lazy(() => import('./pages/Surveys'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// Initialize analytics on app start - moved into the App component
-// Removing the incorrect useEffect outside of a component
+// Define interface for ErrorBoundary props
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
 
 // Error boundary component
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError: boolean; error: Error | null }> {
   state = { hasError: false, error: null };
   
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
   
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
     analytics.error(error.message || 'Unknown error');
   }
