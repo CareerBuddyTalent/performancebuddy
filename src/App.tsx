@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -20,6 +19,8 @@ import { User } from './types';
 import ReviewTemplates from "./pages/ReviewTemplates";
 import HRManagerDashboard from './pages/HRManagerDashboard';
 import LineManagerDashboard from './pages/LineManagerDashboard';
+import SelfReview from "@/pages/SelfReview";
+import PersonalOKRs from "@/pages/PersonalOKRs";
 
 function AppContent() {
   const { setUser, setLoading } = useAuth();
@@ -169,6 +170,8 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route path="/self-review" element={<SelfReview />} />
+      <Route path="/personal-okrs" element={<PersonalOKRs />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

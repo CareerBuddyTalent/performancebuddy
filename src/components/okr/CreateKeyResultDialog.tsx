@@ -1,228 +1,178 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Objective } from "@/types/okr";
-
-const formSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters" }),
-  type: z.enum(["number", "percentage", "currency", "binary"]),
-  startValue: z.coerce.number(),
-  targetValue: z.coerce.number(),
-  unit: z.string().optional()
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { toast } from "sonner";
 
 interface CreateKeyResultDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  objective: Objective;
-  onCreateKeyResult: () => void;
+  objective: any;
+  onCreateKeyResult: (keyResult: any) => void;
 }
 
-export default function CreateKeyResultDialog({ 
-  open, 
-  onOpenChange, 
+export default function CreateKeyResultDialog({
+  open,
+  onOpenChange,
   objective,
   onCreateKeyResult
 }: CreateKeyResultDialogProps) {
-  const [dueDate, setDueDate] = useState<Date>(objective.endDate);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<"number" | "percentage" | "currency" | "binary">("number");
+  const [currentValue, setCurrentValue] = useState(0);
+  const [targetValue, setTargetValue] = useState(100);
+  const [unit, setUnit] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      type: "number",
-      startValue: 0,
-      targetValue: 100,
-      unit: ""
-    }
-  });
-
-  const watchType = form.watch("type");
-
-  const handleSubmit = (data: FormData) => {
-    // In a real app, we would send this data to the API
-    console.log("Creating Key Result with data:", {
-      ...data,
-      dueDate,
-      objectiveId: objective.id
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    onCreateKeyResult();
-    form.reset();
+    if (!title) {
+      toast.error("Please enter a title for the key result");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const newKeyResult = {
+        id: `kr-${Date.now()}`,
+        objectiveId: objective.id,
+        title,
+        description,
+        type,
+        currentValue,
+        targetValue,
+        startValue: 0,
+        unit: type === "currency" ? (unit || "$") : unit,
+        progress: Math.round((currentValue / targetValue) * 100),
+        dueDate: objective.endDate,
+        status: "in_progress" as const,
+        lastCheckin: new Date()
+      };
+      
+      onCreateKeyResult(newKeyResult);
+      toast.success("Key result created successfully");
+      resetForm();
+    } catch (error) {
+      toast.error("Failed to create key result");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
+  
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setType("number");
+    setCurrentValue(0);
+    setTargetValue(100);
+    setUnit("");
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add Key Result</DialogTitle>
           <DialogDescription>
-            Add a measurable key result to track progress on your objective
+            Add a measurable key result to track progress toward your objective.
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="E.g., Complete 3 certifications" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Increase sales by 20%"
+              required
             />
-            
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Measurement Type</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="percentage">Percentage</SelectItem>
-                      <SelectItem value="currency">Currency</SelectItem>
-                      <SelectItem value="binary">Binary (Yes/No)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    How will you measure progress on this key result?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (optional)</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Provide additional details about this key result"
+              rows={3}
             />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Starting Value</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field}
-                        disabled={watchType === "binary"}
-                        value={watchType === "binary" ? 0 : field.value}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="targetValue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Target Value</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field}
-                        disabled={watchType === "binary"}
-                        value={watchType === "binary" ? 1 : field.value}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="type">Measurement Type</Label>
+            <Select value={type} onValueChange={(value: any) => setType(value)}>
+              <SelectTrigger id="type">
+                <SelectValue placeholder="Select a type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="number">Number</SelectItem>
+                <SelectItem value="percentage">Percentage</SelectItem>
+                <SelectItem value="currency">Currency</SelectItem>
+                <SelectItem value="binary">Binary (Yes/No)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="current">Current Value</Label>
+              <Input
+                id="current"
+                type="number"
+                value={currentValue}
+                onChange={(e) => setCurrentValue(Number(e.target.value))}
+                min={0}
               />
             </div>
-            
-            {watchType !== "binary" && (
-              <FormField
-                control={form.control}
-                name="unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unit {watchType !== "currency" && "(optional)"}</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder={watchType === "currency" ? "$" : "e.g., tasks, points"} 
-                        {...field} 
-                        value={watchType === "currency" ? "$" : field.value}
-                        required={watchType === "currency"}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
             
             <div className="space-y-2">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !dueDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dueDate}
-                    onSelect={(date) => date && setDueDate(date)}
-                    initialFocus
-                    disabled={(date) => 
-                      date < objective.startDate || 
-                      date > objective.endDate
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
-              <p className="text-xs text-muted-foreground">
-                Due date must be within the objective timeframe
-              </p>
+              <Label htmlFor="target">Target Value</Label>
+              <Input
+                id="target"
+                type="number"
+                value={targetValue}
+                onChange={(e) => setTargetValue(Number(e.target.value))}
+                min={1}
+              />
             </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">Add Key Result</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+          
+          {(type === "number" || type === "currency") && (
+            <div className="space-y-2">
+              <Label htmlFor="unit">Unit (optional)</Label>
+              <Input
+                id="unit"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                placeholder={type === "currency" ? "$" : "e.g., users, items, etc."}
+              />
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Key Result"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

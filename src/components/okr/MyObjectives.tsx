@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, BarChart, Check, X } from "lucide-react";
 import ObjectiveCard from "./ObjectiveCard";
 import CreateKeyResultDialog from "./CreateKeyResultDialog";
-import { Objective } from "@/types/okr";
+import { Objective, KeyResult } from "@/types/okr";
+import { toast } from "sonner";
 
 interface MyObjectivesProps {
   userId: string;
@@ -14,9 +15,7 @@ interface MyObjectivesProps {
 export default function MyObjectives({ userId }: MyObjectivesProps) {
   const [showCreateKR, setShowCreateKR] = useState(false);
   const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
-  
-  // Sample objectives - in a real app, these would come from an API
-  const objectives = [
+  const [objectives, setObjectives] = useState<Objective[]>([
     {
       id: "1",
       userId,
@@ -95,7 +94,7 @@ export default function MyObjectives({ userId }: MyObjectivesProps) {
         }
       ]
     }
-  ];
+  ]);
 
   // Function to handle adding a key result to an objective
   const handleAddKeyResult = (objectiveId: string) => {
@@ -104,6 +103,26 @@ export default function MyObjectives({ userId }: MyObjectivesProps) {
       setSelectedObjective(objective);
       setShowCreateKR(true);
     }
+  };
+
+  // Function to create a new key result
+  const handleCreateKeyResult = (newKeyResult: KeyResult) => {
+    if (!selectedObjective) return;
+    
+    // Add key result to objective
+    const updatedObjectives = objectives.map(o => {
+      if (o.id === selectedObjective.id) {
+        return {
+          ...o,
+          keyResults: [...o.keyResults, newKeyResult]
+        };
+      }
+      return o;
+    });
+    
+    setObjectives(updatedObjectives);
+    setShowCreateKR(false);
+    toast.success("Key result added successfully");
   };
 
   return (
@@ -151,7 +170,7 @@ export default function MyObjectives({ userId }: MyObjectivesProps) {
           open={showCreateKR}
           onOpenChange={setShowCreateKR}
           objective={selectedObjective}
-          onCreateKeyResult={() => setShowCreateKR(false)}
+          onCreateKeyResult={handleCreateKeyResult}
         />
       )}
     </div>

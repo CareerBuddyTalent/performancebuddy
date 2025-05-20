@@ -4,10 +4,12 @@ import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Clock } from "lucide-react";
+import { Clock, ChevronLeft } from "lucide-react";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 import { ReviewSkill } from "@/types";
 import { initialSkills } from "@/data/reviewSkillsData";
+import { Link } from "react-router-dom";
+import { getReviewDraft, formatLastSaved } from "@/utils/reviewUtils";
 
 // Mock data - Replace with actual data from your backend
 const mockParameters = [
@@ -35,9 +37,10 @@ const mockParameters = [
 
 const mockActiveCycle = {
   id: "cycle1",
-  name: "Q1 2024 Performance Review",
-  deadline: "2024-03-31",
-  status: "active"
+  name: "Q2 2025 Performance Review",
+  deadline: "2025-06-30",
+  status: "active",
+  type: "Quarterly"
 };
 
 export default function SelfReview() {
@@ -45,11 +48,20 @@ export default function SelfReview() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [skills, setSkills] = useState<ReviewSkill[]>([]);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [draftLastSaved, setDraftLastSaved] = useState<Date | null>(null);
 
-  // In a real app, fetch skills from your backend
+  // In a real app, fetch skills and active cycle from your backend
   useEffect(() => {
     // Simulating API call with mock data
     setSkills(initialSkills || []);
+    
+    // Check for existing draft
+    const draft = getReviewDraft(mockActiveCycle.id);
+    if (draft) {
+      setHasDraft(true);
+      setDraftLastSaved(new Date(draft.lastSaved));
+    }
   }, []);
 
   const handleSubmitReview = async (data: any) => {
@@ -74,15 +86,34 @@ export default function SelfReview() {
     }
   };
 
+  // Calculate days remaining until deadline
+  const getDaysRemaining = () => {
+    const today = new Date();
+    const deadlineDate = new Date(mockActiveCycle.deadline);
+    const diffTime = deadlineDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysRemaining = getDaysRemaining();
+
   if (!user) return null;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Self Review</h1>
-        <p className="text-muted-foreground">
-          Complete your self-assessment for the current review cycle
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Self Review</h1>
+          <p className="text-muted-foreground">
+            Complete your self-assessment for the current review cycle
+          </p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-6">
@@ -99,11 +130,24 @@ export default function SelfReview() {
                   Due by {new Date(mockActiveCycle.deadline).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-green-600">
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
                 <Clock className="h-5 w-5" />
-                <span className="text-sm font-medium">In Progress</span>
+                <span className="text-sm font-medium">
+                  {daysRemaining > 0 
+                    ? `${daysRemaining} days remaining` 
+                    : daysRemaining === 0 
+                      ? "Due today" 
+                      : "Overdue"
+                  }
+                </span>
               </div>
             </div>
+            
+            {hasDraft && draftLastSaved && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md text-sm">
+                <p>You have a saved draft from {formatLastSaved(draftLastSaved)}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

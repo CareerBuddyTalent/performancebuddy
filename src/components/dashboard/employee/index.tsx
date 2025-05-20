@@ -8,6 +8,9 @@ import NavigationTabs from "./NavigationTabs";
 import ProgressionCard from "./ProgressionCard";
 import ReviewTabs from "./ReviewTabs";
 import ReviewRequestDialog from "./ReviewRequestDialog";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowUpRight } from "lucide-react";
 
 export default function EmployeeDashboard({ reviews, goals, feedbackEntries, users, parameters }: any) {
   const { user, requestReview } = useAuth();
@@ -72,10 +75,33 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
     }
   };
 
+  // Check if the user has any active review cycles
+  const hasActiveReviewCycles = true; // In a real app, this would check if there are active cycles
+
   return (
     <div className="space-y-6">
       <ProfileHeader user={user} manager={manager} />
       <NavigationTabs goalProgress={goalProgress} />
+
+      {hasActiveReviewCycles && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold text-blue-800 dark:text-blue-300">Active Review Cycles</h3>
+              <p className="text-blue-700 dark:text-blue-400 text-sm">
+                You have pending self-assessments to complete
+              </p>
+            </div>
+            <Button asChild>
+              <Link to="/self-review" className="flex items-center gap-2">
+                Complete Self Assessment
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+      
       <ProgressionCard />
       
       <div className="flex justify-between items-center">

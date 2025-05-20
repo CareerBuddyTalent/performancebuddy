@@ -1,112 +1,171 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Objective } from "@/types/okr";
-import { format } from "date-fns";
-import { AlertCircle, Calendar, Check, ChevronDown, ChevronUp, Plus } from "lucide-react";
-import KeyResultItem from "./KeyResultItem";
-import { useState } from "react";
-import CheckInDialog from "./CheckInDialog";
+import { AlertCircle, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import OKRProgressBar from "./OKRProgressBar";
 
 interface ObjectiveCardProps {
-  objective: Objective;
+  objective: any;
   onAddKeyResult: () => void;
 }
 
 export default function ObjectiveCard({ objective, onAddKeyResult }: ObjectiveCardProps) {
-  const [expanded, setExpanded] = useState(true);
-  const [showCheckIn, setShowCheckIn] = useState(false);
-  const [selectedKeyResultId, setSelectedKeyResultId] = useState<string | null>(null);
-
-  const statusColors = {
-    draft: "bg-gray-100 text-gray-800",
-    active: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [objectiveProgress, setObjectiveProgress] = useState(objective.progress);
+  const [keyResults, setKeyResults] = useState(objective.keyResults);
+  const [showWarning, setShowWarning] = useState(false);
+  
+  // Recalculate objective progress when key results change
+  useEffect(() => {
+    if (keyResults.length === 0) return;
+    
+    const totalProgress = keyResults.reduce((sum: number, kr: any) => sum + kr.progress, 0);
+    const newProgress = Math.round(totalProgress / keyResults.length);
+    
+    if (newProgress !== objectiveProgress) {
+      setObjectiveProgress(newProgress);
+      // In a real app, this would update the objective in the database
+    }
+  }, [keyResults]);
+  
+  // Check for behind-schedule objectives and show warning
+  useEffect(() => {
+    // Simple logic: if progress is significantly behind expectation based on timeline
+    const startDate = new Date(objective.startDate).getTime();
+    const endDate = new Date(objective.endDate).getTime();
+    const today = new Date().getTime();
+    
+    const totalDuration = endDate - startDate;
+    const elapsed = today - startDate;
+    const expectedProgress = Math.min(100, Math.round((elapsed / totalDuration) * 100));
+    
+    // If progress is more than 20% behind expected, show warning
+    setShowWarning(expectedProgress - objectiveProgress > 20);
+  }, [objective, objectiveProgress]);
+  
+  // Update key result progress
+  const handleKeyResultProgressUpdate = (id: string, newProgress: number) => {
+    const updatedKeyResults = keyResults.map((kr: any) => 
+      kr.id === id ? { ...kr, progress: newProgress } : kr
+    );
+    
+    setKeyResults(updatedKeyResults);
+    
+    // In a real app, this would update the key result in the database
   };
-
-  const handleCheckIn = (keyResultId: string) => {
-    setSelectedKeyResultId(keyResultId);
-    setShowCheckIn(true);
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
-
+  
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "active":
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30">
+            Active
+          </Badge>
+        );
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/30">
+            Completed
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline">
+            {status}
+          </Badge>
+        );
+    }
+  };
+  
+  // Get progress color
+  const getProgressColor = (value: number) => {
+    if (value < 30) return "bg-red-500";
+    if (value < 70) return "bg-yellow-500";
+    return "bg-green-500";
+  };
+  
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-xl">{objective.title}</CardTitle>
-            <CardDescription className="line-clamp-2">
-              {objective.description}
-            </CardDescription>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className={`px-2 py-1 text-xs rounded ${statusColors[objective.status]}`}>
-              {objective.status.charAt(0).toUpperCase() + objective.status.slice(1)}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setExpanded(!expanded)}
-            >
-              {expanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+      <CardHeader>
+        <div className="flex justify-between items-start mb-2">
+          <CardTitle>{objective.title}</CardTitle>
+          {getStatusBadge(objective.status)}
         </div>
-        <div className="mt-2 text-sm text-muted-foreground flex items-center">
-          <Calendar className="h-3 w-3 mr-1" />
-          {format(objective.startDate, "MMM d, yyyy")} - {format(objective.endDate, "MMM d, yyyy")}
+        <CardDescription className="line-clamp-2">{objective.description}</CardDescription>
+        <div className="flex justify-between items-center text-sm mt-2 text-muted-foreground">
+          <div>
+            {formatDate(objective.startDate)} — {formatDate(objective.endDate)}
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between mb-2 mt-2">
-          <span className="text-sm font-medium">Progress: {objective.progress}%</span>
-          {objective.progress >= 70 ? (
-            <Check className="h-4 w-4 text-green-500" />
-          ) : objective.progress < 30 ? (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
-          ) : null}
+      
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="text-sm font-medium">Overall Progress</div>
+            <div className="text-sm font-medium">{objectiveProgress}%</div>
+          </div>
+          <Progress value={objectiveProgress} className={`h-2 ${getProgressColor(objectiveProgress)}`} />
         </div>
-        <Progress value={objective.progress} className="h-2" />
-
-        {expanded && (
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold">Key Results</h4>
-              <span className="text-xs text-muted-foreground">{objective.keyResults.length} items</span>
-            </div>
-            <div className="space-y-2 mt-2">
-              {objective.keyResults.map(keyResult => (
-                <KeyResultItem
-                  key={keyResult.id}
-                  keyResult={keyResult}
-                  onCheckIn={() => handleCheckIn(keyResult.id)}
-                />
-              ))}
+        
+        {showWarning && (
+          <div className="flex items-start gap-2 p-3 rounded bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300 text-sm">
+            <AlertCircle className="h-4 w-4 mt-0.5" />
+            <div>
+              <p className="font-medium">Goal is behind schedule</p>
+              <p>Progress is lower than expected at this point in the timeline.</p>
             </div>
           </div>
         )}
+        
+        <div className="pt-2">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium">Key Results</h3>
+            <Button onClick={() => setIsExpanded(!isExpanded)} variant="ghost" size="sm">
+              {isExpanded ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </div>
+          
+          {isExpanded && (
+            <div className="space-y-4 mt-2">
+              {keyResults.map((kr: any) => (
+                <div key={kr.id} className="border rounded-lg p-3 space-y-2">
+                  <div className="font-medium">{kr.title}</div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <div>Current: {kr.currentValue}</div>
+                    <div>Target: {kr.targetValue}</div>
+                  </div>
+                  <OKRProgressBar 
+                    progress={kr.progress} 
+                    keyResultId={kr.id} 
+                    onUpdateProgress={handleKeyResultProgressUpdate} 
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
-      <CardFooter className="border-t pt-4">
-        <Button variant="outline" size="sm" onClick={onAddKeyResult}>
-          <Plus className="h-3 w-3 mr-1" />
+      
+      <CardFooter>
+        <Button onClick={onAddKeyResult} variant="outline" className="w-full">
+          <Plus className="h-4 w-4 mr-2" />
           Add Key Result
         </Button>
       </CardFooter>
-
-      {selectedKeyResultId && (
-        <CheckInDialog
-          open={showCheckIn}
-          onOpenChange={setShowCheckIn}
-          keyResult={objective.keyResults.find(kr => kr.id === selectedKeyResultId)!}
-          onCheckIn={() => setShowCheckIn(false)}
-        />
-      )}
     </Card>
   );
 }
