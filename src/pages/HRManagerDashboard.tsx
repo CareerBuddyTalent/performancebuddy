@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -138,6 +137,16 @@ const sampleReminders: ReminderType[] = [
   }
 ];
 
+// Convert types before passing to OKRAlignmentView
+const convertObjectiveTypes = (objectives: any[]): any[] => {
+  return objectives.map(obj => ({
+    ...obj,
+    user_id: obj.userId,
+    start_date: obj.startDate.toISOString(),
+    due_date: obj.endDate.toISOString(),
+  }));
+};
+
 export default function HRManagerDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("templates");
@@ -209,7 +218,7 @@ export default function HRManagerDashboard() {
     console.log("Creating objective with parent:", parentId);
   };
   
-  const handleViewObjective = (objective: Objective) => {
+  const handleViewObjective = (objective: any) => {
     // This would normally navigate to the objective detail page
     console.log("Viewing objective:", objective);
   };
@@ -355,8 +364,7 @@ export default function HRManagerDashboard() {
             </CardHeader>
             <CardContent>
               <OKRAlignmentView 
-                objectives={objectives}
-                onCreateObjective={handleCreateObjective}
+                objectives={convertObjectiveTypes(objectives)}
                 onViewObjective={handleViewObjective}
               />
             </CardContent>
