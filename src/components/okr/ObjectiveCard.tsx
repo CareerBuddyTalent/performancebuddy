@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,22 @@ import {
   AlertCircle
 } from "lucide-react";
 import KeyResultItem from "./KeyResultItem";
+
+// Define the KeyResult type that matches the expected structure
+interface KeyResult {
+  id: string;
+  title: string;
+  description?: string;
+  progress: number;
+  status: string;
+  objectiveId: string;
+  type: string;
+  currentValue: number;
+  targetValue: number;
+  startValue: number;
+  unit?: string;
+  updated_at?: string;
+}
 
 interface ObjectiveCardProps {
   objective: Objective;
@@ -138,7 +153,7 @@ export function ObjectiveCard({ objective, onView, onAddKeyResult }: ObjectiveCa
               {expanded && (
                 <div className="mt-2 space-y-2">
                   {objective.key_results.map(kr => (
-                    <KeyResultItem key={kr.id} keyResult={kr} />
+                    <KeyResultItem key={kr.id} keyResult={kr as KeyResult} />
                   ))}
                 </div>
               )}
