@@ -1,25 +1,34 @@
 
-import { User, UserRole } from '@/types/user';
-import { Session } from '@supabase/supabase-js';
+import { User } from "@/types/user";
 
 export interface AuthContextType {
   user: User | null;
-  session: Session | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string, role?: UserRole) => Promise<boolean>;
-  logout: () => Promise<void>;
-  switchRole: (role: UserRole) => void;
+  setUser: (user: User | null) => void;
   isLoading: boolean;
-  requestReview: (managerId: string, comments?: string) => Promise<boolean>;
-  authError: string | null;
-  clearAuthError: () => void;
-  isAuthenticated: boolean; // Added for clearer authentication state checks
+  setLoading: (isLoading: boolean) => void;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, fullName: string) => Promise<void>;
+  logout: () => Promise<void>;
+  requestReview: (revieweeId: string) => Promise<void>;
 }
 
 export interface AuthState {
   user: User | null;
-  session: Session | null;
   isLoading: boolean;
-  authError: string | null;
-  isAuthenticated: boolean; // Added to simplify auth state checks
+  isAuthenticated: boolean;
+}
+
+export type AuthAction =
+  | { type: 'SET_USER'; payload: User | null }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'LOGOUT' };
+
+export interface Session {
+  user: {
+    id: string;
+    email: string;
+  };
+  access_token: string;
+  refresh_token: string;
 }

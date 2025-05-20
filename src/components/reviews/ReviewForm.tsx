@@ -1,6 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { User, ReviewCycle, PerformanceReview } from "@/types/templates";
+import { User } from "@/types/user";
+import { ReviewCycle, PerformanceReview } from "@/types/performance";
 import ReviewTypeSelector from "./ReviewTypeSelector";
 import CycleSelector from "./CycleSelector";
 import EmployeeSelector from "./EmployeeSelector";
@@ -10,6 +12,7 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { mockTemplates } from "@/components/templates/mockTemplateData";
+import { useState } from "react";
 
 interface ReviewFormProps {
   onCreateReview: (review: PerformanceReview) => void;
@@ -137,9 +140,11 @@ export default function ReviewForm({
 
         <EmployeeSelector
           type={activeTab}
-          employees={filteredUsers}
-          selectedEmployees={selectedEmployees}
-          onSelectionChange={setSelectedEmployees}
+          employees={filteredUsers.map(user => user.id)}
+          selectedEmployees={selectedEmployees.map(user => user.id)}
+          onSelectionChange={(ids) => {
+            setSelectedEmployees(filteredUsers.filter(user => ids.includes(user.id)));
+          }}
         />
         
         <InitialComments

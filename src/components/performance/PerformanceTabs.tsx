@@ -8,13 +8,33 @@ import PerformanceGoalsTab from "@/components/performance/tabs/PerformanceGoalsT
 import PerformanceRankingsTab from "@/components/performance/tabs/PerformanceRankingsTab";
 import PerformanceAnalyticsTab from "@/components/performance/tabs/PerformanceAnalyticsTab";
 import PerformanceSettingsTab from "@/components/performance/tabs/PerformanceSettingsTab";
+import { Goal } from "@/types";
 
 interface PerformanceTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  canManageSettings?: boolean;
+  canViewAnalytics?: boolean;
+  performanceGoals?: Goal[];
+  timeframe?: 'week' | 'month' | 'quarter' | 'year';
+  handleExport?: (format: string) => void;
+  onAddGoal?: (goal: Goal) => void;
+  onUpdateGoal?: (goal: Goal) => void;
+  onDeleteGoal?: (goalId: string) => void;
 }
 
-export default function PerformanceTabs({ activeTab, setActiveTab }: PerformanceTabsProps) {
+export default function PerformanceTabs({ 
+  activeTab, 
+  setActiveTab,
+  canManageSettings,
+  canViewAnalytics,
+  performanceGoals = [],
+  timeframe = 'quarter',
+  handleExport,
+  onAddGoal,
+  onUpdateGoal,
+  onDeleteGoal
+}: PerformanceTabsProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -34,7 +54,7 @@ export default function PerformanceTabs({ activeTab, setActiveTab }: Performance
           <TabsTrigger value="goals">Goals</TabsTrigger>
           <TabsTrigger value="rankings">Rankings</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          {(canManageCycles || canManageTemplates) && (
+          {(canManageCycles || canManageTemplates || canManageSettings) && (
             <TabsTrigger value="settings">Settings</TabsTrigger>
           )}
           {canManageTemplates && (
@@ -48,7 +68,12 @@ export default function PerformanceTabs({ activeTab, setActiveTab }: Performance
         </TabsList>
         
         <TabsContent value="goals">
-          <PerformanceGoalsTab />
+          <PerformanceGoalsTab 
+            goals={performanceGoals}
+            onAddGoal={onAddGoal}
+            onUpdateGoal={onUpdateGoal}
+            onDeleteGoal={onDeleteGoal}
+          />
         </TabsContent>
         
         <TabsContent value="rankings">
@@ -59,7 +84,7 @@ export default function PerformanceTabs({ activeTab, setActiveTab }: Performance
           <PerformanceAnalyticsTab />
         </TabsContent>
         
-        {(canManageCycles || canManageTemplates) && (
+        {(canManageCycles || canManageTemplates || canManageSettings) && (
           <TabsContent value="settings">
             <PerformanceSettingsTab />
           </TabsContent>
