@@ -12,6 +12,7 @@ import Performance from "@/pages/Performance";
 import Skills from "@/pages/Skills";
 import Reviews from "@/pages/Reviews";
 import OKRs from "@/pages/OKRs";
+import OKRAlignment from "@/pages/OKRAlignment";
 import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
@@ -42,6 +43,7 @@ function App() {
               <Route path="performance" element={<Performance />} />
               <Route path="performance/reviews" element={<Reviews />} />
               <Route path="okrs" element={<OKRs />} />
+              <Route path="okrs/alignment" element={<OKRAlignment />} />
               <Route path="skills" element={<Skills />} />
               <Route
                 path="users"

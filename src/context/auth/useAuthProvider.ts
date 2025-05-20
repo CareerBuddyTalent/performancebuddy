@@ -15,7 +15,7 @@ export const useAuthProvider = (): AuthContextType => {
   useEffect(() => {
     // First establish the auth listener to avoid missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log("Auth state changed:", event);
         
         setSession(currentSession);
@@ -33,24 +33,22 @@ export const useAuthProvider = (): AuthContextType => {
           
           // Update the user data with the role from the database
           // Using setTimeout to avoid deadlock in Auth state changes
-          setTimeout(async () => {
-            try {
-              const { data, error } = await supabase
-                .from("user_roles")
-                .select("role")
-                .eq("user_id", currentSession.user.id)
-                .single();
-                
-              if (data && !error) {
-                setUser({ ...userData, role: data.role });
-              } else {
-                setUser(userData);
-              }
-            } catch (error) {
-              console.error("Error fetching user role:", error);
+          try {
+            const { data, error } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", currentSession.user.id)
+              .single();
+              
+            if (data && !error) {
+              setUser({ ...userData, role: data.role });
+            } else {
               setUser(userData);
             }
-          }, 0);
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+            setUser(userData);
+          }
         } else {
           setUser(null);
         }

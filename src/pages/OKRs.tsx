@@ -4,8 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import OKRDashboard from "@/components/okr/OKRDashboard";
 import MyObjectives from "@/components/okr/MyObjectives";
 import TeamObjectives from "@/components/okr/TeamObjectives";
@@ -13,19 +14,42 @@ import CompanyObjectives from "@/components/okr/CompanyObjectives";
 import CreateOKRDialog from "@/components/okr/CreateOKRDialog";
 import OKRSettingsDialog from "@/components/okr/OKRSettingsDialog";
 import OKRPeriodSelector from "@/components/okr/OKRPeriodSelector";
+import OKRProgressDashboard from "@/components/okr/OKRProgressDashboard";
+import { getObjectiveHierarchy, Objective } from "@/services/objectiveService";
+import { useEffect } from "react";
 
 export default function OKRs() {
   const [activeTab, setActiveTab] = useState("my-objectives");
   const [isCreateOKROpen, setIsCreateOKROpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [objectives, setObjectives] = useState<Objective[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  
+  useEffect(() => {
+    const fetchAllObjectives = async () => {
+      try {
+        setLoading(true);
+        const data = await getObjectiveHierarchy();
+        setObjectives(data);
+      } catch (error) {
+        console.error("Error fetching objectives:", error);
+        toast.error("Failed to load objectives");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllObjectives();
+  }, []);
   
   if (!user) return null;
 
   const isManager = user.role === 'manager' || user.role === 'admin';
   const isAdmin = user.role === 'admin';
 
-  const handleCreateOKR = () => {
+  const handleCreateOKR = (newObjective: Objective) => {
+    setObjectives([newObjective, ...objectives]);
     toast.success("Objective created successfully");
     setIsCreateOKROpen(false);
   };
@@ -39,6 +63,11 @@ export default function OKRs() {
         </div>
         <div className="flex items-center gap-2">
           <OKRPeriodSelector />
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/okrs/alignment">
+              Advanced Alignment <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
           {(isManager || isAdmin) && (
             <Button 
               variant="outline" 
@@ -63,6 +92,7 @@ export default function OKRs() {
             {isManager && <TabsTrigger value="team-objectives">Team Objectives</TabsTrigger>}
             <TabsTrigger value="company-objectives">Company Objectives</TabsTrigger>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="advanced-analytics">Advanced Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="my-objectives">
@@ -81,6 +111,10 @@ export default function OKRs() {
 
           <TabsContent value="dashboard">
             <OKRDashboard />
+          </TabsContent>
+          
+          <TabsContent value="advanced-analytics">
+            <OKRProgressDashboard objectives={objectives} />
           </TabsContent>
         </Tabs>
       </Card>

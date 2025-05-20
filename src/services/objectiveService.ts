@@ -1,4 +1,3 @@
-
 import { supabaseClient } from "@/integrations/supabase/client";
 
 export interface Objective {
@@ -204,6 +203,38 @@ const recalculateObjectiveProgress = async (objectiveId: string) => {
       status,
     })
     .eq("id", objectiveId);
+};
+
+// Update objective alignment
+export const updateObjectiveAlignment = async (objectiveId: string, parentId: string | null) => {
+  const { data, error } = await supabaseClient
+    .from("objectives")
+    .update({
+      parent_id: parentId
+    })
+    .eq("id", objectiveId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as Objective;
+};
+
+// Get objective hierarchy
+export const getObjectiveHierarchy = async () => {
+  const { data, error } = await supabaseClient
+    .from("objectives")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as Objective[];
 };
 
 // Get team objectives (for managers)
