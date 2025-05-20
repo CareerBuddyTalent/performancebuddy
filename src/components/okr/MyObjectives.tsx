@@ -1,178 +1,93 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, BarChart, Check, X } from "lucide-react";
+import { getUserObjectives, Objective } from "@/services/objectiveService";
+import { useToast } from "@/hooks/use-toast";
+import { Spinner } from "@/components/ui/spinner";
 import ObjectiveCard from "./ObjectiveCard";
-import CreateKeyResultDialog from "./CreateKeyResultDialog";
-import { Objective, KeyResult } from "@/types/okr";
-import { toast } from "sonner";
+import { Plus } from "lucide-react";
+import CreateOKRDialog from "./CreateOKRDialog";
 
 interface MyObjectivesProps {
   userId: string;
 }
 
 export default function MyObjectives({ userId }: MyObjectivesProps) {
-  const [showCreateKR, setShowCreateKR] = useState(false);
-  const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
-  const [objectives, setObjectives] = useState<Objective[]>([
-    {
-      id: "1",
-      userId,
-      title: "Improve Technical Skills",
-      description: "Enhance my technical capabilities to better contribute to team projects",
-      status: "active" as const,
-      progress: 60,
-      startDate: new Date("2025-04-01"),
-      endDate: new Date("2025-06-30"),
-      level: "individual" as const,
-      createdAt: new Date("2025-03-20"),
-      updatedAt: new Date("2025-05-10"),
-      keyResults: [
-        {
-          id: "kr1",
-          objectiveId: "1",
-          title: "Complete Advanced React Course",
-          type: "percentage" as const,
-          currentValue: 80,
-          targetValue: 100,
-          startValue: 0,
-          progress: 80,
-          dueDate: new Date("2025-05-30"),
-          status: "in_progress" as const
-        },
-        {
-          id: "kr2",
-          objectiveId: "1",
-          title: "Contribute to 5 team projects",
-          type: "number" as const,
-          currentValue: 3,
-          targetValue: 5,
-          startValue: 0,
-          progress: 60,
-          dueDate: new Date("2025-06-15"),
-          status: "in_progress" as const
-        }
-      ]
-    },
-    {
-      id: "2",
-      userId,
-      title: "Improve Communication",
-      description: "Enhance communication skills through public speaking and documentation",
-      status: "active" as const,
-      progress: 40,
-      startDate: new Date("2025-04-01"),
-      endDate: new Date("2025-06-30"),
-      level: "individual" as const,
-      createdAt: new Date("2025-03-25"),
-      updatedAt: new Date("2025-05-05"),
-      keyResults: [
-        {
-          id: "kr3",
-          objectiveId: "2",
-          title: "Present at 3 team meetings",
-          type: "number" as const,
-          currentValue: 1,
-          targetValue: 3,
-          startValue: 0,
-          progress: 33,
-          dueDate: new Date("2025-06-30"),
-          status: "in_progress" as const
-        },
-        {
-          id: "kr4",
-          objectiveId: "2",
-          title: "Improve documentation quality rating",
-          type: "percentage" as const,
-          currentValue: 75,
-          targetValue: 90,
-          startValue: 60,
-          progress: 50,
-          dueDate: new Date("2025-06-30"),
-          status: "in_progress" as const
-        }
-      ]
-    }
-  ]);
+  const { toast } = useToast();
+  const [objectives, setObjectives] = useState<Objective[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Function to handle adding a key result to an objective
-  const handleAddKeyResult = (objectiveId: string) => {
-    const objective = objectives.find(o => o.id === objectiveId);
-    if (objective) {
-      setSelectedObjective(objective);
-      setShowCreateKR(true);
-    }
-  };
-
-  // Function to create a new key result
-  const handleCreateKeyResult = (newKeyResult: KeyResult) => {
-    if (!selectedObjective) return;
-    
-    // Add key result to objective
-    const updatedObjectives = objectives.map(o => {
-      if (o.id === selectedObjective.id) {
-        return {
-          ...o,
-          keyResults: [...o.keyResults, newKeyResult]
-        };
+  useEffect(() => {
+    const fetchObjectives = async () => {
+      try {
+        setLoading(true);
+        const data = await getUserObjectives(userId);
+        setObjectives(data);
+      } catch (error: any) {
+        console.error("Error fetching objectives:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load objectives",
+        });
+      } finally {
+        setLoading(false);
       }
-      return o;
-    });
-    
-    setObjectives(updatedObjectives);
-    setShowCreateKR(false);
-    toast.success("Key result added successfully");
+    };
+
+    fetchObjectives();
+  }, [userId, toast]);
+
+  const handleCreateOKR = (newObjective: Objective) => {
+    setObjectives(prev => [newObjective, ...prev]);
+    setIsCreateDialogOpen(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold">My Objectives</h2>
-          <p className="text-sm text-muted-foreground">Track your personal OKRs</p>
-        </div>
-        <Button variant="outline" size="sm">
-          <BarChart className="h-4 w-4 mr-2" />
-          Progress Report
+        <h2 className="text-xl font-semibold">My Objectives</h2>
+        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Objective
         </Button>
       </div>
-      
-      {objectives.length > 0 ? (
-        <div className="grid gap-6">
-          {objectives.map((objective) => (
-            <ObjectiveCard
-              key={objective.id}
-              objective={objective}
-              onAddKeyResult={() => handleAddKeyResult(objective.id)}
-            />
-          ))}
-        </div>
-      ) : (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle>No Objectives Yet</CardTitle>
-            <CardDescription>
-              Create your first objective to start tracking your progress
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center">
-            <Button>
+
+      {objectives.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-muted-foreground mb-4">
+              You don't have any objectives yet
+            </p>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Objective
+              Create Your First Objective
             </Button>
           </CardContent>
         </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {objectives.map((objective) => (
+            <ObjectiveCard key={objective.id} objective={objective} />
+          ))}
+        </div>
       )}
 
-      {selectedObjective && (
-        <CreateKeyResultDialog
-          open={showCreateKR}
-          onOpenChange={setShowCreateKR}
-          objective={selectedObjective}
-          onCreateKeyResult={handleCreateKeyResult}
-        />
-      )}
+      <CreateOKRDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onCreateOKR={handleCreateOKR}
+        userId={userId}
+      />
     </div>
   );
 }

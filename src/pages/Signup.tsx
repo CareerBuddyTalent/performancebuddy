@@ -1,119 +1,122 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { SignupForm } from "@/components/auth/signup/SignupForm";
-import { Spinner } from "@/components/ui/spinner";
-import type { SignupFormValues } from "@/components/auth/signup/schema";
+import { supabaseClient } from "@/integrations/supabase/client";
 
 export default function Signup() {
-  const { signup, authError, clearAuthError, isAuthenticated, isLoading } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const [signupInProgress, setSignupInProgress] = useState(false);
-  
-  const from = (location.state as any)?.from || "/dashboard";
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log("Signup - User already authenticated, redirecting to:", from);
-      navigate(from, { replace: true });
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
     }
-  }, [isAuthenticated, isLoading, navigate, from]);
-
-  useEffect(() => {
-    return () => {
-      // Clean up auth errors when component unmounts
-      clearAuthError();
-    };
-  }, [clearAuthError]);
-
-  const handleSubmit = async (data: SignupFormValues) => {
-    setSignupInProgress(true);
+    
+    setIsLoading(true);
+    
     try {
-      const success = await signup(data.email, data.password, data.name, data.role);
-      if (success) {
-        toast.success("Account created successfully!");
-        navigate("/dashboard");
+      const { error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+      
+      if (error) {
+        throw error;
       }
-    } catch (err) {
-      console.error(err);
+      
+      toast.success("Signup successful! Please check your email for verification.");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign up");
     } finally {
-      setSignupInProgress(false);
+      setIsLoading(false);
     }
   };
 
-  // Don't render the signup form if already logged in or still checking auth status
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/40">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Spinner size="lg" />
-            <p className="mt-4 text-muted-foreground">Verifying authentication...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // If user is already logged in, don't render form (handled by useEffect redirect)
-  if (isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/40">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Spinner size="lg" />
-            <p className="mt-4 text-muted-foreground">You are already logged in. Redirecting...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40">
-      <div className="w-full max-w-md px-4">
-        <Card className="w-full">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-2">
-              <img 
-                src="/lovable-uploads/5f7f5cab-6e48-4d4e-b4a2-edee8cc1cbc4.png" 
-                alt="CareerBuddy" 
-                className="h-8"
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardDescription>
+            Enter your information to create an account
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSignup}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input 
+                id="name" 
+                type="text" 
+                placeholder="John Doe" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
               />
             </div>
-            <CardDescription>Create your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {authError && (
-              <Alert variant="destructive" className="mb-4">
-                <ExclamationTriangleIcon className="h-4 w-4" />
-                <AlertDescription>{authError}</AlertDescription>
-              </Alert>
-            )}
-            <SignupForm
-              onSubmit={handleSubmit}
-              isLoading={signupInProgress}
-              authError={authError}
-              clearAuthError={clearAuthError}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="name@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input 
+                id="password" 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} 
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input 
+                id="confirmPassword" 
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                required
+              />
+            </div>
           </CardContent>
-          <CardFooter className="justify-center">
-            <p className="text-sm text-muted-foreground">
-              Already have an account? {" "}
+          <CardFooter className="flex flex-col space-y-4">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Sign Up"}
+            </Button>
+            <div className="text-center text-sm">
+              Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
                 Log in
               </Link>
-            </p>
+            </div>
           </CardFooter>
-        </Card>
-      </div>
+        </form>
+      </Card>
     </div>
   );
 }

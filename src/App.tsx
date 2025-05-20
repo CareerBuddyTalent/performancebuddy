@@ -1,189 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Performance from './pages/Performance';
-import EmployeeGoals from './pages/EmployeeGoals';
-import Skills from './pages/Skills';
-import Surveys from './pages/Surveys';
-import PageLayout from './components/layout/PageLayout';
-import ProtectedRoute from './components/ProtectedRoute';
-import { supabase } from './integrations/supabase/client';
-import { User } from './types';
 
-// Add import for ReviewTemplates page
-import ReviewTemplates from "./pages/ReviewTemplates";
-import HRManagerDashboard from './pages/HRManagerDashboard';
-import LineManagerDashboard from './pages/LineManagerDashboard';
-import SelfReview from "@/pages/SelfReview";
-import PersonalOKRs from "@/pages/PersonalOKRs";
-
-function AppContent() {
-  const { setUser, setLoading } = useAuth();
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      setLoading(true);
-      try {
-        const { data } = await supabase.auth.getSession();
-        const session = data.session;
-
-        if (session) {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error("Error fetching profile:", profileError);
-          }
-
-          const userProfile: User = {
-            id: session.user.id,
-            email: session.user.email || '',
-            name: profile?.full_name || session.user.email || 'Unknown User',
-            role: profile?.role || 'employee',
-            profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'Unknown User')}&background=random`
-          };
-          setUser(userProfile);
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-      } finally {
-        setLoading(false);
-        setInitialLoadComplete(true);
-      }
-    };
-
-    loadUser();
-
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        loadUser();
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-      }
-    });
-
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, [setUser, setLoading]);
-
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <Dashboard />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <Profile />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/performance"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <Performance />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/employee-goals"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <EmployeeGoals />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/skills"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <Skills />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/surveys"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <Surveys />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route 
-        path="/review-templates" 
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <ReviewTemplates />
-            </PageLayout>
-          </ProtectedRoute>
-        } 
-      />
-      <Route
-        path="/hr-manager"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <HRManagerDashboard />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/line-manager"
-        element={
-          <ProtectedRoute>
-            <PageLayout>
-              <LineManagerDashboard />
-            </PageLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/self-review" element={<SelfReview />} />
-      <Route path="/personal-okrs" element={<PersonalOKRs />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
-}
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { PageLayout } from "@/components/PageLayout";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import Dashboard from "@/pages/Dashboard";
+import Performance from "@/pages/Performance";
+import Skills from "@/pages/Skills";
+import Reviews from "@/pages/Reviews";
+import OKRs from "@/pages/OKRs";
+import UserManagement from "@/pages/UserManagement";
+import Settings from "@/pages/Settings";
+import NotFound from "@/pages/NotFound";
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <AppContent />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <PageLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="performance" element={<Performance />} />
+              <Route path="performance/reviews" element={<Reviews />} />
+              <Route path="okrs" element={<OKRs />} />
+              <Route path="skills" element={<Skills />} />
+              <Route
+                path="users"
+                element={
+                  <ProtectedRoute requiredRoles={["admin", "manager"]}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            
+            {/* 404 page */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </Router>
+        <Toaster position="top-right" />
       </AuthProvider>
     </ThemeProvider>
   );

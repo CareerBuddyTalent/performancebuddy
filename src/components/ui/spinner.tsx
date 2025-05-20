@@ -8,20 +8,18 @@ interface SpinnerProps {
 
 export function Spinner({ size = "md", className }: SpinnerProps) {
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-6 w-6",
-    lg: "h-8 w-8"
+    sm: "h-4 w-4 border-2",
+    md: "h-8 w-8 border-2",
+    lg: "h-12 w-12 border-3",
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "animate-spin rounded-full border-2 border-current border-t-transparent text-primary", 
+        "animate-spin rounded-full border-t-transparent border-primary",
         sizeClasses[size],
         className
       )}
-    >
-      <span className="sr-only">Loading</span>
-    </div>
+    />
   );
 }

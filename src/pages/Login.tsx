@@ -1,136 +1,99 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { LoginForm } from "@/components/auth/login/LoginForm";
-import { GlobalLoading } from "@/components/ui/global-loading";
-import { ErrorState } from "@/components/ui/error-state";
-import { useAnalytics } from "@/context/AnalyticsContext";
-import analytics from "@/services/analytics";
-import type { LoginFormValues } from "@/components/auth/login/schema";
+import { supabaseClient } from "@/integrations/supabase/client";
 
 export default function Login() {
-  const { login, authError, clearAuthError, isAuthenticated, isLoading } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const [loginInProgress, setLoginInProgress] = useState(false);
-  const { trackEvent } = useAnalytics();
-  const [systemError, setSystemError] = useState<string | null>(null);
-  
-  // Get the intended destination from location state or default to dashboard
-  const from = (location.state as any)?.from || "/dashboard";
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      console.log("Login - User already authenticated, redirecting to:", from);
-      navigate(from, { replace: true });
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
     }
-  }, [isAuthenticated, isLoading, navigate, from]);
-
-  useEffect(() => {
-    // Clean up auth errors when component unmounts
-    return () => {
-      clearAuthError();
-    };
-  }, [clearAuthError]);
-
-  const handleSubmit = async (data: LoginFormValues) => {
-    setLoginInProgress(true);
-    setSystemError(null);
+    
+    setIsLoading(true);
     
     try {
-      const success = await login(data.email, data.password);
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      if (success) {
-        toast.success("Logged in successfully!");
-        analytics.track('login', { email: data.email });
-        navigate(from, { replace: true });
-      } else {
-        // If login returns false but no authError is set, show a generic message
-        if (!authError) {
-          setSystemError("Failed to log in. Please check your credentials.");
-        }
+      if (error) {
+        throw error;
       }
-    } catch (err) {
-      console.error(err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown login error";
-      setSystemError(errorMessage);
-      analytics.error(`Login error: ${errorMessage}`);
+      
+      toast.success("Logged in successfully");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to log in");
     } finally {
-      setLoginInProgress(false);
+      setIsLoading(false);
     }
   };
 
-  const retryAfterError = () => {
-    setSystemError(null);
-  };
-
-  // Handle system-level errors
-  if (systemError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/40">
-        <ErrorState 
-          title="Login Error" 
-          message={systemError} 
-          retry={retryAfterError} 
-        />
-      </div>
-    );
-  }
-
-  // Don't render the login form if already logged in or still checking auth status
-  if (isLoading) {
-    return <GlobalLoading message="Verifying authentication..." fullScreen />;
-  }
-
-  // If user is already logged in, don't render form (handled by useEffect redirect)
-  if (isAuthenticated) {
-    return <GlobalLoading message="You are already logged in. Redirecting..." fullScreen />;
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40">
-      <div className="w-full max-w-md px-4">
-        <Card className="w-full">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-2">
-              <img 
-                src="/lovable-uploads/5f7f5cab-6e48-4d4e-b4a2-edee8cc1cbc4.png" 
-                alt="CareerBuddy" 
-                className="h-8"
+    <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardDescription>
+            Enter your email and password to access your account
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleLogin}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="name@example.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-            <CardDescription className="text-lg font-medium">Log in to your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {authError && (
-              <Alert variant="destructive" className="mb-4">
-                <ExclamationTriangleIcon className="h-4 w-4" />
-                <AlertDescription>{authError}</AlertDescription>
-              </Alert>
-            )}
-            <LoginForm
-              onSubmit={handleSubmit}
-              isLoading={loginInProgress}
-              authError={authError}
-              clearAuthError={clearAuthError}
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input 
+                id="password" 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} 
+                required
+              />
+            </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <p className="text-sm text-center text-muted-foreground">
+          <CardFooter className="flex flex-col space-y-4">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
+            </Button>
+            <div className="text-center text-sm">
               Don't have an account?{" "}
               <Link to="/signup" className="text-primary hover:underline">
                 Sign up
               </Link>
-            </p>
+            </div>
           </CardFooter>
-        </Card>
-      </div>
+        </form>
+      </Card>
     </div>
   );
 }

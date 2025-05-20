@@ -1,70 +1,38 @@
 
-import { useState } from "react";
-import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface OKRProgressBarProps {
-  progress: number;
-  keyResultId: string;
-  onUpdateProgress?: (id: string, newProgress: number) => void;
-  readOnly?: boolean;
+  value: number;
+  status: string;
+  className?: string;
 }
 
-export default function OKRProgressBar({ 
-  progress, 
-  keyResultId,
-  onUpdateProgress,
-  readOnly = false
-}: OKRProgressBarProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [progressValue, setProgressValue] = useState(progress);
-  
-  const handleClick = () => {
-    if (readOnly || !onUpdateProgress) return;
-    setIsEditing(true);
-  };
-  
-  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProgressValue(Number(e.target.value));
-  };
-  
-  const handleBlur = () => {
-    if (onUpdateProgress) {
-      onUpdateProgress(keyResultId, progressValue);
+export function OKRProgressBar({ value, status, className }: OKRProgressBarProps) {
+  const getProgressColor = () => {
+    switch (status) {
+      case "completed":
+        return "bg-green-500";
+      case "ahead":
+        return "bg-purple-500";
+      case "on_track":
+        return "bg-green-500";
+      case "behind_schedule":
+        return "bg-red-500";
+      case "in_progress":
+        return "bg-blue-500";
+      case "not_started":
+      case "canceled":
+      default:
+        return "bg-gray-400";
     }
-    setIsEditing(false);
   };
-  
-  const getProgressColor = (value: number) => {
-    if (value < 30) return "bg-red-500";
-    if (value < 70) return "bg-yellow-500";
-    return "bg-green-500";
-  };
-  
+
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <div className="text-sm font-medium">Progress</div>
-        {!isEditing ? (
-          <div 
-            className="text-sm font-medium cursor-pointer"
-            onClick={handleClick}
-          >
-            {progressValue}%
-          </div>
-        ) : (
-          <input
-            type="number"
-            value={progressValue}
-            onChange={handleProgressChange}
-            onBlur={handleBlur}
-            min={0}
-            max={100}
-            className="w-16 h-6 text-sm border rounded px-1"
-            autoFocus
-          />
-        )}
-      </div>
-      <Progress value={progressValue} className={`h-2 ${getProgressColor(progressValue)}`} />
+    <div className={cn("h-2 w-full bg-gray-200 rounded-full overflow-hidden", className)}>
+      <div
+        className={cn("h-full transition-all", getProgressColor())}
+        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+      />
     </div>
   );
 }
