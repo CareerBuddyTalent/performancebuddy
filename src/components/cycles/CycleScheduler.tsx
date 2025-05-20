@@ -31,8 +31,8 @@ interface CycleSchedulerProps {
 }
 
 const defaultReminders = [
-  { days: 7, type: "before_start", notificationType: "both" },
-  { days: 3, type: "before_end", notificationType: "both" },
+  { days: 7, type: "before_start" as const, notificationType: "both" as const },
+  { days: 3, type: "before_end" as const, notificationType: "both" as const },
 ];
 
 export default function CycleScheduler({ 

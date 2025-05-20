@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { Plus, Settings } from "lucide-react";
 import { ReviewTemplate } from "@/types/templates";
@@ -101,6 +101,7 @@ const sampleReminderTemplates: ReminderTemplate[] = [
   }
 ];
 
+// Fix the reminders type to match the expected types
 const sampleReminders = [
   {
     id: "reminder-1",
@@ -358,7 +359,7 @@ export default function HRManagerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PerformanceBenchmarkingDashboard timeframe={timeframe} />
+              <PerformanceBenchmarkingDashboard timeframe={timeframe as "week" | "month" | "quarter" | "year"} />
             </CardContent>
           </Card>
         </TabsContent>
