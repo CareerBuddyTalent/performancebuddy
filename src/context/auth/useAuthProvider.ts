@@ -9,6 +9,7 @@ export const useAuthProvider = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Handle auth state changes
   useEffect(() => {
@@ -18,6 +19,7 @@ export const useAuthProvider = (): AuthContextType => {
         console.log("Auth state changed:", event);
         
         setSession(currentSession);
+        setIsAuthenticated(!!currentSession?.user);
         
         if (currentSession?.user) {
           const userData: User = {
@@ -58,6 +60,7 @@ export const useAuthProvider = (): AuthContextType => {
     // Initial session check
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
+      setIsAuthenticated(!!initialSession?.user);
       
       if (initialSession?.user) {
         const userData: User = {
@@ -96,9 +99,11 @@ export const useAuthProvider = (): AuthContextType => {
           if (storedUser) {
             try {
               setUser(JSON.parse(storedUser));
+              setIsAuthenticated(true);
             } catch (error) {
               console.error("Error parsing stored user:", error);
               setUser(null);
+              setIsAuthenticated(false);
             }
           }
         } else {
@@ -106,6 +111,10 @@ export const useAuthProvider = (): AuthContextType => {
         }
         setIsLoading(false);
       }
+    }).catch(error => {
+      console.error("Error getting initial session:", error);
+      setIsLoading(false);
+      setIsAuthenticated(false);
     });
 
     return () => {
@@ -138,5 +147,6 @@ export const useAuthProvider = (): AuthContextType => {
     signup,
     logout,
     isLoading,
+    isAuthenticated,
   };
 };

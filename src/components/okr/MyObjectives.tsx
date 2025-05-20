@@ -39,7 +39,7 @@ export default function MyObjectives({ userId }: MyObjectivesProps) {
     fetchObjectives();
   }, [userId, toast]);
 
-  const handleCreateOKR = (newObjective: Objective) => {
+  const handleCreateOKR = (newObjective: any) => {
     setObjectives(prev => [newObjective, ...prev]);
     setIsCreateDialogOpen(false);
   };

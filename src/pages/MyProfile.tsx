@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { users } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
-import { User } from "@/types";
+import { User, UserRole } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -81,6 +81,12 @@ export default function MyProfile() {
     }
     setIsEditing(false);
   };
+
+  const handleSwitchRole = (role: string) => {
+    if (switchRole) {
+      switchRole(role as UserRole);
+    }
+  };
   
   if (!user) return null;
   
@@ -113,7 +119,7 @@ export default function MyProfile() {
                   <p className="text-sm font-medium mb-2">Role Switcher (Dev Only)</p>
                   <Select 
                     value={user.role} 
-                    onValueChange={(value) => switchRole(value as User['role'])}
+                    onValueChange={handleSwitchRole}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a role" />

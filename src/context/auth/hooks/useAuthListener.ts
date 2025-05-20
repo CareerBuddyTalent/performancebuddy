@@ -97,6 +97,14 @@ export function useAuthListener(
         }));
       }
       // If session exists, the onAuthStateChange handler will set the user
+    }).catch(error => {
+      console.error("Error checking session:", error);
+      setAuthState(prev => ({
+        ...prev,
+        isLoading: false,
+        isAuthenticated: false,
+        authError: "Failed to check authentication status"
+      }));
     });
 
     // Clean up subscription on unmount

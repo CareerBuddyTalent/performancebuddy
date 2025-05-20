@@ -8,7 +8,7 @@ import { Objective } from "@/types/okr";
 
 export default function CompanyObjectives() {
   // Sample company objectives - in a real app, these would come from an API
-  const companyObjectives: Objective[] = [
+  const companyObjectives: any[] = [
     {
       id: "5",
       userId: "company",

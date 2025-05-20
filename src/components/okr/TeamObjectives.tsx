@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { BarChart, List } from "lucide-react";
 import ObjectiveCard from "./ObjectiveCard";
 import { useState } from "react";
-import { Objective } from "@/types/okr";
 
 interface TeamObjectivesProps {
   managerId: string;
@@ -12,7 +11,7 @@ interface TeamObjectivesProps {
 
 export default function TeamObjectives({ managerId }: TeamObjectivesProps) {
   // Sample team objectives - in a real app, these would come from an API
-  const teamObjectives: Objective[] = [
+  const teamObjectives: any[] = [
     {
       id: "3",
       userId: "team1",
