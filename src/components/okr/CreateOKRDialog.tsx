@@ -1,238 +1,203 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
+import { Objective, createObjective } from "@/services/objectiveService";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const formSchema = z.object({
-  title: z.string().min(3, { message: "Title must be at least 3 characters" }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters" }),
-  level: z.enum(["individual", "team", "department", "company"]),
-  alignedWith: z.string().optional()
-});
-
-type FormData = z.infer<typeof formSchema>;
+import { useToast } from "@/hooks/use-toast";
 
 interface CreateOKRDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateOKR: () => void;
+  onCreateOKR: (objective: Objective) => void;
   userId: string;
 }
 
-export default function CreateOKRDialog({ 
-  open, 
-  onOpenChange, 
-  onCreateOKR,
-  userId 
-}: CreateOKRDialogProps) {
+export default function CreateOKRDialog({ open, onOpenChange, onCreateOKR, userId }: CreateOKRDialogProps) {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Date>(new Date());
-  const [endDate, setEndDate] = useState<Date>(
-    new Date(new Date().setMonth(new Date().getMonth() + 3))
-  );
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      level: "individual",
-      alignedWith: ""
-    }
-  });
-
-  const handleSubmit = (data: FormData) => {
-    // In a real app, we would send this data to the API
-    console.log("Creating OKR with data:", {
-      ...data,
-      startDate,
-      endDate,
-      userId
-    });
+  const [dueDate, setDueDate] = useState<Date>(new Date());
+  const [level, setLevel] = useState<"individual" | "team" | "department" | "company">("individual");
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    onCreateOKR();
-    form.reset();
+    if (!title) {
+      toast({
+        title: "Error",
+        description: "Title is required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (dueDate < startDate) {
+      toast({
+        title: "Error",
+        description: "Due date must be after start date",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      const newObjective: Objective = {
+        user_id: userId,
+        title,
+        description,
+        start_date: startDate.toISOString(),
+        due_date: dueDate.toISOString(),
+        status: "not_started",
+        progress: 0,
+        level
+      };
+      
+      const createdObjective = await createObjective(newObjective);
+      
+      toast({
+        title: "Success",
+        description: "Objective created successfully"
+      });
+      
+      onCreateOKR(createdObjective);
+      resetForm();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create objective",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  // Sample company objectives for alignment - in a real app these would come from an API
-  const companyObjectives = [
-    { id: "obj1", title: "Increase Revenue by 25%" },
-    { id: "obj2", title: "Improve Employee Satisfaction" },
-    { id: "obj3", title: "Expand Market Share" }
-  ];
-
+  
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setStartDate(new Date());
+    setDueDate(new Date());
+    setLevel("individual");
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create New Objective</DialogTitle>
           <DialogDescription>
-            Define a new objective and align it with company goals
+            Set a new objective and track your progress towards achieving it.
           </DialogDescription>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Objective Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="E.g., Improve technical skills" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter objective title"
+              required
             />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe what you want to achieve" 
-                      className="min-h-[80px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your objective"
+              rows={3}
             />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <FormLabel>Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !startDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={(date) => date && setStartDate(date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <div className="space-y-2">
-                <FormLabel>End Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !endDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={(date) => date && setEndDate(date)}
-                      initialFocus
-                      disabled={(date) => date < startDate}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={(date) => date && setStartDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             
-            <FormField
-              control={form.control}
-              name="level"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Level</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
+            <div className="space-y-2">
+              <Label>Due Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
                   >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="team">Team</SelectItem>
-                      <SelectItem value="department">Department</SelectItem>
-                      <SelectItem value="company">Company</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="alignedWith"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Align with Company Objective (Optional)</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select objective to align with" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">Not aligned</SelectItem>
-                      {companyObjectives.map(obj => (
-                        <SelectItem key={obj.id} value={obj.id}>{obj.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">Create Objective</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dueDate ? format(dueDate, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dueDate}
+                    onSelect={(date) => date && setDueDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="level">Level</Label>
+            <Select value={level} onValueChange={(value) => setLevel(value as any)}>
+              <SelectTrigger id="level">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">Individual</SelectItem>
+                <SelectItem value="team">Team</SelectItem>
+                <SelectItem value="department">Department</SelectItem>
+                <SelectItem value="company">Company</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <DialogFooter className="pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Objective"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

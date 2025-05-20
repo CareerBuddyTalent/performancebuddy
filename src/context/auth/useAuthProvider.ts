@@ -58,64 +58,68 @@ export const useAuthProvider = (): AuthContextType => {
     );
 
     // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      setIsAuthenticated(!!initialSession?.user);
-      
-      if (initialSession?.user) {
-        const userData: User = {
-          id: initialSession.user.id,
-          email: initialSession.user.email || "",
-          name: initialSession.user.user_metadata.full_name || 
-               initialSession.user.email?.split("@")[0] || "User",
-          role: "employee", // Default role, will be updated below
-          profilePicture: initialSession.user.user_metadata.avatar_url,
-        };
+    const getInitialSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        // Fetch user role
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", initialSession.user.id)
-          .single()
-          .then(({ data, error }) => {
+        setSession(initialSession);
+        setIsAuthenticated(!!initialSession?.user);
+        
+        if (initialSession?.user) {
+          const userData: User = {
+            id: initialSession.user.id,
+            email: initialSession.user.email || "",
+            name: initialSession.user.user_metadata.full_name || 
+                 initialSession.user.email?.split("@")[0] || "User",
+            role: "employee", // Default role, will be updated below
+            profilePicture: initialSession.user.user_metadata.avatar_url,
+          };
+          
+          // Fetch user role
+          try {
+            const { data, error } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", initialSession.user.id)
+              .single();
+              
             if (data && !error) {
               setUser({ ...userData, role: data.role });
             } else {
               // If no role found, use default
               setUser(userData);
             }
-            setIsLoading(false);
-          })
-          .catch((error) => {
+          } catch (error) {
             console.error("Error fetching user role:", error);
             setUser(userData);
-            setIsLoading(false);
-          });
-      } else {
-        // For development convenience, use mock user when not in production
-        if (process.env.NODE_ENV === "development") {
-          const storedUser = localStorage.getItem("authUser");
-          if (storedUser) {
-            try {
-              setUser(JSON.parse(storedUser));
-              setIsAuthenticated(true);
-            } catch (error) {
-              console.error("Error parsing stored user:", error);
-              setUser(null);
-              setIsAuthenticated(false);
-            }
           }
         } else {
-          setUser(null);
+          // For development convenience, use mock user when not in production
+          if (process.env.NODE_ENV === "development") {
+            const storedUser = localStorage.getItem("authUser");
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+                setIsAuthenticated(true);
+              } catch (error) {
+                console.error("Error parsing stored user:", error);
+                setUser(null);
+                setIsAuthenticated(false);
+              }
+            }
+          } else {
+            setUser(null);
+          }
         }
         setIsLoading(false);
+      } catch (error) {
+        console.error("Error getting initial session:", error);
+        setIsLoading(false);
+        setIsAuthenticated(false);
       }
-    }).catch((error) => {
-      console.error("Error getting initial session:", error);
-      setIsLoading(false);
-      setIsAuthenticated(false);
-    });
+    };
+    
+    getInitialSession();
 
     return () => {
       subscription.unsubscribe();
