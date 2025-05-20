@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -18,6 +17,7 @@ import { User } from './types';
 
 // Add import for ReviewTemplates page
 import ReviewTemplates from "./pages/ReviewTemplates";
+import HRManagerDashboard from './pages/HRManagerDashboard';
 
 function AppContent() {
   const { setUser, setLoading } = useAuth();
@@ -146,6 +146,16 @@ function AppContent() {
             </PageLayout>
           </ProtectedRoute>
         } 
+      />
+      <Route
+        path="/hr-manager"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <HRManagerDashboard />
+            </PageLayout>
+          </ProtectedRoute>
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

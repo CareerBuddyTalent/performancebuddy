@@ -30,6 +30,25 @@ export type ReviewSection = {
 
 export type ReviewTemplateType = '360' | 'self' | 'peer' | 'manager';
 
+// Template metadata for extended features
+export type TemplateMetadata = {
+  version: number;
+  anonymitySettings?: {
+    isAnonymous: boolean;
+    responseVisibility: "reviewer_only" | "manager_only" | "reviewee_visible" | "all_participants";
+    hideIdentities: boolean;
+    aggregateResults: boolean;
+  };
+  tags?: string[];
+  sourceTemplateId?: string; // For templates created from pre-built templates
+  versionHistory?: string[]; // IDs of previous versions
+  usage?: {
+    lastUsed?: Date;
+    cycleIds?: string[];
+    completionRate?: number;
+  };
+};
+
 export interface ReviewTemplate {
   id: string;
   name: string;
@@ -42,6 +61,7 @@ export interface ReviewTemplate {
   isActive: boolean;
   isDefault?: boolean;
   usageCount?: number;
+  metadata?: TemplateMetadata; // Extended metadata
 }
 
 // Type for template creation/editing
