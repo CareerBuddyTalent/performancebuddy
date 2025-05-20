@@ -15,6 +15,7 @@ import OKRs from "@/pages/OKRs";
 import OKRAlignment from "@/pages/OKRAlignment";
 import UserManagement from "@/pages/UserManagement";
 import Settings from "@/pages/Settings";
+import TestingDashboard from "@/pages/TestingDashboard";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -54,6 +55,14 @@ function App() {
                 }
               />
               <Route path="settings" element={<Settings />} />
+              <Route 
+                path="testing" 
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <TestingDashboard />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
             
             {/* 404 page */}

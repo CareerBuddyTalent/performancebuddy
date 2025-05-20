@@ -4,7 +4,9 @@ import {
   LineChart, 
   Users2, 
   ClipboardCheck,
-  Target // Added for OKRs
+  Target,
+  Settings,
+  BarChart3
 } from "lucide-react";
 
 // Define navigation item type
@@ -47,6 +49,18 @@ export const navigationItems: NavigationItem[] = [
     icon: ClipboardCheck, 
     roles: ['admin', 'manager', 'employee'] 
   },
+  { 
+    path: '/testing', 
+    label: 'Test Dashboard', 
+    icon: BarChart3, 
+    roles: ['admin'] 
+  },
+  { 
+    path: '/settings', 
+    label: 'Settings', 
+    icon: Settings, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
 ];
 
 // Helper function to get navigation items by group
@@ -64,7 +78,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
     workNavItems: [],
     
     adminNavItems: filteredNavItems.filter(item => 
-      ['/companies'].includes(item.path)
+      ['/testing', '/settings', '/companies'].includes(item.path)
     )
   };
 };
