@@ -1,9 +1,10 @@
 
 import { 
-  LayoutDashboard, // More descriptive dashboard icon
-  LineChart, // Better performance visualization
-  Users2, // More modern people icon
-  ClipboardCheck // Better surveys representation
+  LayoutDashboard, 
+  LineChart, 
+  Users2, 
+  ClipboardCheck,
+  Target // Added for OKRs
 } from "lucide-react";
 
 // Define navigation item type
@@ -29,6 +30,12 @@ export const navigationItems: NavigationItem[] = [
     roles: ['admin', 'manager', 'employee'] 
   },
   { 
+    path: '/okrs', 
+    label: 'OKRs', 
+    icon: Target, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
+  { 
     path: '/users', 
     label: 'People', 
     icon: Users2, 
@@ -51,7 +58,7 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/dashboard', '/performance', '/users', '/surveys'].includes(item.path)
+      ['/dashboard', '/performance', '/okrs', '/users', '/surveys'].includes(item.path)
     ),
     
     workNavItems: [],
