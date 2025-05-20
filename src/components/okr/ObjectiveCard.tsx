@@ -1,163 +1,153 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+
+import React from 'react';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { MoreVertical, Edit, Trash2, CheckCircle, Circle, ArrowRight, CheckCheck } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { KeyResultItem } from "./KeyResultItem";
+import { format } from "date-fns";
 import { Objective } from "@/services/objectiveService";
+import {
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Calendar,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
+import KeyResultItem from "./KeyResultItem";
 
 interface ObjectiveCardProps {
   objective: Objective;
-  onViewDetails?: () => void;
-  onAddKeyResult?: () => void;
-  onCheckIn?: () => void;
-  expanded?: boolean;
-  onToggleExpand?: () => void;
-  showActions?: boolean;
+  onView?: (objective: Objective) => void;
+  onAddKeyResult?: (objectiveId: string) => void;
 }
 
-export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({
-  objective,
-  onViewDetails,
-  onAddKeyResult,
-  onCheckIn,
-  expanded = false,
-  onToggleExpand,
-  showActions = true,
-}) => {
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "default";
-      case "on_track":
-        return "outline";
-      case "behind_schedule":
-        return "destructive";
+export function ObjectiveCard({ objective, onView, onAddKeyResult }: ObjectiveCardProps) {
+  const [expanded, setExpanded] = React.useState(false);
+  
+  const getLevelBadgeColor = (level: string) => {
+    switch (level) {
+      case 'company':
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+      case 'department':
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
+      case 'team':
+        return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300';
       default:
-        return "secondary";
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
     }
   };
-
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) {
-      return 'bg-green-600';
-    } else if (progress >= 50) {
-      return 'bg-amber-600';
-    } else {
-      return 'bg-red-600';
+  
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300';
+      case 'on_track':
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+      case 'behind_schedule':
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
+      case 'at_risk':
+      case 'cancelled':
+        return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
+      default:
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     }
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const renderKeyResults = (keyResults: any[]) => {
-    if (!keyResults || keyResults.length === 0) {
-      return (
-        <div className="text-sm text-muted-foreground p-2">
-          No key results added yet.
-        </div>
-      );
-    }
-
-    return keyResults.map((kr) => (
-      <KeyResultItem
-        key={kr.id}
-        keyResult={{
-          id: kr.id,
-          objectiveId: kr.objective_id,
-          title: kr.title,
-          description: kr.description || '',
-          currentValue: kr.current_value,
-          targetValue: kr.target_value,
-          startValue: kr.start_value,
-          type: 'number',
-          unit: kr.unit || '',
-          progress: kr.progress,
-          dueDate: new Date(kr.due_date),
-          status: kr.status,
-          lastCheckin: kr.last_checkin ? new Date(kr.last_checkin) : undefined
-        }}
-        onCheckIn={() => {}}
-      />
-    ));
+  
+  const formatStatus = (status: string) => {
+    return status.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <h3 className="text-lg font-semibold">{objective.title}</h3>
-              {showActions && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={onViewDetails}>
-                      <Edit className="h-4 w-4 mr-2" /> View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onAddKeyResult}>
-                      <Plus className="h-4 w-4 mr-2" /> Add Key Result
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
-                      <Trash2 className="h-4 w-4 mr-2" /> Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="pb-2 flex flex-row items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <Badge className={getLevelBadgeColor(objective.level)}>
+              {objective.level.charAt(0).toUpperCase() + objective.level.slice(1)}
+            </Badge>
+            <Badge className={getStatusBadgeColor(objective.status)}>
+              {formatStatus(objective.status)}
+            </Badge>
+          </div>
+          <h3 className="font-medium text-lg mt-2">{objective.title}</h3>
+          {objective.description && <p className="text-sm text-muted-foreground mt-1">{objective.description}</p>}
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium">{objective.progress}%</span>
+            </div>
+            <Progress value={objective.progress} className="h-2" />
+          </div>
+          
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5 mr-1" />
+              <span>
+                {format(new Date(objective.due_date), "MMM d, yyyy")}
+              </span>
+            </div>
+            
+            <div className="flex gap-2">
+              {onAddKeyResult && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onAddKeyResult(objective.id || '')}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Key Result
+                </Button>
+              )}
+              
+              {onView && (
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => onView(objective)}
+                >
+                  View
+                </Button>
               )}
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2">{objective.description || 'No description'}</p>
-            <div className="flex items-center space-x-2">
-              <Badge variant={getStatusBadgeVariant(objective.status)}>
-                {objective.status?.replace(/_/g, ' ')}
-              </Badge>
-              <span className="text-xs text-muted-foreground">
-                Start: {formatDate(objective.start_date)}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Due: {formatDate(objective.due_date)}
-              </span>
-            </div>
-            <div className="mt-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium">Progress</span>
-                <span className="text-xs font-medium">{objective.progress}%</span>
-              </div>
-              <Progress value={objective.progress} className={`h-2 ${getProgressColor(objective.progress)}`} />
-            </div>
           </div>
-        </div>
-        
-        {expanded && (
-          <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Key Results</h4>
-            {renderKeyResults(objective.key_results || [])}
-            {showActions && (
-              <Button variant="secondary" size="sm" className="mt-2 w-full" onClick={onCheckIn}>
-                Check-in <ArrowRight className="ml-2 h-4 w-4" />
+          
+          {objective.key_results && objective.key_results.length > 0 && (
+            <div className="pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-0 h-6 text-muted-foreground"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? (
+                  <ChevronUp className="h-4 w-4 mr-1" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 mr-1" />
+                )}
+                {objective.key_results.length} Key Results
               </Button>
-            )}
-          </div>
-        )}
+              
+              {expanded && (
+                <div className="mt-2 space-y-2">
+                  {objective.key_results.map(kr => (
+                    <KeyResultItem key={kr.id} keyResult={kr} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
-};
+}
+
+export default ObjectiveCard;

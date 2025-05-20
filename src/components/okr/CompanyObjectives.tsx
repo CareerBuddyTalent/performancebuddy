@@ -1,10 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart, List } from "lucide-react";
-import ObjectiveCard from "./ObjectiveCard";
+import { ObjectiveCard } from "./ObjectiveCard";
 import { useState } from "react";
-import { Objective } from "@/types/okr";
 
 export default function CompanyObjectives() {
   // Sample company objectives - in a real app, these would come from an API
