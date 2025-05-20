@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -18,6 +19,7 @@ import { User } from './types';
 // Add import for ReviewTemplates page
 import ReviewTemplates from "./pages/ReviewTemplates";
 import HRManagerDashboard from './pages/HRManagerDashboard';
+import LineManagerDashboard from './pages/LineManagerDashboard';
 
 function AppContent() {
   const { setUser, setLoading } = useAuth();
@@ -153,6 +155,16 @@ function AppContent() {
           <ProtectedRoute>
             <PageLayout>
               <HRManagerDashboard />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/line-manager"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <LineManagerDashboard />
             </PageLayout>
           </ProtectedRoute>
         }
