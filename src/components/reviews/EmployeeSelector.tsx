@@ -8,8 +8,8 @@ import { useEffect } from "react";
 interface EmployeeSelectorProps {
   type: "individual" | "team";
   employees: User[];
-  selectedEmployees: string[];
-  onSelectionChange: (selected: string[]) => void;
+  selectedEmployees: User[];
+  onSelectionChange: (selected: User[]) => void;
 }
 
 export default function EmployeeSelector({ 
@@ -30,8 +30,11 @@ export default function EmployeeSelector({
       <div className="grid gap-2">
         <Label>Employee</Label>
         <Select
-          value={selectedEmployees[0] || ""}
-          onValueChange={(value) => onSelectionChange([value])}
+          value={selectedEmployees[0]?.id || ""}
+          onValueChange={(value) => {
+            const selectedUser = employees.find(user => user.id === value);
+            onSelectionChange(selectedUser ? [selectedUser] : []);
+          }}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an employee" />
@@ -61,12 +64,12 @@ export default function EmployeeSelector({
             <div key={user.id} className="flex items-center space-x-2">
               <Checkbox
                 id={user.id}
-                checked={selectedEmployees.includes(user.id)}
+                checked={selectedEmployees.some(emp => emp.id === user.id)}
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    onSelectionChange([...selectedEmployees, user.id]);
+                    onSelectionChange([...selectedEmployees, user]);
                   } else {
-                    onSelectionChange(selectedEmployees.filter(id => id !== user.id));
+                    onSelectionChange(selectedEmployees.filter(emp => emp.id !== user.id));
                   }
                 }}
               />

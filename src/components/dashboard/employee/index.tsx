@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
@@ -43,6 +44,7 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
     setIsSubmitting(true);
     
     try {
+      // We're now only passing the manager ID as required by the updated function
       const success = await requestReview(manager.id);
       
       if (success) {

@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { User, UserRole } from '@/types';
 import { supabase } from "@/integrations/supabase/client";
@@ -131,13 +130,13 @@ export function useAuthActions(
     }
   }, [user, setAuthState]);
 
-  const requestReview = async (managerId: string, comments?: string): Promise<boolean> => {
+  const requestReview = async (managerId: string): Promise<boolean> => {
     try {
       if (!user) return false;
       
       setAuthState(prev => ({ ...prev, isLoading: true, authError: null }));
       
-      const success = await requestUserReview(user.id, managerId, comments);
+      const success = await requestUserReview(managerId);
       
       setAuthState(prev => ({ ...prev, isLoading: false }));
       return success;

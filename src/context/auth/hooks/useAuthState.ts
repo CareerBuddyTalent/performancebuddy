@@ -3,16 +3,18 @@ import { useState } from 'react';
 import { AuthState } from '../types';
 
 /**
- * Hook for managing authentication state
+ * Hook for setting up and managing auth state
  */
 export function useAuthState() {
-  const [authState, setAuthState] = useState<AuthState>({
+  const initialState: AuthState = {
     user: null,
+    isLoading: false,
+    isAuthenticated: false,
     session: null,
-    isLoading: true,
-    authError: null,
-    isAuthenticated: false
-  });
+    authError: null
+  };
+  
+  const [authState, setAuthState] = useState<AuthState>(initialState);
 
   const setAuthError = (error: string | null) => {
     setAuthState(prev => ({
@@ -22,12 +24,15 @@ export function useAuthState() {
   };
 
   const clearAuthError = () => {
-    setAuthError(null);
+    setAuthState(prev => ({
+      ...prev,
+      authError: null
+    }));
   };
 
-  return {
-    authState,
-    setAuthState,
+  return { 
+    authState, 
+    setAuthState, 
     setAuthError,
     clearAuthError
   };
