@@ -141,8 +141,8 @@ export default function ReviewForm({
         <EmployeeSelector
           type={activeTab}
           employees={filteredUsers.map(user => user.id)}
-          selectedEmployees={selectedEmployees.map(user => user.id)}
-          onSelectionChange={(ids) => {
+          selectedEmployees={selectedEmployees.map(user => user.id)} 
+          onSelectionChange={(ids: string[]) => {
             setSelectedEmployees(filteredUsers.filter(user => ids.includes(user.id)));
           }}
         />

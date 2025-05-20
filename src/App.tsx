@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -26,7 +27,8 @@ function AppContent() {
     const loadUser = async () => {
       setLoading(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
 
         if (session) {
           const { data: profile, error: profileError } = await supabase
@@ -58,7 +60,7 @@ function AppContent() {
 
     loadUser();
 
-    const { subscription } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         loadUser();
       } else if (event === 'SIGNED_OUT') {
@@ -67,7 +69,7 @@ function AppContent() {
     });
 
     return () => {
-      subscription?.unsubscribe();
+      data.subscription.unsubscribe();
     };
   }, [setUser, setLoading]);
 

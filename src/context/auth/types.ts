@@ -7,16 +7,22 @@ export interface AuthContextType {
   isLoading: boolean;
   setLoading: (isLoading: boolean) => void;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, fullName: string) => Promise<void>;
+  authError: string | null;
+  clearAuthError: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (email: string, password: string, name: string, role?: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  requestReview: (revieweeId: string) => Promise<void>;
+  switchRole?: (role: string) => void;
+  requestReview: (revieweeId: string) => Promise<boolean>;
+  session?: any;
 }
 
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  session: any | null;
+  authError: string | null;
 }
 
 export type AuthAction =

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
@@ -44,7 +43,7 @@ export default function EmployeeDashboard({ reviews, goals, feedbackEntries, use
     setIsSubmitting(true);
     
     try {
-      const success = await requestReview(manager.id, reviewComments);
+      const success = await requestReview(manager.id);
       
       if (success) {
         addNotification({

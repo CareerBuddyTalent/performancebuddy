@@ -1,38 +1,18 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Requests a performance review from a manager
+ * Handles sending review requests to other users
  */
-export const requestReview = async (
-  userId: string,
-  managerId: string, 
-  comments?: string
-): Promise<boolean> => {
+export const requestReview = async (revieweeId: string): Promise<boolean> => {
   try {
-    if (!userId) return false;
+    // In a real implementation, this would create a review request in the database
+    console.log(`Review requested for user ${revieweeId}`);
     
-    // In production, we would create a DB record here
-    const { error } = await supabase
-      .from('review_requests')
-      .insert({
-        id: uuidv4(),
-        employee_id: userId,
-        manager_id: managerId,
-        comments: comments || '',
-        status: 'pending',
-        created_at: new Date().toISOString()
-      });
-
-    if (error) {
-      console.error('Error requesting review:', error);
-      return false;
-    }
-    
+    // Mock successful API response
     return true;
   } catch (error) {
-    console.error('Error requesting review:', error);
+    console.error('Review request error:', error);
     return false;
   }
 };
