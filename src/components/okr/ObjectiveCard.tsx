@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronUp, Clock, Plus } from "lucide-react";
 import { Objective } from "@/services/objectiveService";
-import OKRProgressBar from "./OKRProgressBar";
+import { OKRProgressBar } from "./OKRProgressBar";
 import KeyResultItem from "./KeyResultItem";
 
 interface ObjectiveCardProps {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -48,7 +47,7 @@ export default function OKRAlignment() {
         )
       );
       
-      return true;
+      return;
     } catch (error: any) {
       toast({
         title: "Error",
