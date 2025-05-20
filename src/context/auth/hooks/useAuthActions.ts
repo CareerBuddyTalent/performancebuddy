@@ -8,7 +8,7 @@ import {
   signupUser, 
   logoutUser, 
   requestReview as requestUserReview 
-} from '../utils/authOperations';
+} from '../utils';
 
 /**
  * Hook for auth-related actions (login, logout, signup, etc.)
