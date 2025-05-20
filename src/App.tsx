@@ -1,173 +1,165 @@
-import { Suspense, lazy } from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { CompanyProvider } from "./context/CompanyContext";
-import { NotificationProvider } from "./context/NotificationContext";
-import { AnalyticsProvider } from "./context/AnalyticsContext";
-import { GlobalLoading } from "@/components/ui/global-loading";
-import { ErrorState } from "@/components/ui/error-state";
-import PageLayout from "./components/PageLayout";
-import React from 'react';
-import analytics from './services/analytics';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Performance from './pages/Performance';
+import EmployeeGoals from './pages/EmployeeGoals';
+import Skills from './pages/Skills';
+import Surveys from './pages/Surveys';
+import PageLayout from './components/layout/PageLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { supabase } from './integrations/supabase/client';
+import { User } from './types';
 
-// Lazy-loaded components
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const MyProfile = lazy(() => import('./pages/MyProfile'));
-const Performance = lazy(() => import('./pages/Performance'));
-const UserManagement = lazy(() => import('./pages/UserManagement'));
-const UserDetail = lazy(() => import('./pages/UserDetail'));
-const CompanyManagement = lazy(() => import('./pages/CompanyManagement'));
-const Settings = lazy(() => import('./pages/Settings'));
-const Surveys = lazy(() => import('./pages/Surveys'));
-const Documentation = lazy(() => import('./pages/Documentation'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const OKRs = lazy(() => import('./pages/OKRs'));
+// Add import for ReviewTemplates page
+import ReviewTemplates from "./pages/ReviewTemplates";
 
-// Define interface for ErrorBoundary props
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-}
+function AppContent() {
+  const { setUser, setLoading } = useAuth();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-// Error boundary component
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError: boolean; error: Error | null }> {
-  state = { hasError: false, error: null };
-  
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-  
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
-    analytics.error(error.message || 'Unknown error');
-  }
-  
-  render() {
-    if (this.state.hasError) {
-      return (
-        <ErrorState 
-          title="Something went wrong" 
-          message="We're sorry, but an unexpected error has occurred."
-          fullScreen
-          retry={() => window.location.reload()}
-        />
-      );
-    }
-    
-    return this.props.children;
-  }
-}
+  useEffect(() => {
+    const loadUser = async () => {
+      setLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+        if (session) {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
 
-const App = () => {
-  // Initialize analytics when the App component mounts
-  React.useEffect(() => {
-    analytics.initialize();
-  }, []);
-  
+          if (profileError) {
+            console.error("Error fetching profile:", profileError);
+          }
+
+          const userProfile: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: profile?.full_name || session.user.email || 'Unknown User',
+            role: profile?.role || 'employee',
+            profilePicture: `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'Unknown User')}&background=random`
+          };
+          setUser(userProfile);
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+      } finally {
+        setLoading(false);
+        setInitialLoadComplete(true);
+      }
+    };
+
+    loadUser();
+
+    const { subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        loadUser();
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [setUser, setLoading]);
+
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <CompanyProvider>
-            <NotificationProvider>
-              <BrowserRouter>
-                <AnalyticsProvider>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <Suspense fallback={<GlobalLoading fullScreen message="Loading application..." />}>
-                      <Routes>
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/signup" element={<Signup />} />
-                        
-                        <Route path="/dashboard" element={
-                          <PageLayout>
-                            <Dashboard />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/my-profile" element={
-                          <PageLayout>
-                            <MyProfile />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/performance" element={
-                          <PageLayout>
-                            <Performance />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/okrs" element={
-                          <PageLayout>
-                            <OKRs />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/users" element={
-                          <PageLayout allowedRoles={["admin", "manager"]}>
-                            <UserManagement />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/user/:userId" element={
-                          <PageLayout allowedRoles={["admin", "manager"]}>
-                            <UserDetail />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/companies" element={
-                          <PageLayout allowedRoles={["admin"]}>
-                            <CompanyManagement />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/settings" element={
-                          <PageLayout>
-                            <Settings />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/surveys" element={
-                          <PageLayout>
-                            <Surveys />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="/documentation" element={
-                          <PageLayout>
-                            <Documentation />
-                          </PageLayout>
-                        } />
-                        
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </TooltipProvider>
-                </AnalyticsProvider>
-              </BrowserRouter>
-            </NotificationProvider>
-          </CompanyProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <Dashboard />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <Profile />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/performance"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <Performance />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employee-goals"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <EmployeeGoals />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/skills"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <Skills />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/surveys"
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <Surveys />
+            </PageLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route 
+        path="/review-templates" 
+        element={
+          <ProtectedRoute>
+            <PageLayout>
+              <ReviewTemplates />
+            </PageLayout>
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
-};
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
 
 export default App;

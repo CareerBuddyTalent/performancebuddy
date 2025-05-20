@@ -1,72 +1,70 @@
 
-import { Dispatch, SetStateAction } from "react";
-import { Goal } from "@/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PerformanceGoalsTab from "./tabs/PerformanceGoalsTab";
-import PerformanceRankingsTab from "./tabs/PerformanceRankingsTab";
-import PerformanceAnalyticsTab from "./tabs/PerformanceAnalyticsTab";
-import PerformanceSettingsTab from "./tabs/PerformanceSettingsTab";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { hasPermission } from "@/types/performance-permissions";
+import PerformanceGoalsTab from "@/components/performance/tabs/PerformanceGoalsTab";
+import PerformanceRankingsTab from "@/components/performance/tabs/PerformanceRankingsTab";
+import PerformanceAnalyticsTab from "@/components/performance/tabs/PerformanceAnalyticsTab";
+import PerformanceSettingsTab from "@/components/performance/tabs/PerformanceSettingsTab";
 
 interface PerformanceTabsProps {
-  canManageSettings: boolean;
-  canViewAnalytics: boolean;
   activeTab: string;
-  setActiveTab: Dispatch<SetStateAction<string>>;
-  performanceGoals: Goal[];
-  timeframe: 'week' | 'month' | 'quarter' | 'year';
-  handleExport: (format: string) => void;
-  onAddGoal?: (goal: Goal) => void;
-  onUpdateGoal?: (goal: Goal) => void;
-  onDeleteGoal?: (goalId: string) => void;
+  setActiveTab: (tab: string) => void;
 }
 
-export default function PerformanceTabs({
-  canManageSettings,
-  canViewAnalytics,
-  activeTab,
-  setActiveTab,
-  performanceGoals,
-  timeframe,
-  handleExport,
-  onAddGoal,
-  onUpdateGoal,
-  onDeleteGoal
-}: PerformanceTabsProps) {
+export default function PerformanceTabs({ activeTab, setActiveTab }: PerformanceTabsProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  if (!user) return null;
+  
+  const canManageCycles = hasPermission(user.role, 'manage_cycles');
+  const canManageTemplates = hasPermission(user.role, 'manage_templates');
+  
+  const navigateToTemplates = () => {
+    navigate("/review-templates");
+  };
+
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="goals">Goals</TabsTrigger>
-        {canViewAnalytics && <TabsTrigger value="rankings">Rankings</TabsTrigger>}
-        {canViewAnalytics && <TabsTrigger value="analytics">Analytics</TabsTrigger>}
-        {canManageSettings && <TabsTrigger value="settings">Settings</TabsTrigger>}
-      </TabsList>
-      
-      <TabsContent value="goals" className="space-y-4">
-        <PerformanceGoalsTab 
-          goals={performanceGoals} 
-          onAddGoal={onAddGoal}
-          onUpdateGoal={onUpdateGoal}
-          onDeleteGoal={onDeleteGoal}
-        />
-      </TabsContent>
-      
-      {canViewAnalytics && (
-        <TabsContent value="rankings" className="space-y-4">
+    <Card className="p-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="goals">Goals</TabsTrigger>
+          <TabsTrigger value="rankings">Rankings</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          {(canManageCycles || canManageTemplates) && (
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          )}
+          {canManageTemplates && (
+            <TabsTrigger value="templates" onClick={(e) => {
+              e.preventDefault();
+              navigateToTemplates();
+            }}>
+              Templates
+            </TabsTrigger>
+          )}
+        </TabsList>
+        
+        <TabsContent value="goals">
+          <PerformanceGoalsTab />
+        </TabsContent>
+        
+        <TabsContent value="rankings">
           <PerformanceRankingsTab />
         </TabsContent>
-      )}
-      
-      {canViewAnalytics && (
-        <TabsContent value="analytics" className="space-y-4">
+        
+        <TabsContent value="analytics">
           <PerformanceAnalyticsTab />
         </TabsContent>
-      )}
-      
-      {canManageSettings && (
-        <TabsContent value="settings" className="space-y-4">
-          <PerformanceSettingsTab />
-        </TabsContent>
-      )}
-    </Tabs>
+        
+        {(canManageCycles || canManageTemplates) && (
+          <TabsContent value="settings">
+            <PerformanceSettingsTab />
+          </TabsContent>
+        )}
+      </Tabs>
+    </Card>
   );
 }

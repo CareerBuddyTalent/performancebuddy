@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { User, ReviewCycle, PerformanceReview } from "@/types";
+import { ReviewCycle, PerformanceReview } from "@/types/performance";
+import { User } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from "sonner";
 
@@ -12,118 +13,111 @@ interface UseCreateReviewProps {
 }
 
 export function useCreateReview({ 
-  cycles, 
-  currentUser, 
-  onCreateReview, 
-  onClose 
+  cycles,
+  currentUser,
+  onCreateReview,
+  onClose
 }: UseCreateReviewProps) {
   const [activeTab, setActiveTab] = useState<"individual" | "team">("individual");
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [cycleId, setCycleId] = useState("");
-  const [initialComments, setInitialComments] = useState("");
+  const [selectedEmployees, setSelectedEmployees] = useState<User[]>([]);
+  const [cycleId, setCycleId] = useState<string>("");
+  const [initialComments, setInitialComments] = useState<string>("");
+  const [templateId, setTemplateId] = useState<string>("");
   const [selectedCycle, setSelectedCycle] = useState<ReviewCycle | null>(null);
+  const [performanceCycles, setPerformanceCycles] = useState<ReviewCycle[]>([]);
 
-  // Filter available cycles to only performance review cycles
-  const performanceCycles = cycles.filter(cycle => 
-    cycle.purpose === "performance" || !cycle.purpose
-  );
-
-  // Reset form when dialog opens
   useEffect(() => {
-    setActiveTab("individual");
-    setSelectedEmployees([]);
-    if (performanceCycles.length > 0) {
-      setCycleId(performanceCycles[0].id);
-      setSelectedCycle(performanceCycles[0]);
-    } else {
-      setCycleId("");
-      setSelectedCycle(null);
-    }
-    setInitialComments("");
-  }, [performanceCycles]);
+    // Filter available cycles to only performance review cycles
+    const filteredCycles = cycles.filter(cycle => 
+      cycle.purpose === "performance" || !cycle.purpose
+    );
+    setPerformanceCycles(filteredCycles);
+  }, [cycles]);
 
-  // Update selected cycle when cycleId changes
   useEffect(() => {
-    const cycle = cycles.find(c => c.id === cycleId);
+    const cycle = performanceCycles.find(c => c.id === cycleId);
     setSelectedCycle(cycle || null);
-  }, [cycleId, cycles]);
+  }, [cycleId, performanceCycles]);
 
-  // Set activeTab and handle switching between individual and team reviews
-  const handleTabChange = (tab: "individual" | "team") => {
-    setActiveTab(tab);
-    setSelectedEmployees([]); // Clear selected employees when switching tabs
-  };
-
-  const handleSubmit = (e: React.SyntheticEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!cycleId || !selectedCycle) {
-      toast.error("Please select a review cycle");
-      return;
-    }
 
-    if (activeTab === "individual" && selectedEmployees.length !== 1) {
-      toast.error("Please select an employee for individual review");
-      return;
-    }
+    if (!cycleId || !currentUser) return;
 
-    if (activeTab === "team" && selectedEmployees.length === 0) {
-      toast.error("Please select at least one team member");
-      return;
-    }
-    
-    if (!currentUser) {
-      toast.error("You must be logged in to create a review");
-      return;
-    }
-    
-    let reviewsCreated = 0;
-    
-    selectedEmployees.forEach(employeeId => {
-      // Create parameter ratings for each parameter in the selected cycle
-      const ratings = selectedCycle.parameters.map(param => {
-        const paramId = typeof param === 'string' ? param : param.id;
-        return {
-          parameterId: paramId,
-          score: 0,
-          comment: ""
+    try {
+      if (activeTab === "individual") {
+        if (selectedEmployees.length !== 1) {
+          toast.error("Please select an employee");
+          return;
+        }
+
+        // Create individual review
+        const employeeId = selectedEmployees[0].id;
+        const review: PerformanceReview = {
+          id: uuidv4(),
+          employeeId,
+          reviewerId: currentUser.id,
+          cycleId,
+          templateId,
+          status: "not_started",
+          ratings: [],
+          overallRating: 0,
+          feedback: initialComments || "",
+          createdAt: new Date(),
+          updatedAt: new Date()
         };
-      });
-      
-      const newReview: PerformanceReview = {
-        id: uuidv4(),
-        employeeId,
-        reviewerId: currentUser.id,
-        cycleId,
-        status: "not_started",
-        ratings,
-        overallRating: 0,
-        feedback: initialComments,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      onCreateReview(newReview);
-      reviewsCreated++;
-    });
 
-    const message = activeTab === "individual" 
-      ? "Review created successfully" 
-      : `${reviewsCreated} team reviews created successfully`;
-    
-    toast.success(message);
-    onClose();
+        onCreateReview(review);
+        toast.success(`Review created for ${selectedEmployees[0].name}`);
+      } else {
+        // Team review - create multiple reviews
+        if (selectedEmployees.length === 0) {
+          toast.error("Please select at least one team member");
+          return;
+        }
+
+        // Create a review for each selected employee
+        const reviews: PerformanceReview[] = selectedEmployees.map(employee => ({
+          id: uuidv4(),
+          employeeId: employee.id,
+          reviewerId: currentUser.id,
+          cycleId,
+          templateId,
+          status: "not_started",
+          ratings: [],
+          overallRating: 0,
+          feedback: initialComments || "",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }));
+
+        // Process each review - in a real scenario, we'd batch these
+        reviews.forEach(review => {
+          onCreateReview(review);
+        });
+
+        toast.success(`Created ${reviews.length} team reviews`);
+      }
+
+      // Reset form and close dialog
+      onClose();
+    } catch (err) {
+      console.error("Error creating review:", err);
+      toast.error("Failed to create review");
+    }
   };
 
   return {
     activeTab,
-    setActiveTab: handleTabChange,
+    setActiveTab,
     selectedEmployees,
     setSelectedEmployees,
     cycleId,
     setCycleId,
     initialComments,
     setInitialComments,
+    templateId,
+    setTemplateId,
     selectedCycle,
     performanceCycles,
     handleSubmit

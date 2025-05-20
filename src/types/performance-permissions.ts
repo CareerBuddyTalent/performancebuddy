@@ -1,38 +1,37 @@
 
-export type PerformanceAction = 
-  | 'view_all_goals'
-  | 'manage_all_goals'
-  | 'view_team_goals'
-  | 'manage_team_goals'
-  | 'view_settings'
-  | 'manage_settings'
-  | 'view_analytics'
-  | 'manage_analytics';
+export type PermissionAction = 
+  'view_analytics' | 
+  'create_review' | 
+  'manage_reviews' | 
+  'view_reports' | 
+  'manage_cycles' | 
+  'manage_templates' |
+  'export_data';
 
-export const rolePermissions: Record<string, PerformanceAction[]> = {
+export type UserRole = 'employee' | 'manager' | 'admin';
+
+const rolePermissions: Record<UserRole, PermissionAction[]> = {
   admin: [
-    'view_all_goals',
-    'manage_all_goals',
-    'view_team_goals',
-    'manage_team_goals',
-    'view_settings',
-    'manage_settings',
     'view_analytics',
-    'manage_analytics'
+    'create_review',
+    'manage_reviews',
+    'view_reports',
+    'manage_cycles',
+    'manage_templates',
+    'export_data'
   ],
   manager: [
-    'view_all_goals',
-    'manage_all_goals',
-    'view_team_goals',
-    'manage_team_goals',
-    'view_settings',
-    'view_analytics'
+    'view_analytics',
+    'create_review',
+    'manage_reviews',
+    'view_reports',
+    'manage_templates'
   ],
   employee: [
-    'view_team_goals'
+    'view_analytics'
   ]
 };
 
-export const hasPermission = (role: string, action: PerformanceAction): boolean => {
-  return rolePermissions[role]?.includes(action) ?? false;
-};
+export function hasPermission(role: string, action: PermissionAction): boolean {
+  return rolePermissions[role as UserRole]?.includes(action) || false;
+}

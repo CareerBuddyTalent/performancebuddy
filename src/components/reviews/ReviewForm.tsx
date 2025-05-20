@@ -1,13 +1,15 @@
-
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { User, ReviewCycle, PerformanceReview } from "@/types";
+import { User, ReviewCycle, PerformanceReview } from "@/types/templates";
 import ReviewTypeSelector from "./ReviewTypeSelector";
 import CycleSelector from "./CycleSelector";
 import EmployeeSelector from "./EmployeeSelector";
 import InitialComments from "./InitialComments";
 import { useCreateReview } from "@/hooks/use-create-review";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { mockTemplates } from "@/components/templates/mockTemplateData";
 
 interface ReviewFormProps {
   onCreateReview: (review: PerformanceReview) => void;
@@ -87,6 +89,12 @@ export default function ReviewForm({
       : []
     : [];
 
+  const [templateId, setTemplateId] = useState<string>("");
+  const applicableTemplates = mockTemplates.filter(t => 
+    (activeTab === "individual" && (t.type === "self" || t.type === "manager")) || 
+    (activeTab === "team" && (t.type === "peer" || t.type === "360"))
+  );
+
   const onFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -102,6 +110,11 @@ export default function ReviewForm({
 
     if (activeTab === "team" && selectedEmployees.length === 0) {
       toast.error("Please select at least one team member");
+      return;
+    }
+    
+    if (!templateId) {
+      toast.error("Please select a review template");
       return;
     }
 
@@ -133,6 +146,29 @@ export default function ReviewForm({
           value={initialComments}
           onChange={setInitialComments}
         />
+
+        <div className="grid gap-2">
+          <Label>Review Template</Label>
+          <Select
+            value={templateId}
+            onValueChange={setTemplateId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a template" />
+            </SelectTrigger>
+            <SelectContent>
+              {applicableTemplates.length > 0 ? (
+                applicableTemplates.map(template => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-templates" disabled>No templates available</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <DialogFooter className="mt-6">
@@ -144,6 +180,7 @@ export default function ReviewForm({
           disabled={
             !cycleId || 
             !selectedCycle || 
+            !templateId ||
             (activeTab === "individual" && selectedEmployees.length !== 1) ||
             (activeTab === "team" && selectedEmployees.length === 0)
           }

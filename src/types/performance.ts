@@ -1,3 +1,4 @@
+
 import { ImprovementPlan } from './development';
 
 export interface PerformanceParameter {
@@ -16,6 +17,7 @@ export interface ReviewCycle {
   parameters: ReviewParameter[]; // Updated from string[] to ReviewParameter[]
   type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
   purpose: 'goal' | 'feedback' | 'performance';
+  templateIds?: string[]; // Reference to templates used in this cycle
   weightings?: {
     [key: string]: number; // Category to weighting mapping (adds up to 100)
   };
@@ -36,6 +38,7 @@ export interface PerformanceReview {
   employeeId: string;
   reviewerId: string;
   cycleId: string;
+  templateId?: string; // Reference to the template used
   status: 'not_started' | 'in_progress' | 'submitted' | 'acknowledged';
   ratings: {
     parameterId: string;
