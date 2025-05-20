@@ -11,7 +11,7 @@ interface KeyResultItemProps {
 }
 
 export default function KeyResultItem({ keyResult, onCheckIn }: KeyResultItemProps) {
-  const formatValue = (value: number, type: KeyResultType) => {
+  const formatValue = (value: number, type: KeyResult['type']) => {
     switch (type) {
       case "percentage":
         return `${value}%`;

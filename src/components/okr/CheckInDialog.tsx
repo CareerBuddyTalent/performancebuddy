@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,7 @@ export default function CheckInDialog({
   const [confidence, setConfidence] = useState<number>(8); // Default confidence: 8 out of 10
   const [notes, setNotes] = useState<string>("");
 
-  const formatValue = (value: number, type: KeyResultType) => {
+  const formatValue = (value: number, type: KeyResult['type']) => {
     switch (type) {
       case "percentage":
         return `${value}%`;
