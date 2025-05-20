@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import KeyResultItem from "./KeyResultItem";
+import KeyResultItem, { KeyResult as KeyResultItemType } from "./KeyResultItem";
 
 // Define the KeyResult type that matches the expected structure
 interface KeyResult {
@@ -73,6 +74,24 @@ export function ObjectiveCard({ objective, onView, onAddKeyResult }: ObjectiveCa
     return status.split('_').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ');
+  };
+
+  // Create a function to convert service KeyResult to component KeyResult
+  const convertKeyResult = (kr: any): KeyResultItemType => {
+    return {
+      id: kr.id,
+      title: kr.title,
+      description: kr.description,
+      progress: kr.progress,
+      status: kr.status,
+      objectiveId: kr.objective_id || objective.id || '',
+      type: kr.type || 'number',
+      currentValue: kr.current_value,
+      targetValue: kr.target_value,
+      startValue: kr.start_value || 0,
+      unit: kr.unit,
+      updated_at: kr.updated_at
+    };
   };
 
   return (
@@ -153,7 +172,7 @@ export function ObjectiveCard({ objective, onView, onAddKeyResult }: ObjectiveCa
               {expanded && (
                 <div className="mt-2 space-y-2">
                   {objective.key_results.map(kr => (
-                    <KeyResultItem key={kr.id} keyResult={kr as KeyResult} />
+                    <KeyResultItem key={kr.id} keyResult={convertKeyResult(kr)} />
                   ))}
                 </div>
               )}
