@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ProgressBar } from "@/components/ui/progress";
+import { ProgressBar } from "@/components/line-manager/ProgressBar";
 import { Bell, CalendarDays, AlertCircle } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { PerformanceImprovementPlan } from "@/types/templates";
