@@ -127,6 +127,7 @@ export default function CompanyObjectives() {
             <ObjectiveCard
               key={objective.id}
               objective={objective}
+              onView={() => console.log("View objective", objective.id)}
               onAddKeyResult={() => handleAddKeyResult(objective.id)}
             />
           ))}

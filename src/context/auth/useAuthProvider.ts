@@ -111,7 +111,7 @@ export const useAuthProvider = (): AuthContextType => {
         }
         setIsLoading(false);
       }
-    }).catch(error => {
+    }).catch((error) => {
       console.error("Error getting initial session:", error);
       setIsLoading(false);
       setIsAuthenticated(false);

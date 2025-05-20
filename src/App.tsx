@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -31,7 +31,9 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <PageLayout />
+                  <PageLayout>
+                    <Outlet />
+                  </PageLayout>
                 </ProtectedRoute>
               }
             >

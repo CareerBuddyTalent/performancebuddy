@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,13 @@ import { formatDistanceToNow } from "date-fns";
 import { CheckCircle, Circle, AlertCircle, Clock, Zap, Ban } from "lucide-react";
 import { OKRProgressBar } from "./OKRProgressBar";
 
-interface ObjectiveCardProps {
+export interface ObjectiveCardProps {
   objective: Objective;
   onView?: () => void;
+  onAddKeyResult?: () => void;
 }
 
-export default function ObjectiveCard({ objective, onView }: ObjectiveCardProps) {
+export default function ObjectiveCard({ objective, onView, onAddKeyResult }: ObjectiveCardProps) {
   const statusIcons = {
     not_started: <Clock className="h-4 w-4 text-gray-400" />,
     in_progress: <Circle className="h-4 w-4 text-blue-500" />,
@@ -92,8 +92,13 @@ export default function ObjectiveCard({ objective, onView }: ObjectiveCardProps)
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full" onClick={onView}>
+      <CardFooter className="flex gap-2">
+        {onAddKeyResult && (
+          <Button variant="outline" className="flex-1" onClick={onAddKeyResult}>
+            Add Key Result
+          </Button>
+        )}
+        <Button variant={onAddKeyResult ? "outline" : "outline"} className={onAddKeyResult ? "flex-1" : "w-full"} onClick={onView}>
           View Details
         </Button>
       </CardFooter>

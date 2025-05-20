@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart, List } from "lucide-react";
@@ -130,6 +129,7 @@ export default function TeamObjectives({ managerId }: TeamObjectivesProps) {
             <ObjectiveCard
               key={objective.id}
               objective={objective}
+              onView={() => console.log("View objective", objective.id)}
               onAddKeyResult={() => handleAddKeyResult(objective.id)}
             />
           ))}
