@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Plus, Settings } from "lucide-react";
 import { ReviewTemplate } from "@/types/templates";
 import { Objective } from "@/types/okr";
 
-import CreateTemplateDialog from "@/components/templates/CreateTemplateDialog";
+import CreateTemplateDialog from "@/components/templates/dialogs/CreateTemplateDialog";
 import PrebuiltTemplateLibrary from "@/components/templates/PrebuiltTemplateLibrary";
 import OKRAlignmentView from "@/components/okr/OKRAlignmentView";
 import CycleScheduler, { CycleSchedule } from "@/components/cycles/CycleScheduler";
