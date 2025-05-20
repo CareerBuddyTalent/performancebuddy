@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewTemplate, ReviewTemplateType } from "@/types/templates";
 import TemplateCard from "@/components/templates/TemplateCard";
-import CreateTemplateDialog from "@/components/templates/CreateTemplateDialog";
+import CreateTemplateDialog from "@/components/templates/dialogs/CreateTemplateDialog";
 import { mockTemplates } from "@/components/templates/mockTemplateData";
 import { hasPermission } from "@/types/performance-permissions";
 
