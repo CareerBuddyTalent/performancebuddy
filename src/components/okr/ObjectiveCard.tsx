@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronUp, Clock, Plus } from "lucide-react";
-import { Objective } from "@/services/objectiveService";
+import { Objective, KeyResult } from "@/services/objectiveService";
 import { OKRProgressBar } from "./OKRProgressBar";
 import KeyResultItem from "./KeyResultItem";
 
