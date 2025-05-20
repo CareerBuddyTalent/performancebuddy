@@ -82,6 +82,18 @@ const sampleObjectives: Objective[] = [
   }
 ];
 
+// Define type for reminders to fix type issues
+type ReminderType = {
+  id: string;
+  templateId: string;
+  cycleId: string;
+  triggerDate: Date;
+  triggerType: "before_end" | "after_start";
+  daysBefore: number;
+  status: "scheduled";
+  recipientType: "everyone" | "reviewers";
+};
+
 const sampleReminderTemplates: ReminderTemplate[] = [
   {
     id: "template-1",
@@ -102,26 +114,26 @@ const sampleReminderTemplates: ReminderTemplate[] = [
 ];
 
 // Fix the reminders type to match the expected types
-const sampleReminders = [
+const sampleReminders: ReminderType[] = [
   {
     id: "reminder-1",
     templateId: "template-1",
     cycleId: "cycle-1",
     triggerDate: new Date(new Date().setDate(new Date().getDate() + 3)),
-    triggerType: "before_end" as const,
+    triggerType: "before_end",
     daysBefore: 3,
-    status: "scheduled" as const,
-    recipientType: "everyone" as const
+    status: "scheduled",
+    recipientType: "everyone"
   },
   {
     id: "reminder-2",
     templateId: "template-2",
     cycleId: "cycle-1",
     triggerDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-    triggerType: "after_start" as const,
+    triggerType: "after_start",
     daysBefore: 0,
-    status: "scheduled" as const,
-    recipientType: "reviewers" as const
+    status: "scheduled",
+    recipientType: "reviewers"
   }
 ];
 
@@ -143,7 +155,7 @@ export default function HRManagerDashboard() {
     ]
   });
   const [reminderTemplates, setReminderTemplates] = useState(sampleReminderTemplates);
-  const [reminders, setReminders] = useState(sampleReminders);
+  const [reminders, setReminders] = useState<ReminderType[]>(sampleReminders);
   
   if (!user) return null;
   
@@ -359,7 +371,7 @@ export default function HRManagerDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <PerformanceBenchmarkingDashboard timeframe={timeframe as "week" | "month" | "quarter" | "year"} />
+              <PerformanceBenchmarkingDashboard timeframe={timeframe} />
             </CardContent>
           </Card>
         </TabsContent>

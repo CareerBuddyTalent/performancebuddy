@@ -1,10 +1,10 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface BenchmarkData {
+export interface BenchmarkData {
   name: string;
   value: number;
   benchmark?: number;
@@ -13,7 +13,7 @@ interface BenchmarkData {
   color?: string;
 }
 
-interface PerformanceBenchmarkChartProps {
+export interface PerformanceBenchmarkChartProps {
   title: string;
   description: string;
   timeframe: 'week' | 'month' | 'quarter' | 'year';
