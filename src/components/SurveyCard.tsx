@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { useState } from "react";
 import { Survey } from "@/types";
@@ -8,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { MessageSquareText, BarChart4, ExternalLink } from "lucide-react";
 import TakeSurveyDialog from "./surveys/TakeSurveyDialog";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 interface SurveyCardProps {
   survey: Survey;
@@ -17,7 +16,7 @@ interface SurveyCardProps {
 
 export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
   const [showTakeSurvey, setShowTakeSurvey] = useState(false);
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   const hasResponded = survey.responses.some(r => r.user_id === user?.id);
   

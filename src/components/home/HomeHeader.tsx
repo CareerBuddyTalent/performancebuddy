@@ -1,6 +1,6 @@
 
 import { User } from "@/types";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 interface HomeHeaderProps {
   user: User;

@@ -1,8 +1,8 @@
 
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 export default function SurveyHeader() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   return (
     <div className="flex flex-col space-y-2">

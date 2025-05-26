@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { hasPermission } from "@/types/performance-permissions";
 import { Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -20,7 +19,7 @@ export default function Performance() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isCreateReviewOpen, setIsCreateReviewOpen] = useState(false);
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   if (!user) return null;
 

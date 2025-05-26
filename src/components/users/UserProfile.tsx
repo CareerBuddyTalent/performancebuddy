@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Building, Users, LineChart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import UserSkills from "./UserSkills";
 import UserValues from "./UserValues";
 
@@ -26,7 +26,7 @@ export default function UserProfile({
   userSkills,
   getPerformanceColor
 }: UserProfileProps) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useClerkAuth();
   const canViewDetails = currentUser?.role === 'admin' || currentUser?.role === 'manager';
 
   return (

@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code, HeartHandshake } from "lucide-react";
@@ -16,7 +15,7 @@ interface SkillsUploaderProps {
 
 export function SkillsUploader({ skills, onSkillAdded, onSkillDeleted }: SkillsUploaderProps) {
   const [activeTab, setActiveTab] = useState("technical");
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   // Filter skills by category and visibility based on user role
   const filterSkillsByRole = (skills: ReviewSkill[], category: string) => {

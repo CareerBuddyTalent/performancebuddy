@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +10,7 @@ import OKRHierarchyTree from "@/components/okr/OKRHierarchyTree";
 import { getObjectiveHierarchy, updateObjectiveAlignment, Objective } from "@/services/objectiveService";
 
 export default function OKRAlignment() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const { toast } = useToast();
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const [loading, setLoading] = useState(true);

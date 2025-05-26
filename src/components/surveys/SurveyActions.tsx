@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Plus, BarChart4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SurveyAnalytics from "./analytics/SurveyAnalytics";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 interface SurveyActionsProps {
   onCreateClick: () => void;
@@ -11,7 +10,7 @@ interface SurveyActionsProps {
 
 export default function SurveyActions({ onCreateClick }: SurveyActionsProps) {
   const [showAnalytics, setShowAnalytics] = useState(false);
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   // Only allow admin and manager roles to create surveys
   const canCreateSurvey = user && (user.role === 'admin' || user.role === 'manager');

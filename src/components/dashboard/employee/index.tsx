@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
 
 import ProfileHeader from "./ProfileHeader";
@@ -13,7 +12,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 
 export default function EmployeeDashboard({ reviews, goals, feedbackEntries, users, parameters }: any) {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const { addNotification } = useNotificationContext();
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);

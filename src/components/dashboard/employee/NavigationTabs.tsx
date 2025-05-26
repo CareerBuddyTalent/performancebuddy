@@ -1,8 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { UserCircle2, ChartBar, Target, Star } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 interface NavigationTabsProps {
@@ -11,7 +10,7 @@ interface NavigationTabsProps {
 
 export default function NavigationTabs({ goalProgress }: NavigationTabsProps) {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   const isActive = (path: string) => location.pathname === path;
   const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');

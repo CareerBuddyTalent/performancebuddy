@@ -1,13 +1,12 @@
-
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { SkillsUploader } from "@/components/reviews/SkillsUploader";
 import { toast } from "sonner";
 import { ReviewSkill } from "@/types";
 import { initialSkills } from "@/data/reviewSkillsData";
 
 export default function ReviewSkills() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [skills, setSkills] = useState<ReviewSkill[]>(initialSkills);
   
   const handleAddSkill = (newSkill: ReviewSkill) => {

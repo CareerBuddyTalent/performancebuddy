@@ -1,6 +1,5 @@
-
-import { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useClerkAuth } from '@/context/ClerkAuthContext';
 import { useLocation } from 'react-router-dom';
 import analytics from '@/services/analytics';
 import env from '@/config/env';
@@ -16,7 +15,7 @@ const AnalyticsContext = createContext<AnalyticsContextType>({
 export const useAnalytics = () => useContext(AnalyticsContext);
 
 export const AnalyticsProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const location = useLocation();
   
   // Initialize analytics with user when available

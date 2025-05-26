@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { ReviewCycle, ReviewParameter } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import CycleManagement from "@/components/cycles/CycleManagement";
@@ -8,7 +7,7 @@ import { reviewCycles as mockCycles } from "@/data/mockData";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function PerformanceCycles() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const { toast } = useToast();
   
   // Convert legacy mock cycles to include the new parameter structure

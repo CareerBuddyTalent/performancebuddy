@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Survey } from "@/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SurveyGrid from "./SurveyGrid";
@@ -22,7 +22,7 @@ export default function SurveyList({
   isLoading = false, 
   error 
 }: SurveyListProps) {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);

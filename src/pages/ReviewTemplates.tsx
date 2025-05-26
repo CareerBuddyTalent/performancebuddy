@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,7 @@ import { mockTemplates } from "@/components/templates/mockTemplateData";
 import { hasPermission } from "@/types/performance-permissions";
 
 export default function ReviewTemplates() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [templates, setTemplates] = useState<ReviewTemplate[]>(mockTemplates);
   const [activeTab, setActiveTab] = useState<ReviewTemplateType | 'all'>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
