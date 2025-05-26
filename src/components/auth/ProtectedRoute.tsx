@@ -1,7 +1,8 @@
 
-import { ReactNode, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { ReactNode } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Navigate, useLocation } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 
 interface ProtectedRouteProps {
@@ -10,28 +11,11 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useClerkAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      // Redirect to login if not authenticated
-      navigate("/login", {
-        state: { from: location.pathname },
-        replace: true
-      });
-    }
-    
-    if (!isLoading && user && requiredRoles.length > 0) {
-      // Check if user has required role
-      if (!requiredRoles.includes(user.role)) {
-        navigate("/unauthorized", { replace: true });
-      }
-    }
-  }, [user, isLoading, navigate, location.pathname, requiredRoles]);
-
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
@@ -39,6 +23,13 @@ export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteP
     );
   }
 
-  // If not loading and we have a user, render children
-  return user ? <>{children}</> : null;
+  if (!isSignedIn) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  if (requiredRoles.length > 0 && user && !requiredRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
 }

@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
-import { AuthProvider } from "@/context/AuthContext";
+import { ClerkAuthProvider } from "@/context/ClerkAuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import PageLayout from "@/components/PageLayout";
@@ -21,7 +21,7 @@ import NotFound from "@/pages/NotFound";
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
+      <ClerkAuthProvider>
         <Router>
           <Routes>
             {/* Public routes */}
@@ -70,7 +70,7 @@ function App() {
           </Routes>
         </Router>
         <Toaster position="top-right" />
-      </AuthProvider>
+      </ClerkAuthProvider>
     </ThemeProvider>
   );
 }

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -15,7 +15,7 @@ import {
 
 export default function UserMenuDropdown() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout } = useClerkAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   if (!user) return null;

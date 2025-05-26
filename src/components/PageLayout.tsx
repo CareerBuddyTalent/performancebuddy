@@ -5,7 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import RoleGuard from "@/components/layout/RoleGuard";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { GlobalLoading } from "@/components/ui/global-loading";
 
 interface PageLayoutProps {
@@ -14,14 +14,12 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ children, allowedRoles = ['admin', 'manager', 'employee'] }: PageLayoutProps) {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated } = useClerkAuth();
 
-  // Show a loading indicator while checking authentication
   if (isLoading) {
     return <GlobalLoading message="Loading application..." fullScreen />;
   }
 
-  // If not loading but not authenticated, RoleGuard will handle the redirect
   if (!isAuthenticated) {
     return (
       <RoleGuard allowedRoles={allowedRoles}>
