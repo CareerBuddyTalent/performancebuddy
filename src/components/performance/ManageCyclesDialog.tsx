@@ -7,9 +7,8 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
-import { ReviewCycle } from "@/types";
-import { reviewCycles as mockCycles } from "@/data/mockData";
 import { useToast } from "@/components/ui/use-toast";
+import { useRealReviewCycles } from "@/hooks/useRealReviewCycles";
 
 interface ManageCyclesDialogProps {
   open: boolean;
@@ -19,7 +18,7 @@ interface ManageCyclesDialogProps {
 export default function ManageCyclesDialog({ open, onOpenChange }: ManageCyclesDialogProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [cycles] = useState<ReviewCycle[]>(mockCycles.slice(0, 3));
+  const { reviewCycles, isLoading } = useRealReviewCycles();
 
   const handleCreateCycle = () => {
     // Close the dialog
@@ -58,7 +57,12 @@ export default function ManageCyclesDialog({ open, onOpenChange }: ManageCyclesD
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          {cycles.length > 0 ? (
+          {isLoading ? (
+            <div className="py-12 text-center text-muted-foreground">
+              <Calendar className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <p>Loading review cycles...</p>
+            </div>
+          ) : reviewCycles.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -70,12 +74,12 @@ export default function ManageCyclesDialog({ open, onOpenChange }: ManageCyclesD
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {cycles.map(cycle => (
+                {reviewCycles.slice(0, 3).map(cycle => (
                   <TableRow key={cycle.id}>
                     <TableCell className="font-medium">{cycle.name}</TableCell>
                     <TableCell>{cycle.type}</TableCell>
-                    <TableCell>{format(new Date(cycle.startDate), 'MMM d, yyyy')}</TableCell>
-                    <TableCell>{format(new Date(cycle.endDate), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{format(new Date(cycle.start_date), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{format(new Date(cycle.end_date), 'MMM d, yyyy')}</TableCell>
                     <TableCell>{getStatusBadge(cycle.status)}</TableCell>
                   </TableRow>
                 ))}

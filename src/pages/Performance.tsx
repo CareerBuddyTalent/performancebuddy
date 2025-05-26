@@ -30,6 +30,18 @@ export default function Performance() {
     setIsCreateReviewOpen(false);
   };
 
+  // Transform review cycles to match expected format
+  const transformedCycles = reviewCycles.map(cycle => ({
+    id: cycle.id,
+    name: cycle.name,
+    startDate: new Date(cycle.start_date),
+    endDate: new Date(cycle.end_date),
+    status: cycle.status as 'draft' | 'active' | 'completed',
+    parameters: cycle.parameters || [],
+    type: cycle.type as 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual',
+    purpose: cycle.purpose as 'goal' | 'feedback' | 'performance'
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-6">
@@ -88,7 +100,7 @@ export default function Performance() {
           open={isCreateReviewOpen}
           onOpenChange={setIsCreateReviewOpen}
           onCreateReview={handleCreateReview}
-          cycles={reviewCycles} 
+          cycles={transformedCycles} 
           currentUser={user}
         />
       )}

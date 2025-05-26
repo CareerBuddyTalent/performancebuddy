@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Company } from "@/types";
-import { companies as mockCompanies } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CompanyContextType {
   companies: Company[];
@@ -18,12 +18,35 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, this would fetch from Supabase
-    setCompanies(mockCompanies);
-    if (mockCompanies.length > 0) {
-      setCurrentCompany(mockCompanies[0]);
-    }
-    setIsLoading(false);
+    const fetchCompanies = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const transformedCompanies: Company[] = (data || []).map(company => ({
+          id: company.id,
+          name: company.name,
+          description: company.description,
+          logoUrl: company.logo_url
+        }));
+
+        setCompanies(transformedCompanies);
+        if (transformedCompanies.length > 0) {
+          setCurrentCompany(transformedCompanies[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+        setCompanies([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCompanies();
   }, []);
 
   return (

@@ -1,5 +1,5 @@
+
 import { User } from "@/types";
-import { reviews as mockReviews } from "@/data/mockData";
 import { Trophy, Star } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -11,28 +11,28 @@ export interface PerformanceScore {
   ranking: number;
 }
 
-export const calculatePerformanceScores = (users: User[]): PerformanceScore[] => {
+export const calculatePerformanceScores = (users: User[], reviews: any[] = []): PerformanceScore[] => {
   // Get all unique user IDs from reviews
-  const userIds = Array.from(new Set(mockReviews.map(review => review.employeeId)));
+  const userIds = Array.from(new Set(reviews.map(review => review.employeeId)));
   
   // Calculate average scores for each user
   const scores = userIds.map(userId => {
-    const userReviews = mockReviews.filter(review => review.employeeId === userId);
-    const totalScore = userReviews.reduce((sum, review) => sum + review.overallRating, 0);
+    const userReviews = reviews.filter(review => review.employeeId === userId);
+    const totalScore = userReviews.reduce((sum, review) => sum + (review.overallRating || 0), 0);
     const averageScore = userReviews.length > 0 ? totalScore / userReviews.length : 0;
     
     // Get the latest review date
     const lastReview = userReviews.sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      new Date(b.updatedAt || b.updated_at).getTime() - new Date(a.updatedAt || a.updated_at).getTime()
     )[0];
     
     const user = users.find(u => u.id === userId);
     
     return {
-      userId,
+      userId: userId as string,
       user: user as User,
       score: parseFloat(averageScore.toFixed(2)),
-      lastReviewDate: lastReview?.updatedAt,
+      lastReviewDate: lastReview?.updatedAt || lastReview?.updated_at,
       ranking: 0 // Will be set later
     };
   });

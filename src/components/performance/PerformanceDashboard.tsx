@@ -49,11 +49,11 @@ export default function PerformanceDashboard() {
     });
   };
 
-  const handleAddGoalSubmit = async (goal: Goal) => {
+  const handleAddGoalSubmit = async (goalData: Omit<Goal, "id" | "createdAt" | "updatedAt">) => {
     if (canManageGoals) {
       try {
         await createGoal({
-          ...goal,
+          ...goalData,
           userId: user?.id || '',
         });
         

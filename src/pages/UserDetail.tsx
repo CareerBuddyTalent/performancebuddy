@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Laptop, Target, LineChart, FileText } from "lucide-react";
 import { User, Goal, Skill } from "@/types";
-import { users as mockUsers, goals as mockGoals, reviews as mockReviews } from "@/data/mockData";
 
 // Import our new components
 import UserProfile from "@/components/users/UserProfile";
@@ -13,6 +12,9 @@ import UserOverview from "@/components/users/UserOverview";
 import UserGoals from "@/components/users/UserGoals";
 import UserSkills from "@/components/users/UserSkills";
 import UserReviews from "@/components/users/UserReviews";
+import { useRealUsers } from "@/hooks/useRealUsers";
+import { useEnhancedGoalsData } from "@/hooks/useEnhancedGoalsData";
+import { useRealReviews } from "@/hooks/useRealReviews";
 
 export default function UserDetail() {
   const { userId } = useParams<{ userId: string }>();
@@ -21,15 +23,19 @@ export default function UserDetail() {
   const [userSkills, setUserSkills] = useState<Skill[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   
+  const { users } = useRealUsers();
+  const { goals } = useEnhancedGoalsData();
+  const { reviews } = useRealReviews();
+  
   // Fetch user data
   useEffect(() => {
-    if (userId) {
-      const foundUser = mockUsers.find(u => u.id === userId);
+    if (userId && users.length > 0) {
+      const foundUser = users.find(u => u.id === userId);
       setUser(foundUser || null);
       
       // Fetch user goals
-      const goals = mockGoals.filter(goal => goal.userId === userId);
-      setUserGoals(goals);
+      const userSpecificGoals = goals.filter(goal => goal.userId === userId);
+      setUserGoals(userSpecificGoals);
       
       // Fetch user skills (mocked for now)
       const mockSkills: Skill[] = [
@@ -103,7 +109,7 @@ export default function UserDetail() {
       
       setUserSkills(mockSkills);
     }
-  }, [userId]);
+  }, [userId, users, goals]);
   
   if (!user) {
     return (
@@ -118,7 +124,7 @@ export default function UserDetail() {
   }
   
   // Calculate performance data
-  const userReviews = mockReviews.filter(review => review.employeeId === userId);
+  const userReviews = reviews.filter(review => review.employeeId === userId);
   const averageRating = userReviews.length > 0
     ? userReviews.reduce((sum, review) => sum + review.overallRating, 0) / userReviews.length
     : 0;

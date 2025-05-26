@@ -1,20 +1,25 @@
 
 import { useState, useEffect } from "react";
-import { users, reviews, reviewCycles } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy, AlertTriangle } from "lucide-react";
 import UserPerformanceRanking from "@/components/UserPerformanceRanking";
-import { calculatePerformanceScores } from "@/utils/performanceUtils";
 import TopUnderperformers from "./TopUnderperformers";
+import { useRealUsers } from "@/hooks/useRealUsers";
+import { useRealReviews } from "@/hooks/useRealReviews";
+import { useRealReviewCycles } from "@/hooks/useRealReviewCycles";
 
 export default function PerformanceRankingsDashboard() {
   const [filter, setFilter] = useState<'all' | 'department' | 'cycle'>('all');
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedCycle, setSelectedCycle] = useState<string>("all");
-  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  
+  const { users } = useRealUsers();
+  const { reviews } = useRealReviews();
+  const { reviewCycles } = useRealReviewCycles();
   
   // Extract unique departments from users
   const uniqueDepartments = Array.from(
@@ -45,7 +50,7 @@ export default function PerformanceRankingsDashboard() {
     }
     
     setFilteredUsers(filtered);
-  }, [filter, selectedDepartment, selectedCycle]);
+  }, [filter, selectedDepartment, selectedCycle, users, reviews]);
   
   return (
     <Card className="shadow-md">

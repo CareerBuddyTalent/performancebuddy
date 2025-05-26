@@ -10,7 +10,7 @@ import { User, Feedback } from "@/types";
 import { useForm } from "react-hook-form";
 import { toast } from "@/hooks/use-toast";
 import { v4 as uuidv4 } from 'uuid';
-import { users } from "@/data/mockData";
+import { useRealUsers } from "@/hooks/useRealUsers";
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -32,6 +32,7 @@ export default function FeedbackDialog({
   onSubmit,
   currentUser
 }: FeedbackDialogProps) {
+  const { users } = useRealUsers();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   
   // Create form
@@ -53,10 +54,10 @@ export default function FeedbackDialog({
   
   // Filter out the current user from the recipients list
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && users.length > 0) {
       setFilteredUsers(users.filter(u => u.id !== currentUser.id));
     }
-  }, [currentUser]);
+  }, [currentUser, users]);
   
   const handleSubmit = (values: FeedbackFormValues) => {
     if (!currentUser || !values.recipientId || !values.content) return;
