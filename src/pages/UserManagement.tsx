@@ -11,25 +11,82 @@ import { User, Company } from "@/types";
 import DepartmentManagement from "@/components/DepartmentManagement";
 import UserPerformanceRanking from "@/components/UserPerformanceRanking";
 import { useToast } from "@/components/ui/use-toast";
-import { users as mockUsers, companies as mockCompanies } from "@/data/mockData";
-import CompanySelector from "@/components/CompanySelector";
+import { supabase } from "@/integrations/supabase/client";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 export default function UserManagement() {
   const { user } = useAuth();
+  const { user: clerkUser } = useClerkAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("allusers");
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [companies, setCompanies] = useState<Company[]>(mockCompanies);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
-    searchParams.get("company") || (companies.length > 0 ? companies[0].id : "")
-  );
+  const [users, setUsers] = useState<User[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isAdmin = user?.role === "admin";
   
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch users with their roles
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select(`
+            *,
+            user_roles!inner(role)
+          `);
+
+        if (profilesError) throw profilesError;
+
+        // Transform data to match User interface
+        const transformedUsers: User[] = (profilesData || []).map(profile => ({
+          id: profile.id,
+          name: profile.name || profile.email.split('@')[0],
+          email: profile.email,
+          role: profile.user_roles?.role || 'employee',
+          department: profile.department,
+          position: profile.position,
+          profilePicture: profile.profile_picture,
+          manager: profile.manager,
+          companyId: profile.company_id || undefined
+        }));
+
+        setUsers(transformedUsers);
+        
+        // Extract unique departments
+        const depts = Array.from(
+          new Set(
+            transformedUsers
+              .map(user => user.department)
+              .filter(Boolean) as string[]
+          )
+        );
+        setDepartments(depts);
+
+      } catch (error: any) {
+        console.error('Error fetching users:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load users.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (clerkUser) {
+      fetchUsers();
+    }
+  }, [clerkUser, toast]);
+
   useEffect(() => {
     let companyUsers = users;
     
@@ -40,15 +97,6 @@ export default function UserManagement() {
     }
     
     setFilteredUsers(companyUsers);
-    
-    const depts = Array.from(
-      new Set(
-        companyUsers
-          .map(user => user.department)
-          .filter(Boolean) as string[]
-      )
-    );
-    setDepartments(depts);
     
     if (isAdmin && selectedCompanyId) {
       setSearchParams({ company: selectedCompanyId });
@@ -61,19 +109,52 @@ export default function UserManagement() {
     setSelectedCompanyId(companyId);
   };
   
-  const handleAddUser = (newUser: User) => {
-    const userWithCompany = {
-      ...newUser,
-      companyId: selectedCompanyId,
-      company: companies.find(c => c.id === selectedCompanyId)
-    };
-    
-    setUsers(prev => [...prev, userWithCompany]);
-    toast({
-      title: "User added",
-      description: `${newUser.name} has been added to the platform`,
-    });
-    setShowAddUserDialog(false);
+  const handleAddUser = async (newUser: User) => {
+    try {
+      // Create user profile in Supabase
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
+          department: newUser.department,
+          position: newUser.position,
+          manager: newUser.manager
+        });
+
+      if (profileError) throw profileError;
+
+      // Create user role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: newUser.id,
+          role: newUser.role
+        });
+
+      if (roleError) throw roleError;
+
+      const userWithCompany = {
+        ...newUser,
+        companyId: selectedCompanyId,
+        company: companies.find(c => c.id === selectedCompanyId)
+      };
+      
+      setUsers(prev => [...prev, userWithCompany]);
+      toast({
+        title: "User added",
+        description: `${newUser.name} has been added to the platform`,
+      });
+      setShowAddUserDialog(false);
+    } catch (error: any) {
+      console.error('Error adding user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add user.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddDepartment = (department: string) => {
@@ -86,13 +167,55 @@ export default function UserManagement() {
     }
   };
 
-  const handleUpdateUser = (updatedUser: User) => {
-    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-    toast({
-      title: "User updated",
-      description: `${updatedUser.name}'s profile has been updated`,
-    });
+  const handleUpdateUser = async (updatedUser: User) => {
+    try {
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: updatedUser.name,
+          department: updatedUser.department,
+          position: updatedUser.position,
+          manager: updatedUser.manager
+        })
+        .eq('id', updatedUser.id);
+
+      if (profileError) throw profileError;
+
+      // Update role if changed
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .upsert({
+          user_id: updatedUser.id,
+          role: updatedUser.role
+        });
+
+      if (roleError) throw roleError;
+
+      setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+      toast({
+        title: "User updated",
+        description: `${updatedUser.name}'s profile has been updated`,
+      });
+    } catch (error: any) {
+      console.error('Error updating user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex items-center justify-center h-32">
+          <div className="text-muted-foreground">Loading users...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -136,7 +259,7 @@ export default function UserManagement() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-muted-foreground" />
-                  {companies.find(c => c.id === selectedCompanyId)?.name || "All Companies"}
+                  Team Members
                 </CardTitle>
                 <CardDescription>
                   Manage team members and their roles in the organization
@@ -181,7 +304,7 @@ export default function UserManagement() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-muted-foreground" />
-                    {companies.find(c => c.id === selectedCompanyId)?.name || "All Companies"} - Performance Rankings
+                    Performance Rankings
                   </CardTitle>
                   <CardDescription>
                     View top performers and performance rankings across the organization
