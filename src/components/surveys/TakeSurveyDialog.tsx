@@ -10,16 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { Survey } from "@/types";
+import { Survey, SurveyQuestion } from "@/types";
 import { toast } from "sonner";
-
-interface Question {
-  id: string;
-  text: string;
-  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
-  required: boolean;
-  options?: string[];
-}
 
 interface TakeSurveyDialogProps {
   survey: Survey;
@@ -98,7 +90,7 @@ export default function TakeSurveyDialog({
     toast.success("Survey submitted successfully");
   };
 
-  const renderQuestionInput = (question: Question) => {
+  const renderQuestionInput = (question: SurveyQuestion) => {
     const currentValue = responses[question.id];
 
     switch (question.type) {
@@ -111,17 +103,7 @@ export default function TakeSurveyDialog({
           />
         );
 
-      case 'textarea':
-        return (
-          <Textarea
-            value={currentValue || ''}
-            onChange={(e) => handleResponse(question.id, e.target.value)}
-            placeholder="Enter your answer"
-            rows={4}
-          />
-        );
-
-      case 'radio':
+      case 'multiple_choice':
         return (
           <RadioGroup
             value={currentValue}
@@ -134,29 +116,6 @@ export default function TakeSurveyDialog({
               </div>
             ))}
           </RadioGroup>
-        );
-
-      case 'checkbox':
-        return (
-          <div className="space-y-2">
-            {question.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`${question.id}-${index}`}
-                  checked={currentValue?.includes(option) || false}
-                  onCheckedChange={(checked) => {
-                    const current = currentValue || [];
-                    if (checked) {
-                      handleResponse(question.id, [...current, option]);
-                    } else {
-                      handleResponse(question.id, current.filter((v: string) => v !== option));
-                    }
-                  }}
-                />
-                <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
-              </div>
-            ))}
-          </div>
         );
 
       case 'rating':
@@ -176,7 +135,14 @@ export default function TakeSurveyDialog({
         );
 
       default:
-        return null;
+        return (
+          <Textarea
+            value={currentValue || ''}
+            onChange={(e) => handleResponse(question.id, e.target.value)}
+            placeholder="Enter your answer"
+            rows={4}
+          />
+        );
     }
   };
 

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { SurveyQuestion } from '@/types';
 
 export interface CreateSurveyForm {
   title: string;
@@ -20,26 +21,13 @@ interface SurveyData {
   start_date?: string;
   end_date?: string;
   target_audience: string;
-  questions: Array<{
-    text: string;
-    type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
-    required: boolean;
-    options?: string[];
-  }>;
-}
-
-interface Question {
-  id: string;
-  text: string;
-  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
-  required: boolean;
-  options?: string[];
+  questions: Array<Partial<SurveyQuestion>>;
 }
 
 export function useSurveyCreation(onCreateSurvey?: Function, onClose?: Function) {
   const { user } = useClerkAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Partial<SurveyQuestion>[]>([]);
 
   const form = useForm<CreateSurveyForm>({
     defaultValues: {
@@ -53,8 +41,8 @@ export function useSurveyCreation(onCreateSurvey?: Function, onClose?: Function)
 
   const canCreateSurvey = user?.role === 'admin' || user?.role === 'manager';
 
-  const handleAddQuestion = (question: Omit<Question, 'id'>) => {
-    const newQuestion: Question = {
+  const handleAddQuestion = (question: Partial<SurveyQuestion>) => {
+    const newQuestion: Partial<SurveyQuestion> = {
       ...question,
       id: crypto.randomUUID()
     };
@@ -90,9 +78,9 @@ export function useSurveyCreation(onCreateSurvey?: Function, onClose?: Function)
       if (surveyData.questions.length > 0) {
         const questionsToInsert = surveyData.questions.map((question, index) => ({
           survey_id: survey.id,
-          text: question.text,
-          type: question.type,
-          required: question.required,
+          text: question.text || '',
+          type: question.type || 'text',
+          required: question.required || false,
           order_index: index,
           options: question.options || null
         }));

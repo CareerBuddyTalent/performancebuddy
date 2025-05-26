@@ -88,7 +88,7 @@ export default function ReviewTemplates() {
       <CreateTemplateDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
-        onCreate={handleCreateTemplate}
+        onCreateTemplate={handleCreateTemplate}
       />
     </div>
   );

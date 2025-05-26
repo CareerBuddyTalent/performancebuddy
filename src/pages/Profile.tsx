@@ -280,7 +280,7 @@ export default function Profile() {
                           <div className="flex justify-between items-center mb-2">
                             <h4 className="font-medium">{userSkill.skill.name}</h4>
                             <Badge variant="outline">
-                              Level {userSkill.competency_level}/5
+                              Level {userSkill.proficiency_level}/5
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-2">
@@ -289,7 +289,7 @@ export default function Profile() {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
                               className="bg-blue-600 h-2 rounded-full" 
-                              style={{ width: `${(userSkill.competency_level / 5) * 100}%` }}
+                              style={{ width: `${(userSkill.proficiency_level / 5) * 100}%` }}
                             />
                           </div>
                         </div>
