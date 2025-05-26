@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { useState } from "react";
 import { Survey } from "@/types";
@@ -5,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { MessageSquareText, BarChart4, ExternalLink } from "lucide-react";
+import { MessageSquareText, BarChart4 } from "lucide-react";
 import TakeSurveyDialog from "./surveys/TakeSurveyDialog";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
 
@@ -30,6 +31,11 @@ export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
     draft: "bg-slate-100 text-slate-700",
     active: "bg-green-100 text-green-700",
     closed: "bg-purple-100 text-purple-700"
+  };
+
+  const handleSubmitSurvey = (responses: any) => {
+    console.log('Survey responses submitted:', responses);
+    // Handle survey submission here
   };
   
   return (
@@ -97,6 +103,7 @@ export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
           survey={survey}
           open={showTakeSurvey}
           onClose={() => setShowTakeSurvey(false)}
+          onSubmit={handleSubmitSurvey}
         />
       )}
     </>

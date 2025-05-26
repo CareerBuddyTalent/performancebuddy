@@ -10,8 +10,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { Survey, Question } from "@/types";
+import { Survey } from "@/types";
 import { toast } from "sonner";
+
+interface Question {
+  id: string;
+  text: string;
+  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
+  required: boolean;
+  options?: string[];
+}
 
 interface TakeSurveyDialogProps {
   survey: Survey;

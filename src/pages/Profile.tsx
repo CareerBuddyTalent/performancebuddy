@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

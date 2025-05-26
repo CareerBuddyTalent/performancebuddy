@@ -1,8 +1,17 @@
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useClerkAuth } from '@/context/ClerkAuthContext';
+
+export interface CreateSurveyForm {
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  targetAudience: 'all' | 'department' | 'team';
+}
 
 interface SurveyData {
   title: string;
@@ -19,9 +28,38 @@ interface SurveyData {
   }>;
 }
 
-export function useSurveyCreation() {
+interface Question {
+  id: string;
+  text: string;
+  type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
+  required: boolean;
+  options?: string[];
+}
+
+export function useSurveyCreation(onCreateSurvey?: Function, onClose?: Function) {
   const { user } = useClerkAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  const form = useForm<CreateSurveyForm>({
+    defaultValues: {
+      title: '',
+      description: '',
+      startDate: '',
+      endDate: '',
+      targetAudience: 'all'
+    }
+  });
+
+  const canCreateSurvey = user?.role === 'admin' || user?.role === 'manager';
+
+  const handleAddQuestion = (question: Omit<Question, 'id'>) => {
+    const newQuestion: Question = {
+      ...question,
+      id: crypto.randomUUID()
+    };
+    setQuestions([...questions, newQuestion]);
+  };
 
   const createSurvey = async (surveyData: SurveyData) => {
     if (!user) {
@@ -77,8 +115,33 @@ export function useSurveyCreation() {
     }
   };
 
+  const handleSubmit = async (data: CreateSurveyForm) => {
+    const surveyData: SurveyData = {
+      title: data.title,
+      description: data.description,
+      status: 'draft',
+      start_date: data.startDate,
+      end_date: data.endDate,
+      target_audience: data.targetAudience,
+      questions: questions
+    };
+
+    const result = await createSurvey(surveyData);
+    if (result && onCreateSurvey) {
+      onCreateSurvey(result);
+    }
+    if (result && onClose) {
+      onClose();
+    }
+  };
+
   return {
+    form,
+    questions,
+    canCreateSurvey,
     createSurvey,
-    isSubmitting
+    isSubmitting,
+    handleSubmit,
+    handleAddQuestion
   };
 }
