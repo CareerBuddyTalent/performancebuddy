@@ -20,23 +20,17 @@ export default function PerformanceStats({ performanceGoals }: PerformanceStatsP
   
   const completionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
   
-  // Calculate metrics from enhanced goal data
+  // Calculate metrics from goal data
   const totalMetrics = performanceGoals.reduce((sum, goal) => {
-    if ('enhancedMetrics' in goal && goal.enhancedMetrics) {
-      return sum + goal.enhancedMetrics.length;
-    }
-    return sum + (goal.metrics?.length || 0);
+    return sum + (Array.isArray(goal.metrics) ? goal.metrics.length : 0);
   }, 0);
   
   const totalMilestones = performanceGoals.reduce((sum, goal) => {
-    if ('milestones' in goal && goal.milestones) {
-      return sum + goal.milestones.length;
-    }
-    return sum;
+    return sum + (Array.isArray(goal.milestones) ? goal.milestones.length : 0);
   }, 0);
   
   const completedMilestones = performanceGoals.reduce((sum, goal) => {
-    if ('milestones' in goal && goal.milestones) {
+    if (Array.isArray(goal.milestones)) {
       return sum + goal.milestones.filter(m => m.status === 'completed').length;
     }
     return sum;

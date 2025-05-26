@@ -2,29 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useClerkAuth } from '@/context/ClerkAuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Goal } from '@/types';
+import { Goal, Milestone } from '@/types';
 import { useGoalsData } from './useGoalsData';
-
-interface EnhancedGoal extends Goal {
-  milestones?: Array<{
-    id: string;
-    title: string;
-    status: 'not_started' | 'in_progress' | 'completed';
-    due_date?: string;
-  }>;
-  enhancedMetrics?: Array<{
-    id: string;
-    name: string;
-    target_value: number;
-    current_value: number;
-    unit: string;
-  }>;
-}
 
 export function useEnhancedGoalsData() {
   const { user } = useClerkAuth();
   const { goals, isLoading: goalsLoading, error: goalsError, ...goalActions } = useGoalsData();
-  const [enhancedGoals, setEnhancedGoals] = useState<EnhancedGoal[]>([]);
+  const [enhancedGoals, setEnhancedGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,12 +40,36 @@ export function useEnhancedGoalsData() {
 
         if (metricsError) throw metricsError;
 
-        // Combine goals with their enhancements
-        const enhanced = goals.map(goal => ({
-          ...goal,
-          milestones: milestonesData?.filter(m => m.goal_id === goal.id) || [],
-          enhancedMetrics: metricsData?.filter(m => m.goal_id === goal.id) || []
-        }));
+        // Transform and combine goals with their enhancements
+        const enhanced = goals.map(goal => {
+          // Transform milestones to match Milestone interface
+          const milestones: Milestone[] = (milestonesData || [])
+            .filter(m => m.goal_id === goal.id)
+            .map(m => ({
+              id: m.id,
+              goalId: m.goal_id,
+              title: m.title,
+              status: m.status as "not_started" | "in_progress" | "completed",
+              dueDate: m.due_date ? new Date(m.due_date) : new Date(),
+              completedDate: undefined
+            }));
+
+          // Transform metrics to match Goal metrics interface
+          const metrics = (metricsData || [])
+            .filter(m => m.goal_id === goal.id)
+            .map(m => ({
+              name: m.name,
+              target: m.target_value,
+              current: m.current_value,
+              unit: m.unit
+            }));
+
+          return {
+            ...goal,
+            milestones,
+            metrics
+          };
+        });
 
         setEnhancedGoals(enhanced);
         setError(null);

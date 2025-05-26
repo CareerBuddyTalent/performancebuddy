@@ -120,6 +120,27 @@ export default function PerformanceGoalsTab({
     }
   };
 
+  // Create a wrapper function to handle the update goal signature mismatch
+  const handleEditGoal = async (goal: Goal) => {
+    try {
+      if (onUpdateGoal) {
+        onUpdateGoal(goal);
+      } else {
+        await updateGoal(goal.id, goal);
+        toast({
+          title: "Goal updated",
+          description: "Goal has been updated successfully.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update goal.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -146,7 +167,7 @@ export default function PerformanceGoalsTab({
       
       <GoalTableWrapper 
         goals={goals}
-        onEditGoal={onUpdateGoal || updateGoal}
+        onEditGoal={handleEditGoal}
         onDeleteGoal={handleDelete}
         onUpdateStatus={handleUpdateStatus}
         onUpdateProgress={handleUpdateProgress}
