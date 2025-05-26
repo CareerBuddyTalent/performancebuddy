@@ -1,185 +1,240 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { reviews, goals, feedbackEntries, users, parameters } from "@/data/mockData";
-import { PerformanceReview } from "@/types";
-import UserPerformanceRanking from "@/components/UserPerformanceRanking";
-import DashboardStats from "@/components/dashboard/DashboardStats";
-import DashboardOverview from "@/components/dashboard/DashboardOverview";
-import TeamActivitySection from "@/components/dashboard/TeamActivitySection";
-import AnalyticsContent from "@/components/dashboard/AnalyticsContent";
-import EmployeeDashboard from "@/components/dashboard/employee";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Trophy } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { toast } from "sonner";
 
-// Mock data for recent activity
-const recentActivity = [
-  {
-    type: "review",
-    date: new Date(2025, 3, 16),
-    data: { reviewId: "r123" },
-    message: "Alex Chen completed a performance review for Sarah Johnson",
-    user: {
-      name: "Alex Chen",
-      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    }
-  },
-  {
-    type: "goal",
-    date: new Date(2025, 3, 15),
-    data: { goalId: "g456" },
-    message: "Marcus Wong set a new quarterly goal: Improve team velocity by 15%",
-    user: {
-      name: "Marcus Wong",
-      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    }
-  },
-  {
-    type: "feedback",
-    date: new Date(2025, 3, 14),
-    data: { feedbackId: "f789" },
-    message: "Emily Davis provided positive feedback for the product team",
-    user: {
-      name: "Emily Davis",
-      avatar: "/lovable-uploads/eae3bd18-a4fb-4ca1-8ec2-cbf60f095332.png",
-    }
-  },
-  {
-    type: "system",
-    date: new Date(2025, 3, 12),
-    data: { cycleId: "c101" },
-    message: "Q2 Performance Review cycle has been initiated by the system",
-  }
-];
+import { useState } from "react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRealDashboardData } from "@/hooks/useRealDashboardData";
+import { useRealPerformanceData } from "@/hooks/useRealPerformanceData";
+import { BarChart3, Users, Target, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const [teamReviews, setTeamReviews] = useState<PerformanceReview[]>([]);
-  const [myReviews, setMyReviews] = useState<PerformanceReview[]>([]);
-  const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (!user) return;
-
-    console.log("Dashboard - Current user role:", user.role);
-
-    // Filter reviews based on user role
-    if (user.role === 'admin') {
-      setTeamReviews(reviews);
-      console.log("Admin dashboard loaded with all reviews");
-    } else if (user.role === 'manager') {
-      setTeamReviews(reviews.filter(review => review.reviewerId === user.id));
-      console.log("Manager dashboard loaded with filtered reviews");
-    }
-    
-    setMyReviews(reviews.filter(review => review.employeeId === user.id));
-    
-    if (user.role === 'admin') {
-      toast.success(`Welcome, Administrator ${user.name}!`);
-    } else if (user.role === 'manager') {
-      toast.success(`Welcome, Manager ${user.name}!`);
-    } else {
-      toast.success(`Welcome, ${user.name}!`);
-    }
-  }, [user]);
-
-  // Filter users based on role
-  const getRelevantUsers = () => {
-    if (!user) return [];
-    
-    if (user.role === 'admin') {
-      return users; // All users for admin
-    } else if (user.role === 'manager') {
-      // Only team members for managers
-      return users.filter(u => u.manager === user.name);
-    }
-    return [];
-  };
+  const { user } = useClerkAuth();
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  const { tasks, stats, isLoading: dashboardLoading } = useRealDashboardData();
+  const { teamMembers, isLoading: teamLoading } = useRealPerformanceData();
 
   if (!user) {
-    console.log("Dashboard - No user found, rendering null");
-    return null;
-  }
-  
-  // Render employee dashboard for employee users
-  if (user.role === 'employee') {
-    console.log("Rendering employee dashboard");
     return (
-      <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
-        <EmployeeDashboard 
-          reviews={reviews}
-          goals={goals}
-          feedbackEntries={feedbackEntries}
-          users={users}
-          parameters={parameters}
-        />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-muted-foreground">Please log in to continue.</div>
       </div>
     );
   }
 
-  // Render manager/admin dashboard
-  console.log("Rendering manager/admin dashboard");
+  if (dashboardLoading || teamLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-muted-foreground">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <DashboardStats 
-        user={user} 
-        myReviews={myReviews} 
-        teamReviews={teamReviews} 
-        goals={goals}
-        users={users}
-      />
-      
-      {/* Top Performers Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {user.role === 'manager' && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-                Team Top Performers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UserPerformanceRanking users={getRelevantUsers()} limit={5} />
-            </CardContent>
-          </Card>
-        )}
-        
-        {user.role === 'admin' && (
-          <Card className="md:col-span-2">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
-                Company Top Performers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UserPerformanceRanking users={users} limit={10} />
-            </CardContent>
-          </Card>
-        )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {user.name}! Here's your performance overview.
+          </p>
+        </div>
+        <Badge variant="secondary" className="capitalize">
+          {user.role}
+        </Badge>
       </div>
 
-      <Tabs defaultValue="analytics" className="space-y-4">
-        <TabsList className="w-full justify-start overflow-x-auto">
-          <TabsTrigger value="analytics" className="px-3 py-1.5">Analytics</TabsTrigger>
-          <TabsTrigger value="activity" className="px-3 py-1.5">Recent Activity</TabsTrigger>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Goals</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalGoals}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.completedGoals} completed
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.pendingReviews}</div>
+            <p className="text-xs text-muted-foreground">
+              Reviews to complete
+            </p>
+          </CardContent>
+        </Card>
+
+        {user.role === 'manager' && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Team Size</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.teamSize}</div>
+              <p className="text-xs text-muted-foreground">
+                Direct reports
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.averageProgress}%</div>
+            <p className="text-xs text-muted-foreground">
+              Goal completion rate
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          {user.role === 'manager' && <TabsTrigger value="team">Team</TabsTrigger>}
         </TabsList>
         
-        <TabsContent value="analytics" className="space-y-4 mt-4">
-          <AnalyticsContent 
-            userRole={user.role} 
-            timeframe={timeframe} 
-            handleTimeframeChange={setTimeframe} 
-          />
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Tasks</CardTitle>
+                <CardDescription>Your latest activities and pending items</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {tasks.slice(0, 5).map((task) => (
+                    <div key={task.id} className="flex items-center justify-between p-2 border rounded">
+                      <div>
+                        <p className="font-medium text-sm">{task.title}</p>
+                        <p className="text-xs text-muted-foreground">{task.description}</p>
+                      </div>
+                      <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'default' : 'secondary'}>
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+                {tasks.length === 0 && (
+                  <p className="text-muted-foreground text-center py-4">No pending tasks</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {user.role === 'manager' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Overview</CardTitle>
+                  <CardDescription>Your direct reports</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {teamMembers.slice(0, 5).map((member) => (
+                      <div key={member.id} className="flex items-center space-x-3 p-2 border rounded">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                          {member.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{member.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {teamMembers.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">No team members</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
-        
-        <TabsContent value="activity" className="space-y-4 mt-4">
-          <TeamActivitySection recentActivity={recentActivity} />
+
+        <TabsContent value="tasks" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Tasks</CardTitle>
+              <CardDescription>Complete view of your pending tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {tasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-3 border rounded">
+                    <div className="flex-1">
+                      <p className="font-medium">{task.title}</p>
+                      <p className="text-sm text-muted-foreground">{task.description}</p>
+                      {task.due_date && (
+                        <p className="text-xs text-muted-foreground">
+                          Due: {new Date(task.due_date).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'default' : 'secondary'}>
+                        {task.priority}
+                      </Badge>
+                      <Badge variant="outline">{task.type}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {tasks.length === 0 && (
+                <p className="text-muted-foreground text-center py-8">No tasks found</p>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
+
+        {user.role === 'manager' && (
+          <TabsContent value="team" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Management</CardTitle>
+                <CardDescription>Manage your direct reports</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {teamMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-4 border rounded">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          {member.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-sm text-muted-foreground">{member.email}</p>
+                          <p className="text-xs text-muted-foreground capitalize">{member.role}</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        View Profile
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                {teamMembers.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">No team members found</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

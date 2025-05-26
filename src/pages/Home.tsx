@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import HomeHeader from "@/components/home/HomeHeader";
 import MainContent from "@/components/home/MainContent";
 import FavoritesSection from "@/components/home/FavoritesSection";
@@ -9,7 +9,7 @@ import { useRealPerformanceData } from "@/hooks/useRealPerformanceData";
 import { Card } from "@/components/ui/card";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [activeTab, setActiveTab] = useState("tasks");
   
   const { tasks, stats, isLoading: dashboardLoading } = useRealDashboardData();

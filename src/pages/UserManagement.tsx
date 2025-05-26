@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,8 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 export default function UserManagement() {
-  const { user } = useAuth();
-  const { user: clerkUser } = useClerkAuth();
+  const { user } = useClerkAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("allusers");
@@ -51,7 +49,9 @@ export default function UserManagement() {
           id: profile.id,
           name: profile.name || profile.email.split('@')[0],
           email: profile.email,
-          role: profile.user_roles?.role || 'employee',
+          role: Array.isArray(profile.user_roles) && profile.user_roles.length > 0 
+            ? profile.user_roles[0].role 
+            : 'employee',
           department: profile.department,
           position: profile.position,
           profilePicture: profile.profile_picture,
@@ -83,10 +83,10 @@ export default function UserManagement() {
       }
     };
 
-    if (clerkUser) {
+    if (user) {
       fetchUsers();
     }
-  }, [clerkUser, toast]);
+  }, [user, toast]);
 
   useEffect(() => {
     let companyUsers = users;
