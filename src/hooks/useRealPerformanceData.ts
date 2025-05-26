@@ -79,12 +79,14 @@ export function useRealPerformanceData() {
 
         if (teamError) throw teamError;
 
-        // Transform team data
+        // Transform team data - fix the role access issue
         const transformedTeam: TeamMember[] = (teamData || []).map(member => ({
           id: member.id,
           name: member.name || member.email.split('@')[0],
           email: member.email,
-          role: member.user_roles?.role || 'employee',
+          role: Array.isArray(member.user_roles) && member.user_roles.length > 0 
+            ? member.user_roles[0].role 
+            : 'employee',
           department: member.department,
           position: member.position,
           profile_picture: member.profile_picture,

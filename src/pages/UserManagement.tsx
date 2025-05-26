@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Filter, Download, BarChart, Building2 } from "lucide-react";
 import UserList from "@/components/UserList";
 import AddUserDialog from "@/components/AddUserDialog";
+import CompanySelector from "@/components/CompanySelector";
 import { User, Company } from "@/types";
 import DepartmentManagement from "@/components/DepartmentManagement";
 import UserPerformanceRanking from "@/components/UserPerformanceRanking";
