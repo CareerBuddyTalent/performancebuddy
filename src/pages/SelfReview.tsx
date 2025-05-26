@@ -1,163 +1,230 @@
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Clock, ChevronLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, FileText, Clock, CheckCircle } from "lucide-react";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
-import { ReviewSkill } from "@/types";
-import { initialSkills } from "@/data/reviewSkillsData";
-import { Link } from "react-router-dom";
-import { getReviewDraft, formatLastSaved } from "@/utils/reviewUtils";
-
-// Mock data - Replace with actual data from your backend
-const mockParameters = [
-  {
-    id: "1",
-    name: "Technical Skills",
-    description: "Your proficiency in required technical skills for your role"
-  },
-  {
-    id: "2",
-    name: "Communication",
-    description: "Ability to communicate effectively with team members and stakeholders"
-  },
-  {
-    id: "3",
-    name: "Initiative & Innovation",
-    description: "Taking initiative and bringing innovative solutions to challenges"
-  },
-  {
-    id: "4",
-    name: "Collaboration",
-    description: "Working effectively with others to achieve common goals"
-  }
-];
-
-const mockActiveCycle = {
-  id: "cycle1",
-  name: "Q2 2025 Performance Review",
-  deadline: "2025-06-30",
-  status: "active",
-  type: "Quarterly"
-};
 
 export default function SelfReview() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [skills, setSkills] = useState<ReviewSkill[]>([]);
-  const [hasDraft, setHasDraft] = useState(false);
-  const [draftLastSaved, setDraftLastSaved] = useState<Date | null>(null);
+  const { user } = useClerkAuth();
+  const [selectedCycle, setSelectedCycle] = useState<string | null>(null);
 
-  // In a real app, fetch skills and active cycle from your backend
-  useEffect(() => {
-    // Simulating API call with mock data
-    setSkills(initialSkills || []);
-    
-    // Check for existing draft
-    const draft = getReviewDraft(mockActiveCycle.id);
-    if (draft) {
-      setHasDraft(true);
-      setDraftLastSaved(new Date(draft.lastSaved));
+  // Mock review cycles - replace with real data
+  const availableCycles = [
+    {
+      id: "cycle1",
+      name: "Q1 2024 Performance Review",
+      deadline: "2024-03-31",
+      status: "active",
+      hasSubmitted: false
+    },
+    {
+      id: "cycle2", 
+      name: "Mid-Year 2023 Review",
+      deadline: "2023-06-30",
+      status: "completed",
+      hasSubmitted: true
     }
-  }, []);
+  ];
 
-  const handleSubmitReview = async (data: any) => {
-    setIsSubmitting(true);
-    
-    try {
-      // TODO: Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Review submitted",
-        description: "Your self review has been submitted successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit review. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  if (!user) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">Please log in to complete your self-review.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleReviewSubmit = (reviewData: any) => {
+    console.log('Self-review submitted:', reviewData);
+    // Handle review submission logic here
   };
 
-  // Calculate days remaining until deadline
-  const getDaysRemaining = () => {
-    const today = new Date();
-    const deadlineDate = new Date(mockActiveCycle.deadline);
-    const diffTime = deadlineDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+  const activeCycles = availableCycles.filter(c => c.status === 'active');
+  const completedCycles = availableCycles.filter(c => c.status === 'completed');
 
-  const daysRemaining = getDaysRemaining();
+  if (selectedCycle) {
+    const cycle = availableCycles.find(c => c.id === selectedCycle);
+    return (
+      <div className="container mx-auto py-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Self-Review</h1>
+            <p className="text-muted-foreground">{cycle?.name}</p>
+          </div>
+          <Button variant="outline" onClick={() => setSelectedCycle(null)}>
+            Back to Review Cycles
+          </Button>
+        </div>
 
-  if (!user) return null;
+        <SelfReviewForm 
+          cycleId={selectedCycle} 
+          onSubmit={handleReviewSubmit}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Self Review</h1>
-          <p className="text-muted-foreground">
-            Complete your self-assessment for the current review cycle
-          </p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <ChevronLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Self-Review</h1>
+        <p className="text-muted-foreground">
+          Complete your self-assessment for available review cycles
+        </p>
       </div>
 
-      <div className="grid gap-6">
+      {/* Active Review Cycles */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Clock className="h-5 w-5 mr-2" />
+            Active Review Cycles
+          </CardTitle>
+          <CardDescription>
+            Review cycles that are currently open for submission
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeCycles.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-sm font-semibold text-muted-foreground">No active review cycles</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                There are no review cycles available for completion at this time.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activeCycles.map((cycle) => (
+                <div key={cycle.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{cycle.name}</h3>
+                      <div className="flex items-center text-sm text-muted-foreground mt-1">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Deadline: {new Date(cycle.deadline).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      {cycle.hasSubmitted ? (
+                        <Badge variant="default">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Submitted
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">Pending</Badge>
+                      )}
+                      <Button 
+                        size="sm"
+                        onClick={() => setSelectedCycle(cycle.id)}
+                        disabled={cycle.hasSubmitted}
+                      >
+                        {cycle.hasSubmitted ? 'View' : 'Start Review'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Completed Review Cycles */}
+      {completedCycles.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Active Review Cycle</CardTitle>
-            <CardDescription>Current review cycle requiring your input</CardDescription>
+            <CardTitle className="flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2" />
+              Completed Review Cycles
+            </CardTitle>
+            <CardDescription>
+              Review cycles you have previously completed
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">{mockActiveCycle.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Due by {new Date(mockActiveCycle.deadline).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
-                <Clock className="h-5 w-5" />
-                <span className="text-sm font-medium">
-                  {daysRemaining > 0 
-                    ? `${daysRemaining} days remaining` 
-                    : daysRemaining === 0 
-                      ? "Due today" 
-                      : "Overdue"
-                  }
-                </span>
-              </div>
+            <div className="space-y-4">
+              {completedCycles.map((cycle) => (
+                <div key={cycle.id} className="border rounded-lg p-4 opacity-75">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{cycle.name}</h3>
+                      <div className="flex items-center text-sm text-muted-foreground mt-1">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Completed: {new Date(cycle.deadline).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Badge variant="outline">Completed</Badge>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setSelectedCycle(cycle.id)}
+                      >
+                        View Review
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            
-            {hasDraft && draftLastSaved && (
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md text-sm">
-                <p>You have a saved draft from {formatLastSaved(draftLastSaved)}</p>
-              </div>
-            )}
           </CardContent>
         </Card>
+      )}
 
-        <SelfReviewForm 
-          cycleId={mockActiveCycle.id}
-          parameters={mockParameters}
-          skills={skills}
-          onSubmit={handleSubmitReview}
-        />
-      </div>
+      {/* Getting Started Guide */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="h-5 w-5 mr-2" />
+            Self-Review Guide
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-800">
+                1
+              </div>
+              <div>
+                <h4 className="font-medium">Rate Your Performance</h4>
+                <p className="text-sm text-muted-foreground">
+                  Evaluate yourself on key competencies and skills relevant to your role.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-800">
+                2
+              </div>
+              <div>
+                <h4 className="font-medium">Reflect on Achievements</h4>
+                <p className="text-sm text-muted-foreground">
+                  Highlight your key accomplishments and contributions during the review period.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-blue-800">
+                3
+              </div>
+              <div>
+                <h4 className="font-medium">Set Future Goals</h4>
+                <p className="text-sm text-muted-foreground">
+                  Identify areas for improvement and set objectives for the upcoming period.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

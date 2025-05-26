@@ -4,115 +4,169 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Survey, SurveyQuestion, QuestionResponse } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Survey, Question } from "@/types";
+import { toast } from "sonner";
 
 interface TakeSurveyDialogProps {
   survey: Survey;
   open: boolean;
   onClose: () => void;
+  onSubmit: (responses: any) => void;
 }
 
-export default function TakeSurveyDialog({ survey, open, onClose }: TakeSurveyDialogProps) {
-  const { user } = useAuth();
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+export default function TakeSurveyDialog({ 
+  survey, 
+  open, 
+  onClose, 
+  onSubmit 
+}: TakeSurveyDialogProps) {
+  const { user } = useClerkAuth();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const currentQuestion = survey.questions[currentQuestionIndex];
+  const [responses, setResponses] = useState<Record<string, any>>({});
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }));
+  if (!survey.questions || survey.questions.length === 0) {
+    return null;
+  }
+
+  const currentQuestion = survey.questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / survey.questions.length) * 100;
+  const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
+  const isFirstQuestion = currentQuestionIndex === 0;
+
+  const handleResponse = (questionId: string, value: any) => {
+    setResponses(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (!user) throw new Error('User not authenticated');
+  const handleNext = () => {
+    if (currentQuestion.required && !responses[currentQuestion.id]) {
+      toast.error("Please answer this question before continuing");
+      return;
+    }
 
-      // Create survey response
-      const { data: responseData, error: responseError } = await supabase
-        .from('survey_responses')
-        .insert({
-          survey_id: survey.id,
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (responseError) throw responseError;
-
-      // Create question responses
-      const questionResponses = Object.entries(answers).map(([questionId, answer]) => ({
-        response_id: responseData.id,
-        question_id: questionId,
-        answer
-      }));
-
-      const { error: answersError } = await supabase
-        .from('question_responses')
-        .insert(questionResponses);
-
-      if (answersError) throw answersError;
-
-      toast({
-        title: "Success",
-        description: "Survey submitted successfully."
-      });
-
-      onClose();
-    } catch (error) {
-      console.error('Error submitting survey:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit survey. Please try again.",
-        variant: "destructive"
-      });
+    if (isLastQuestion) {
+      handleSubmit();
+    } else {
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
-  const isLastQuestion = currentQuestionIndex === survey.questions.length - 1;
+  const handlePrevious = () => {
+    if (!isFirstQuestion) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
 
-  const renderQuestionInput = (question: SurveyQuestion) => {
+  const handleSubmit = () => {
+    if (!user) return;
+
+    // Check if all required questions are answered
+    const unansweredRequired = survey.questions?.filter(
+      q => q.required && !responses[q.id]
+    );
+
+    if (unansweredRequired && unansweredRequired.length > 0) {
+      toast.error("Please answer all required questions");
+      return;
+    }
+
+    const submissionData = {
+      surveyId: survey.id,
+      userId: user.id,
+      responses: Object.entries(responses).map(([questionId, answer]) => ({
+        questionId,
+        answer: typeof answer === 'string' ? answer : JSON.stringify(answer)
+      })),
+      submittedAt: new Date()
+    };
+
+    onSubmit(submissionData);
+    onClose();
+    toast.success("Survey submitted successfully");
+  };
+
+  const renderQuestionInput = (question: Question) => {
+    const currentValue = responses[question.id];
+
     switch (question.type) {
       case 'text':
         return (
-          <Textarea
-            value={answers[question.id] || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+          <Input
+            value={currentValue || ''}
+            onChange={(e) => handleResponse(question.id, e.target.value)}
             placeholder="Enter your answer"
-            required={question.required}
           />
         );
-      case 'multiple_choice':
+
+      case 'textarea':
+        return (
+          <Textarea
+            value={currentValue || ''}
+            onChange={(e) => handleResponse(question.id, e.target.value)}
+            placeholder="Enter your answer"
+            rows={4}
+          />
+        );
+
+      case 'radio':
         return (
           <RadioGroup
-            value={answers[question.id]}
-            onValueChange={(value) => handleAnswerChange(question.id, value)}
+            value={currentValue}
+            onValueChange={(value) => handleResponse(question.id, value)}
           >
             {question.options?.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`option-${index}`} />
-                <Label htmlFor={`option-${index}`}>{option}</Label>
+                <RadioGroupItem value={option} id={`${question.id}-${index}`} />
+                <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
               </div>
             ))}
           </RadioGroup>
         );
+
+      case 'checkbox':
+        return (
+          <div className="space-y-2">
+            {question.options?.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`${question.id}-${index}`}
+                  checked={currentValue?.includes(option) || false}
+                  onCheckedChange={(checked) => {
+                    const current = currentValue || [];
+                    if (checked) {
+                      handleResponse(question.id, [...current, option]);
+                    } else {
+                      handleResponse(question.id, current.filter((v: string) => v !== option));
+                    }
+                  }}
+                />
+                <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
+              </div>
+            ))}
+          </div>
+        );
+
       case 'rating':
         return (
-          <Input
-            type="number"
-            min="1"
-            max="5"
-            value={answers[question.id] || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            required={question.required}
-          />
+          <RadioGroup
+            value={currentValue?.toString()}
+            onValueChange={(value) => handleResponse(question.id, parseInt(value))}
+            className="flex space-x-4"
+          >
+            {[1, 2, 3, 4, 5].map((rating) => (
+              <div key={rating} className="flex items-center space-x-2">
+                <RadioGroupItem value={rating.toString()} id={`${question.id}-${rating}`} />
+                <Label htmlFor={`${question.id}-${rating}`}>{rating}</Label>
+              </div>
+            ))}
+          </RadioGroup>
         );
+
       default:
         return null;
     }
@@ -120,45 +174,40 @@ export default function TakeSurveyDialog({ survey, open, onClose }: TakeSurveyDi
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{survey.title}</DialogTitle>
+          <div className="space-y-2">
+            <Progress value={progress} className="w-full" />
+            <p className="text-sm text-muted-foreground">
+              Question {currentQuestionIndex + 1} of {survey.questions.length}
+            </p>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {survey.questions.length}
-          </div>
-
-          <div key={currentQuestion.id} className="space-y-4">
-            <Label>{currentQuestion.text}</Label>
+        <div className="space-y-6">
+          <div>
+            <h3 className="font-medium mb-2">
+              {currentQuestion.text}
+              {currentQuestion.required && <span className="text-red-500 ml-1">*</span>}
+            </h3>
             {renderQuestionInput(currentQuestion)}
           </div>
 
-          <div className="flex justify-between mt-4">
+          <div className="flex justify-between">
             <Button
               variant="outline"
-              onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
-              disabled={currentQuestionIndex === 0}
+              onClick={handlePrevious}
+              disabled={isFirstQuestion}
             >
+              <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
-            
-            {isLastQuestion ? (
-              <Button 
-                onClick={handleSubmit}
-                disabled={!answers[currentQuestion.id] && currentQuestion.required}
-              >
-                Submit
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
-                disabled={!answers[currentQuestion.id] && currentQuestion.required}
-              >
-                Next
-              </Button>
-            )}
+
+            <Button onClick={handleNext}>
+              {isLastQuestion ? 'Submit' : 'Next'}
+              {!isLastQuestion && <ChevronRight className="h-4 w-4 ml-2" />}
+            </Button>
           </div>
         </div>
       </DialogContent>

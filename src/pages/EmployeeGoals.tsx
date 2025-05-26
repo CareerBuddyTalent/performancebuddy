@@ -1,225 +1,212 @@
 
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import GoalCard from "@/components/GoalCard";
-import AddGoalDialog from "@/components/AddGoalDialog";
-import { goals as initialGoals } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Plus, Target, Calendar, TrendingUp } from "lucide-react";
+import { useEnhancedGoalsData } from "@/hooks/useEnhancedGoalsData";
+import GoalFormDialog from "@/components/performance/GoalFormDialog";
 import { Goal } from "@/types";
-import { Plus, Search } from "lucide-react";
-import DepartmentGoals from "@/components/goals/DepartmentGoals";
-import { users } from "@/data/mockData";
 
 export default function EmployeeGoals() {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [goals, setGoals] = useState(initialGoals);
-  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
-  const [goalTypeToAdd, setGoalTypeToAdd] = useState<"individual" | "team">("individual");
-  const [viewMode, setViewMode] = useState<"personal" | "departments">("personal");
-  
-  if (!user) return null;
-  
-  // Filter goals based on user role and search query
-  const userGoals = user.role === 'employee'
-    ? goals.filter(g => g.userId === user.id)
-    : goals;
-  
-  const filteredGoals = userGoals.filter(goal => 
-    goal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    goal.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  // Categorize goals by status
-  const activeGoals = filteredGoals.filter(g => g.status === 'in_progress');
-  const completedGoals = filteredGoals.filter(g => g.status === 'completed');
-  const notStartedGoals = filteredGoals.filter(g => g.status === 'not_started');
-  
-  // Handler for adding a new goal
-  const handleAddGoal = (newGoal: Goal) => {
-    setGoals(prevGoals => [...prevGoals, newGoal]);
-  };
-  
-  // Handler for opening the add goal dialog
-  const handleOpenAddGoal = (type: "individual" | "team") => {
-    setGoalTypeToAdd(type);
-    setIsAddGoalOpen(true);
-  };
-  
-  // Function to get user name and department by user ID
-  const getUserInfo = (userId: string) => {
-    const goalUser = users.find(u => u.id === userId);
-    return {
-      name: goalUser?.name || "Unknown User",
-      department: goalUser?.department
-    };
-  };
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {user.role === 'employee' ? 'My Goals' : 'Team Goals'}
-        </h1>
-        <p className="text-muted-foreground">
-          {user.role === 'employee' 
-            ? 'Track your personal development goals and career progress' 
-            : 'Monitor and manage team goals and development objectives'}
-        </p>
+  const { user } = useClerkAuth();
+  const { goals, isLoading, createGoal, updateGoal } = useEnhancedGoalsData();
+  const [showCreateGoal, setShowCreateGoal] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">Please log in to view your goals.</p>
+          </CardContent>
+        </Card>
       </div>
-      
-      {user.role !== 'employee' && (
-        <Tabs 
-          value={viewMode} 
-          onValueChange={(value) => setViewMode(value as "personal" | "departments")} 
-          className="w-full"
-        >
-          <TabsList className="w-full">
-            <TabsTrigger value="personal" className="flex-1">Individual Goals</TabsTrigger>
-            <TabsTrigger value="departments" className="flex-1">Department View</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-      
-      {viewMode === "personal" ? (
-        <>
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search goals..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">Loading your goals...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleCreateGoal = async (goal: Goal) => {
+    try {
+      await createGoal(goal);
+      setShowCreateGoal(false);
+    } catch (error) {
+      console.error('Error creating goal:', error);
+    }
+  };
+
+  const activeGoals = goals.filter(g => g.status !== 'completed');
+  const completedGoals = goals.filter(g => g.status === 'completed');
+  const overallProgress = goals.length > 0 
+    ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length)
+    : 0;
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Goals</h1>
+          <p className="text-muted-foreground">
+            Track your personal and professional development goals
+          </p>
+        </div>
+        <Button onClick={() => setShowCreateGoal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Goal
+        </Button>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total Goals</p>
+              <p className="text-2xl font-bold">{goals.length}</p>
             </div>
-            <Button onClick={() => handleOpenAddGoal(user.role === 'employee' ? 'individual' : 'team')}>
-              <Plus className="mr-2 h-4 w-4" />
-              {user.role === 'employee' ? 'Add New Goal' : 'Create Team Goal'}
-            </Button>
-          </div>
-          
-          <Separator />
-          
-          <Tabs defaultValue="active" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="active">
-                Active ({activeGoals.length})
-              </TabsTrigger>
-              <TabsTrigger value="completed">
-                Completed ({completedGoals.length})
-              </TabsTrigger>
-              <TabsTrigger value="not-started">
-                Not Started ({notStartedGoals.length})
-              </TabsTrigger>
-              <TabsTrigger value="all">
-                All Goals ({filteredGoals.length})
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="active" className="space-y-4">
-              {activeGoals.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {activeGoals.map((goal: Goal) => {
-                    const { name, department } = getUserInfo(goal.userId);
-                    return (
-                      <GoalCard 
-                        key={goal.id} 
-                        goal={goal} 
-                        userName={goal.level === 'individual' ? name : undefined}
-                        department={goal.level === 'individual' ? department : undefined}
-                      />
-                    );
-                  })}
+            <Target className="h-8 w-8 text-blue-600" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Active</p>
+              <p className="text-2xl font-bold">{activeGoals.length}</p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-orange-600" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Completed</p>
+              <p className="text-2xl font-bold">{completedGoals.length}</p>
+            </div>
+            <Calendar className="h-8 w-8 text-green-600" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Overall Progress</p>
+              <p className="text-2xl font-bold">{overallProgress}%</p>
+            </div>
+            <div className="w-12 h-12 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full border-4 border-gray-200 border-t-blue-600 animate-pulse" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Active Goals */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Goals</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {activeGoals.length === 0 ? (
+            <div className="text-center py-8">
+              <Target className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-sm font-semibold text-muted-foreground">No active goals</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Get started by creating your first goal.</p>
+              <div className="mt-6">
+                <Button onClick={() => setShowCreateGoal(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Goal
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activeGoals.map((goal) => (
+                <div key={goal.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{goal.title}</h3>
+                      {goal.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{goal.description}</p>
+                      )}
+                    </div>
+                    <Badge variant={
+                      goal.status === 'completed' ? 'default' :
+                      goal.status === 'in_progress' ? 'secondary' : 'outline'
+                    }>
+                      {goal.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Progress</span>
+                      <span>{goal.progress}%</span>
+                    </div>
+                    <Progress value={goal.progress} className="w-full" />
+                  </div>
+                  
+                  {goal.dueDate && (
+                    <div className="flex items-center text-sm text-muted-foreground mt-3">
+                      <Calendar className="mr-1 h-4 w-4" />
+                      Due: {goal.dueDate.toLocaleDateString()}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="flex justify-center py-8">
-                  <p className="text-muted-foreground">No active goals found.</p>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Completed Goals */}
+      {completedGoals.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Completed Goals</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {completedGoals.map((goal) => (
+                <div key={goal.id} className="border rounded-lg p-4 opacity-75">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{goal.title}</h3>
+                      {goal.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{goal.description}</p>
+                      )}
+                    </div>
+                    <Badge variant="default">Completed</Badge>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-muted-foreground mt-3">
+                    <Calendar className="mr-1 h-4 w-4" />
+                    Completed: {goal.updatedAt.toLocaleDateString()}
+                  </div>
                 </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="completed" className="space-y-4">
-              {completedGoals.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {completedGoals.map((goal: Goal) => {
-                    const { name, department } = getUserInfo(goal.userId);
-                    return (
-                      <GoalCard 
-                        key={goal.id} 
-                        goal={goal} 
-                        userName={goal.level === 'individual' ? name : undefined}
-                        department={goal.level === 'individual' ? department : undefined}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex justify-center py-8">
-                  <p className="text-muted-foreground">No completed goals found.</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="not-started" className="space-y-4">
-              {notStartedGoals.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {notStartedGoals.map((goal: Goal) => {
-                    const { name, department } = getUserInfo(goal.userId);
-                    return (
-                      <GoalCard 
-                        key={goal.id} 
-                        goal={goal} 
-                        userName={goal.level === 'individual' ? name : undefined}
-                        department={goal.level === 'individual' ? department : undefined}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex justify-center py-8">
-                  <p className="text-muted-foreground">No not-started goals found.</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="all" className="space-y-4">
-              {filteredGoals.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredGoals.map((goal: Goal) => {
-                    const { name, department } = getUserInfo(goal.userId);
-                    return (
-                      <GoalCard 
-                        key={goal.id} 
-                        goal={goal} 
-                        userName={goal.level === 'individual' ? name : undefined}
-                        department={goal.level === 'individual' ? department : undefined}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex justify-center py-8">
-                  <p className="text-muted-foreground">No goals found matching your search.</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </>
-      ) : (
-        <DepartmentGoals goals={goals} users={users} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
-      
-      {/* Add Goal Dialog */}
-      <AddGoalDialog 
-        open={isAddGoalOpen} 
-        onOpenChange={setIsAddGoalOpen}
-        onGoalAdded={handleAddGoal}
-        defaultLevel={goalTypeToAdd}
-        userId={user.id}
+
+      <GoalFormDialog
+        open={showCreateGoal}
+        onOpenChange={setShowCreateGoal}
+        onSave={handleCreateGoal}
       />
     </div>
   );

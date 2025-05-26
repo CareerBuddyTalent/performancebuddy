@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Plus } from "lucide-react";
@@ -9,7 +9,7 @@ import MyObjectives from "@/components/okr/MyObjectives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PersonalOKRs() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   if (!user) return null;
   

@@ -1,129 +1,111 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ReviewTemplate } from "@/types/templates";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
-
-import TemplateSourceStep from "./TemplateSourceStep";
-import TemplateBasicInfo from "../TemplateBasicInfo";
-import TemplateSections from "../TemplateSections";
-import TemplateReview from "../TemplateReview";
-import TemplateAnonymitySettings from "../TemplateAnonymitySettings";
-import useTemplateCreation from "../hooks/useTemplateCreation";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { ReviewTemplate } from "@/types/templates";
+import { toast } from "sonner";
 
 interface CreateTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (template: ReviewTemplate) => void;
+  onCreateTemplate: (template: ReviewTemplate) => void;
 }
 
-export default function CreateTemplateDialog({ open, onOpenChange, onCreate }: CreateTemplateDialogProps) {
-  const { user } = useAuth();
-  const [activeStep, setActiveStep] = useState<"template-source" | "info" | "sections" | "anonymity" | "review">("template-source");
-  
-  const {
-    templateData,
-    handleBasicInfoSubmit,
-    handleSectionsSubmit,
-    handleAnonymitySettingsChange,
-    handlePrebuiltTemplateSelect,
-    handleCreateTemplate
-  } = useTemplateCreation(user, onCreate);
-  
-  const handleStartFromScratch = () => {
-    setActiveStep("info");
-  };
-  
-  const handleImportTemplate = () => {
-    setActiveStep("info");
+export default function CreateTemplateDialog({
+  open,
+  onOpenChange,
+  onCreateTemplate
+}: CreateTemplateDialogProps) {
+  const { user } = useClerkAuth();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<"self" | "manager" | "peer" | "360">("self");
+
+  const handleSubmit = () => {
+    if (!user || !name.trim()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const newTemplate: ReviewTemplate = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      description: description.trim(),
+      type,
+      isActive: true,
+      createdBy: user.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      usageCount: 0,
+      sections: []
+    };
+
+    onCreateTemplate(newTemplate);
+    onOpenChange(false);
+    
+    // Reset form
+    setName("");
+    setDescription("");
+    setType("self");
+    
+    toast.success("Template created successfully");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[85vh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Review Template</DialogTitle>
-          <DialogDescription>
-            Create a new template for reviews. Templates can be used across review cycles.
-          </DialogDescription>
         </DialogHeader>
         
-        <Tabs value={activeStep} className="mt-4" onValueChange={(value) => setActiveStep(value as any)}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="template-source">Source</TabsTrigger>
-            <TabsTrigger value="info" disabled={activeStep === "template-source"}>Basic Info</TabsTrigger>
-            <TabsTrigger value="sections" disabled={!templateData.name}>Sections</TabsTrigger>
-            <TabsTrigger value="anonymity" disabled={!templateData.sections?.length}>Settings</TabsTrigger>
-            <TabsTrigger value="review" disabled={!templateData.sections?.length}>Review</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="template-source" className="space-y-4 py-4">
-            <TemplateSourceStep
-              onStartFromScratch={handleStartFromScratch}
-              onSelectPrebuilt={(template) => {
-                handlePrebuiltTemplateSelect(template);
-                setActiveStep("info");
-              }}
-              onImportTemplate={handleImportTemplate}
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Template Name</label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter template name"
             />
-          </TabsContent>
+          </div>
           
-          <TabsContent value="info" className="space-y-4 py-4">
-            <TemplateBasicInfo 
-              initialData={{ 
-                name: templateData.name || '', 
-                description: templateData.description || '', 
-                type: templateData.type || 'self' 
-              }}
-              onSubmit={(data) => {
-                handleBasicInfoSubmit(data);
-                setActiveStep("sections");
-              }}
+          <div>
+            <label className="text-sm font-medium">Description</label>
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter template description"
+              rows={3}
             />
-          </TabsContent>
+          </div>
           
-          <TabsContent value="sections" className="space-y-4 py-4">
-            <TemplateSections 
-              initialSections={templateData.sections || []}
-              onSubmit={(sections) => {
-                handleSectionsSubmit(sections);
-                setActiveStep("anonymity");
-              }}
-              onBack={() => setActiveStep("info")}
-              templateType={templateData.type || "self"}
-            />
-          </TabsContent>
+          <div>
+            <label className="text-sm font-medium">Review Type</label>
+            <Select value={type} onValueChange={(value: any) => setType(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select review type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="self">Self Assessment</SelectItem>
+                <SelectItem value="manager">Manager Review</SelectItem>
+                <SelectItem value="peer">Peer Review</SelectItem>
+                <SelectItem value="360">360° Review</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
-          <TabsContent value="anonymity" className="space-y-4 py-4">
-            <TemplateAnonymitySettings
-              settings={templateData.metadata?.anonymitySettings || {
-                isAnonymous: false,
-                responseVisibility: "reviewee_visible",
-                hideIdentities: false,
-                aggregateResults: true
-              }}
-              onSettingsChange={handleAnonymitySettingsChange}
-            />
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={() => setActiveStep("sections")}>
-                Back
-              </Button>
-              <Button onClick={() => setActiveStep("review")}>
-                Continue
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="review" className="space-y-4 py-4">
-            <TemplateReview 
-              template={templateData as ReviewTemplate}
-              onCreate={handleCreateTemplate}
-              onBack={() => setActiveStep("anonymity")}
-            />
-          </TabsContent>
-        </Tabs>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit}>
+              Create Template
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

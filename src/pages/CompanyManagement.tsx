@@ -1,255 +1,326 @@
 
-import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Pencil, Building2, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Company } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { companies as mockCompanies } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Building2, Users, Plus, Edit, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  logo_url?: string;
+  industry?: string;
+  location?: string;
+  size?: string;
+  website?: string;
+  created_at: string;
+}
 
 export default function CompanyManagement() {
+  const { user } = useClerkAuth();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [companies, setCompanies] = useState<Company[]>(mockCompanies);
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
-  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
+
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    logoUrl: ""
+    name: '',
+    description: '',
+    industry: '',
+    location: '',
+    size: '',
+    website: ''
   });
 
-  const isAdmin = user?.role === "admin";
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
-  const handleOpenAddDialog = () => {
-    setFormData({
-      name: "",
-      description: "",
-      logoUrl: ""
-    });
-    setShowAddDialog(true);
-  };
+  const fetchCompanies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const handleOpenEditDialog = (company: Company) => {
-    setFormData({
-      name: company.name,
-      description: company.description || "",
-      logoUrl: company.logoUrl || ""
-    });
-    setEditingCompany(company);
-    setShowAddDialog(true);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = () => {
-    if (!formData.name.trim()) {
+      if (error) throw error;
+      setCompanies(data || []);
+    } catch (error: any) {
+      console.error('Error fetching companies:', error);
       toast({
         title: "Error",
-        description: "Company name is required",
-        variant: "destructive"
+        description: "Failed to load companies",
+        variant: "destructive",
       });
-      return;
-    }
-
-    if (editingCompany) {
-      // Update existing company
-      const updatedCompanies = companies.map(c => 
-        c.id === editingCompany.id ? { ...c, ...formData } : c
-      );
-      setCompanies(updatedCompanies);
-      toast({
-        title: "Company updated",
-        description: `${formData.name} has been updated successfully`
-      });
-    } else {
-      // Add new company
-      const newCompany: Company = {
-        id: `comp${Date.now()}`,
-        name: formData.name,
-        description: formData.description,
-        logoUrl: formData.logoUrl || `https://api.dicebear.com/7.x/shapes/svg?seed=${formData.name.replace(/\s/g, '')}`
-      };
-      setCompanies([...companies, newCompany]);
-      toast({
-        title: "Company added",
-        description: `${formData.name} has been added successfully`
-      });
-    }
-
-    setShowAddDialog(false);
-    setEditingCompany(null);
-  };
-
-  const confirmDelete = (company: Company) => {
-    setCompanyToDelete(company);
-    setIsConfirmDeleteOpen(true);
-  };
-
-  const handleDelete = () => {
-    if (companyToDelete) {
-      setCompanies(companies.filter(c => c.id !== companyToDelete.id));
-      toast({
-        title: "Company deleted",
-        description: `${companyToDelete.name} has been deleted`
-      });
-      setIsConfirmDeleteOpen(false);
-      setCompanyToDelete(null);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (editingCompany) {
+        const { error } = await supabase
+          .from('companies')
+          .update(formData)
+          .eq('id', editingCompany.id);
+
+        if (error) throw error;
+        toast({
+          title: "Success",
+          description: "Company updated successfully",
+        });
+      } else {
+        const { error } = await supabase
+          .from('companies')
+          .insert([formData]);
+
+        if (error) throw error;
+        toast({
+          title: "Success",
+          description: "Company created successfully",
+        });
+      }
+
+      setShowForm(false);
+      setEditingCompany(null);
+      setFormData({ name: '', description: '', industry: '', location: '', size: '', website: '' });
+      fetchCompanies();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save company",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (company: Company) => {
+    setEditingCompany(company);
+    setFormData({
+      name: company.name,
+      description: company.description || '',
+      industry: company.industry || '',
+      location: company.location || '',
+      size: company.size || '',
+      website: company.website || ''
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this company?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('companies')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "Company deleted successfully",
+      });
+      fetchCompanies();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete company",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">Access denied. Admin role required.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">Loading companies...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Company Management</h1>
           <p className="text-muted-foreground">
-            Manage your organization's companies and their details
+            Manage companies in the system
           </p>
         </div>
-        {isAdmin && (
-          <Button onClick={handleOpenAddDialog}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Company
-          </Button>
-        )}
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Company
+        </Button>
       </div>
 
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{editingCompany ? 'Edit Company' : 'Add New Company'}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Company Name</label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Industry</label>
+                  <Input
+                    value={formData.industry}
+                    onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Location</label>
+                  <Input
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Size</label>
+                  <Input
+                    value={formData.size}
+                    onChange={(e) => setFormData(prev => ({ ...prev, size: e.target.value }))}
+                    placeholder="e.g., 100-500 employees"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Website</label>
+                  <Input
+                    value={formData.website}
+                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => {
+                  setShowForm(false);
+                  setEditingCompany(null);
+                  setFormData({ name: '', description: '', industry: '', location: '', size: '', website: '' });
+                }}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {editingCompany ? 'Update' : 'Create'} Company
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {companies.map(company => (
-          <Card key={company.id} className="overflow-hidden">
-            <div className="bg-primary/10 h-24 flex items-center justify-center">
-              <Avatar className="h-16 w-16 border-4 border-background">
-                <AvatarImage src={company.logoUrl} alt={company.name} />
-                <AvatarFallback className="text-xl">{company.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </div>
-            
-            <CardHeader className="pb-2">
-              <CardTitle className="flex justify-between items-center">
-                {company.name}
-                {isAdmin && (
-                  <div className="flex space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpenEditDialog(company)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => confirmDelete(company)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+        {companies.map((company) => (
+          <Card key={company.id}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Building2 className="h-5 w-5" />
+                  <CardTitle className="text-lg">{company.name}</CardTitle>
+                </div>
+                <div className="flex space-x-1">
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(company)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDelete(company.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {company.description && (
+                <CardDescription>{company.description}</CardDescription>
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {company.industry && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Industry:</span>
+                    <Badge variant="outline">{company.industry}</Badge>
                   </div>
                 )}
-              </CardTitle>
-              <CardDescription>{company.description}</CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                Company ID: {company.id}
+                {company.location && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Location:</span>
+                    <span className="text-sm">{company.location}</span>
+                  </div>
+                )}
+                {company.size && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Size:</span>
+                    <span className="text-sm">{company.size}</span>
+                  </div>
+                )}
+                {company.website && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Website:</span>
+                    <a 
+                      href={company.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Visit
+                    </a>
+                  </div>
+                )}
               </div>
-              <Button variant="outline" className="w-full mt-4" asChild>
-                <a href={`/users?company=${company.id}`}>
-                  View Users
-                </a>
-              </Button>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Add/Edit Company Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{editingCompany ? "Edit Company" : "Add New Company"}</DialogTitle>
-            <DialogDescription>
-              {editingCompany ? "Update company details" : "Add a new company to the platform"}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Company Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Acme Corporation"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Describe the company..."
-                rows={3}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="logoUrl">Logo URL</Label>
-              <Input
-                id="logoUrl"
-                name="logoUrl"
-                value={formData.logoUrl}
-                onChange={handleChange}
-                placeholder="https://example.com/logo.png"
-              />
-              <p className="text-xs text-muted-foreground">
-                If left blank, a default logo will be generated based on the company name.
-              </p>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit}>
-              {editingCompany ? "Save Changes" : "Add Company"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirm Delete Dialog */}
-      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {companyToDelete?.name}? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {companies.length === 0 && (
+        <Card>
+          <CardContent className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">No companies found. Create your first company to get started.</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

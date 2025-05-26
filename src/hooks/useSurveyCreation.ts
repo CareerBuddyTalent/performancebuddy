@@ -1,80 +1,84 @@
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Survey, SurveyQuestion } from "@/types";
-import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useClerkAuth } from '@/context/ClerkAuthContext';
 
-export interface CreateSurveyForm {
+interface SurveyData {
   title: string;
   description: string;
-  startDate: string;
-  endDate: string;
+  status: 'draft' | 'active' | 'closed';
+  start_date?: string;
+  end_date?: string;
+  target_audience: string;
+  questions: Array<{
+    text: string;
+    type: 'text' | 'radio' | 'checkbox' | 'rating' | 'textarea';
+    required: boolean;
+    options?: string[];
+  }>;
 }
 
-export function useSurveyCreation(onCreateSurvey: (survey: Partial<Survey>) => void, onClose: () => void) {
-  const [questions, setQuestions] = useState<Partial<SurveyQuestion>[]>([]);
-  const { user } = useAuth();
-  const form = useForm<CreateSurveyForm>();
+export function useSurveyCreation() {
+  const { user } = useClerkAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canCreateSurvey = user?.role === 'admin' || user?.role === 'manager';
-
-  const handleSubmit = async (data: CreateSurveyForm) => {
-    if (!canCreateSurvey) {
-      toast.error("You don't have permission to create surveys");
-      return;
+  const createSurvey = async (surveyData: SurveyData) => {
+    if (!user) {
+      toast.error('You must be logged in to create a survey');
+      return null;
     }
 
-    if (questions.length === 0) {
-      toast.error("Please add at least one question to the survey.");
-      return;
-    }
-
+    setIsSubmitting(true);
     try {
-      const newSurvey: Partial<Survey> = {
-        title: data.title,
-        description: data.description,
-        start_date: new Date(data.startDate),
-        end_date: new Date(data.endDate),
-        status: 'draft',
-        creator_id: user?.id,
-        target_audience: 'all',
-        questions: questions.map((q, index) => ({
-          id: crypto.randomUUID(),
-          survey_id: '',
-          text: q.text || '',
-          type: q.type || 'text',
-          options: q.options,
-          required: q.required !== undefined ? q.required : true,
-          order_index: index,
-          created_at: new Date()
-        }))
-      };
-      
-      onCreateSurvey(newSurvey);
-      toast.success("Survey created successfully");
-      onClose();
-      form.reset();
-      setQuestions([]);
-    } catch (error) {
-      console.error('Error creating survey:', error);
-      toast.error("Failed to create survey. Please try again.");
-    }
-  };
+      // Create the survey
+      const { data: survey, error: surveyError } = await supabase
+        .from('surveys')
+        .insert({
+          title: surveyData.title,
+          description: surveyData.description,
+          status: surveyData.status,
+          start_date: surveyData.start_date,
+          end_date: surveyData.end_date,
+          target_audience: surveyData.target_audience,
+          creator_id: user.id
+        })
+        .select()
+        .single();
 
-  const handleAddQuestion = (question: Partial<SurveyQuestion>) => {
-    if (!canCreateSurvey) {
-      toast.error("You don't have permission to add questions");
-      return;
+      if (surveyError) throw surveyError;
+
+      // Create the questions
+      if (surveyData.questions.length > 0) {
+        const questionsToInsert = surveyData.questions.map((question, index) => ({
+          survey_id: survey.id,
+          text: question.text,
+          type: question.type,
+          required: question.required,
+          order_index: index,
+          options: question.options || null
+        }));
+
+        const { error: questionsError } = await supabase
+          .from('survey_questions')
+          .insert(questionsToInsert);
+
+        if (questionsError) throw questionsError;
+      }
+
+      toast.success('Survey created successfully');
+      return survey;
+    } catch (error: any) {
+      console.error('Error creating survey:', error);
+      toast.error(error.message || 'Failed to create survey');
+      return null;
+    } finally {
+      setIsSubmitting(false);
     }
-    setQuestions([...questions, question]);
   };
 
   return {
-    form,
-    questions,
-    canCreateSurvey,
-    handleSubmit,
-    handleAddQuestion
+    createSurvey,
+    isSubmitting
   };
 }

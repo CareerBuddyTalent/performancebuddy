@@ -1,277 +1,164 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ReviewTabsContent } from "./ReviewTabsContent";
-import { ReviewConfirmDialog } from "./ReviewConfirmDialog";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/AuthContext";
-import { ReviewSkill } from "@/types";
-import {
-  saveDraftReview,
-  submitReview,
-  getUserReview,
-  getReviewParameters
-} from "@/services/reviewService";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { StarIcon } from "lucide-react";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { toast } from "sonner";
 
 interface SelfReviewFormProps {
   cycleId: string;
-  parameters?: { id: string; name: string; description: string }[];
-  skills?: ReviewSkill[];
-  onSubmit?: (data: any) => Promise<void>;
-  readOnly?: boolean;
+  onSubmit?: (reviewData: any) => void;
 }
 
-export default function SelfReviewForm({
-  cycleId,
-  parameters = [],
-  skills = [],
-  onSubmit,
-  readOnly = false
-}: SelfReviewFormProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState<"parameters" | "technical" | "soft">("parameters");
+export default function SelfReviewForm({ cycleId, onSubmit }: SelfReviewFormProps) {
+  const { user } = useClerkAuth();
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [dbParameters, setDbParameters] = useState<any[]>([]);
-  const [reviewId, setReviewId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [achievements, setAchievements] = useState("");
+  const [challenges, setChallenges] = useState("");
+  const [goals, setGoals] = useState("");
 
-  // Load review data from database
-  useEffect(() => {
-    if (!user || !cycleId) return;
+  // Mock review parameters - replace with real data
+  const reviewParameters = [
+    { id: "technical", name: "Technical Skills", description: "Your proficiency in technical skills" },
+    { id: "communication", name: "Communication", description: "Your communication effectiveness" },
+    { id: "teamwork", name: "Teamwork", description: "Your collaboration with team members" },
+    { id: "innovation", name: "Innovation", description: "Your creative problem-solving abilities" }
+  ];
 
-    const loadReviewData = async () => {
-      try {
-        setLoading(true);
-        
-        // Get parameters for this cycle
-        const cycleParameters = await getReviewParameters(cycleId);
-        setDbParameters(cycleParameters);
-        
-        // Check for existing review
-        const existingReview = await getUserReview(user.id, cycleId);
-        
-        if (existingReview) {
-          setReviewId(existingReview.id);
-          
-          // Convert responses to ratings and comments
-          const loadedRatings: Record<string, number> = {};
-          const loadedComments: Record<string, string> = {};
-          
-          existingReview.responses.forEach(response => {
-            loadedRatings[response.parameter_id] = response.rating;
-            loadedComments[response.parameter_id] = response.comment || "";
-          });
-          
-          setRatings(loadedRatings);
-          setComments(loadedComments);
-        }
-        
-      } catch (error) {
-        console.error("Error loading review data:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load review data. Please try again later.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
+  const handleRatingChange = (parameterId: string, value: number[]) => {
+    setRatings(prev => ({ ...prev, [parameterId]: value[0] }));
+  };
+
+  const handleCommentChange = (parameterId: string, value: string) => {
+    setComments(prev => ({ ...prev, [parameterId]: value }));
+  };
+
+  const handleSubmit = () => {
+    if (!user) return;
+
+    const reviewData = {
+      cycleId,
+      employeeId: user.id,
+      ratings: Object.entries(ratings).map(([parameterId, score]) => ({
+        parameterId,
+        score,
+        comment: comments[parameterId] || ""
+      })),
+      achievements,
+      challenges,
+      goals,
+      submittedAt: new Date()
     };
 
-    loadReviewData();
-  }, [user, cycleId, toast]);
-
-  const handleRatingChange = (itemId: string, rating: number) => {
-    if (readOnly) return;
-    setRatings(prev => ({ ...prev, [itemId]: rating }));
-  };
-
-  const handleCommentChange = (itemId: string, comment: string) => {
-    if (readOnly) return;
-    setComments(prev => ({ ...prev, [itemId]: comment }));
-  };
-
-  const handleSaveDraft = async () => {
-    if (!user) return;
-    
-    try {
-      setIsSaving(true);
-      
-      // Prepare the review data
-      const reviewResponses = Object.keys(ratings).map(parameterId => ({
-        parameter_id: parameterId,
-        rating: ratings[parameterId],
-        comment: comments[parameterId] || ""
-      }));
-      
-      // Calculate overall score
-      const validRatings = Object.values(ratings).filter(r => r > 0);
-      const overallScore = validRatings.length 
-        ? validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length 
-        : undefined;
-      
-      const result = await saveDraftReview({
-        id: reviewId || undefined,
-        user_id: user.id,
-        cycle_id: cycleId,
-        status: "draft",
-        responses: reviewResponses,
-        overall_score: overallScore
-      });
-      
-      if (result.reviewId && !reviewId) {
-        setReviewId(result.reviewId);
-      }
-      
-      toast({
-        title: "Draft saved",
-        description: "Your review has been saved as a draft."
-      });
-      
-    } catch (error: any) {
-      console.error("Error saving draft:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save draft. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
+    if (onSubmit) {
+      onSubmit(reviewData);
     }
-  };
-
-  const handleConfirmSubmit = async () => {
-    if (!reviewId || !user) return;
     
-    try {
-      setIsSubmitting(true);
-      
-      // First save the latest changes
-      await handleSaveDraft();
-      
-      // Then submit the review
-      await submitReview(reviewId);
-      
-      toast({
-        title: "Review submitted",
-        description: "Your self review has been submitted successfully."
-      });
-      
-      // Close the dialog
-      setIsDialogOpen(false);
-      
-      // Call the onSubmit callback if provided
-      if (onSubmit) {
-        await onSubmit({
-          id: reviewId,
-          userId: user.id,
-          cycleId,
-          ratings,
-          comments
-        });
-      }
-      
-    } catch (error: any) {
-      console.error("Error submitting review:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to submit review. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.success("Self-review submitted successfully");
   };
 
-  // Combine all parameters from props and database
-  const allParameters = [...parameters, ...dbParameters];
-  
-  // Determine when form is ready to be submitted
-  const canSubmit = !readOnly && Object.keys(ratings).length > 0;
+  const isComplete = reviewParameters.every(param => ratings[param.id] !== undefined);
 
-  if (loading) {
-    return (
-      <Card className="mt-6">
+  return (
+    <div className="space-y-6">
+      <Card>
         <CardHeader>
-          <CardTitle>Self Review Form</CardTitle>
-          <CardDescription>Loading review data...</CardDescription>
+          <CardTitle>Self-Assessment</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Rate yourself on the following competencies and provide comments.
+          </p>
         </CardHeader>
-        <CardContent className="flex justify-center py-10">
-          <div className="animate-pulse flex flex-col w-full space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-32 bg-gray-200 rounded w-full"></div>
-            <div className="h-32 bg-gray-200 rounded w-full"></div>
+        <CardContent className="space-y-6">
+          {reviewParameters.map((parameter) => (
+            <div key={parameter.id} className="space-y-3">
+              <div>
+                <h4 className="font-medium">{parameter.name}</h4>
+                <p className="text-sm text-muted-foreground">{parameter.description}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Rating</span>
+                  <Badge variant="outline">
+                    {ratings[parameter.id] || 0} / 5
+                  </Badge>
+                </div>
+                <Slider
+                  value={[ratings[parameter.id] || 0]}
+                  onValueChange={(value) => handleRatingChange(parameter.id, value)}
+                  max={5}
+                  min={0}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Needs Improvement</span>
+                  <span>Excellent</span>
+                </div>
+              </div>
+              
+              <Textarea
+                placeholder="Add comments about this competency..."
+                value={comments[parameter.id] || ""}
+                onChange={(e) => handleCommentChange(parameter.id, e.target.value)}
+                rows={2}
+              />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Additional Feedback</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Key Achievements</label>
+            <Textarea
+              placeholder="What are your key achievements this period?"
+              value={achievements}
+              onChange={(e) => setAchievements(e.target.value)}
+              rows={3}
+            />
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium">Challenges Faced</label>
+            <Textarea
+              placeholder="What challenges did you face and how did you overcome them?"
+              value={challenges}
+              onChange={(e) => setChallenges(e.target.value)}
+              rows={3}
+            />
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium">Goals for Next Period</label>
+            <Textarea
+              placeholder="What are your goals for the upcoming period?"
+              value={goals}
+              onChange={(e) => setGoals(e.target.value)}
+              rows={3}
+            />
           </div>
         </CardContent>
       </Card>
-    );
-  }
 
-  return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>Self Review Form</CardTitle>
-        <CardDescription>
-          Rate yourself on the following parameters and provide comments to support your ratings
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "parameters" | "technical" | "soft")}
-          className="space-y-6"
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSubmit}
+          disabled={!isComplete}
+          className="min-w-[120px]"
         >
-          <TabsList>
-            <TabsTrigger value="parameters">General Parameters</TabsTrigger>
-            <TabsTrigger value="technical">Technical Skills</TabsTrigger>
-            <TabsTrigger value="soft">Soft Skills</TabsTrigger>
-          </TabsList>
-          
-          <ReviewTabsContent 
-            activeTab={activeTab}
-            parameters={allParameters}
-            skills={skills}
-            ratings={ratings}
-            comments={comments}
-            onRatingChange={handleRatingChange}
-            onCommentChange={handleCommentChange}
-            isReadOnly={readOnly}
-          />
-          
-          {!readOnly && (
-            <div className="flex justify-end gap-4 pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={handleSaveDraft}
-                disabled={isSaving || isSubmitting}
-              >
-                {isSaving ? "Saving..." : "Save Draft"}
-              </Button>
-              <Button 
-                onClick={() => setIsDialogOpen(true)}
-                disabled={!canSubmit || isSaving || isSubmitting}
-              >
-                Submit Review
-              </Button>
-            </div>
-          )}
-        </Tabs>
-      </CardContent>
-      <ReviewConfirmDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onConfirm={handleConfirmSubmit}
-        isSubmitting={isSubmitting} 
-      />
-    </Card>
+          Submit Review
+        </Button>
+      </div>
+    </div>
   );
 }

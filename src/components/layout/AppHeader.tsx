@@ -1,128 +1,88 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, LayoutGrid, Target, BarChart, ChartPie, Users, User, Book } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuGroup,
+
+import React from "react";
+import { Bell, Search, Settings, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import CompanySelector from "@/components/CompanySelector";
-import { useCompany } from "@/context/CompanyContext";
-import { useAuth } from "@/context/AuthContext";
-import UserMenuDropdown from "@/components/layout/UserMenuDropdown";
-import NotificationPopover from "@/components/dashboard/NotificationPopover";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 
 export default function AppHeader() {
-  const navigate = useNavigate();
-  const { companies, currentCompany } = useCompany();
-  const { user } = useAuth();
-  const [layoutGridOpen, setLayoutGridOpen] = useState(false);
+  const { user, logout } = useClerkAuth();
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    setLayoutGridOpen(false);
-  };
-
-  const getPageTitle = () => {
-    const pathname = window.location.pathname;
-    if (pathname === '/') return 'Dashboard';
-    return pathname.split('/')[1].replace('-', ' ').replace(/^\w/, c => c.toUpperCase()) || 'Dashboard';
-  };
-
-  const canAccessPerformance = user && (user.role === 'admin' || user.role === 'manager');
-  const isAdmin = user?.role === 'admin';
+  if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6 shadow-sm">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger />
-        <h1 className="hidden md:block text-xl font-semibold capitalize">
-          {getPageTitle()}
-        </h1>
-      </div>
-      
-      <div className="flex items-center gap-4">
-        <button 
-          className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors dark:hover:bg-gray-800 dark:hover:text-gray-200"
-          onClick={() => handleNavigate('/dashboard')}
-          aria-label="Search"
-        >
-          <Search className="h-5 w-5" />
-        </button>
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <SidebarTrigger className="mr-4" />
         
-        <NotificationPopover />
-        
-        <DropdownMenu open={layoutGridOpen} onOpenChange={setLayoutGridOpen}>
-          <DropdownMenuTrigger asChild>
-            <button 
-              className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors dark:hover:bg-gray-800 dark:hover:text-gray-200"
-              aria-label="Quick Access"
-            >
-              <LayoutGrid className="h-5 w-5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 p-2">
-            <DropdownMenuLabel>Quick Access</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => handleNavigate('/dashboard')} className="cursor-pointer">
-                <BarChart className="h-4 w-4 mr-2" />
-                Dashboard
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/goals')} className="cursor-pointer">
-                <Target className="h-4 w-4 mr-2" />
-                Goals
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/skills')} className="cursor-pointer">
-                <Book className="h-4 w-4 mr-2" />
-                Skills
-              </DropdownMenuItem>
-              {canAccessPerformance && (
-                <DropdownMenuItem onClick={() => handleNavigate('/performance')} className="cursor-pointer">
-                  <ChartPie className="h-4 w-4 mr-2" />
-                  Performance
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-            
-            <DropdownMenuSeparator />
-            
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => handleNavigate('/my-profile')} className="cursor-pointer">
-                <User className="h-4 w-4 mr-2" />
-                My Profile
-              </DropdownMenuItem>
-              {(user?.role === 'admin' || user?.role === 'manager') && (
-                <DropdownMenuItem onClick={() => handleNavigate('/users')} className="cursor-pointer">
-                  <Users className="h-4 w-4 mr-2" />
-                  Team Members
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        
-        {isAdmin && currentCompany && (
-          <div className="hidden md:flex items-center gap-2 border-l pl-4 ml-2">
-            <CompanySelector 
-              companies={companies} 
-              selectedCompanyId={currentCompany.id} 
-              onCompanyChange={id => {
-                const company = companies.find(c => c.id === id);
-                if (company) {
-                  // This is handled by the CompanyContext
-                }
-              }} 
-            />
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <div className="w-full flex-1 md:w-auto md:flex-none">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="pl-8 md:w-[300px] lg:w-[400px]"
+              />
+            </div>
           </div>
-        )}
-        
-        <UserMenuDropdown />
+          
+          <nav className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-4 w-4" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs">
+                3
+              </Badge>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.profilePicture} alt={user.name} />
+                    <AvatarFallback>
+                      {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout}>
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </nav>
+        </div>
       </div>
     </header>
   );

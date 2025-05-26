@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { CareerPath, CareerRole } from "@/types/career";
 
 export function useCareerPaths() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [paths, setPaths] = useState<CareerPath[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

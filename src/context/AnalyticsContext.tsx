@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useClerkAuth } from '@/context/ClerkAuthContext';
 import { useLocation } from 'react-router-dom';
 import analytics from '@/services/analytics';
