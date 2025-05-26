@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useClerkAuth } from '@/context/ClerkAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,7 +56,7 @@ export function useGoalsData() {
       const { data, error } = await supabase
         .from('goals')
         .insert({
-          user_id: user.id,
+          user_id: user.id, // Explicitly set user_id here
           title: goalData.title,
           description: goalData.description,
           due_date: goalData.dueDate?.toISOString(),

@@ -937,32 +937,55 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string | null
+          department: string | null
           email: string
           id: string
+          manager: string | null
           name: string | null
+          position: string | null
+          profile_picture: string | null
           role: string | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
+          department?: string | null
           email: string
           id: string
+          manager?: string | null
           name?: string | null
+          position?: string | null
+          profile_picture?: string | null
           role?: string | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string | null
+          department?: string | null
           email?: string
           id?: string
+          manager?: string | null
           name?: string | null
+          position?: string | null
+          profile_picture?: string | null
           role?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       question_responses: {
         Row: {
@@ -1445,6 +1468,16 @@ export type Database = {
       is_company_admin: {
         Args: { company_id: string }
         Returns: boolean
+      }
+      sync_clerk_user_profile: {
+        Args: {
+          user_id_param: string
+          email_param: string
+          name_param: string
+          role_param?: string
+          profile_picture_param?: string
+        }
+        Returns: undefined
       }
       user_manages_company: {
         Args: { company_id: string }

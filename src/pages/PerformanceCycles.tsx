@@ -1,17 +1,25 @@
 
 import { useState } from "react";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { ReviewCycle, ReviewParameter } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
+import { useRealReviewCycles } from "@/hooks/useRealReviewCycles";
 import CycleManagement from "@/components/cycles/CycleManagement";
-import { v4 as uuidv4 } from 'uuid';
+
+interface ReviewCycle {
+  id: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  status: 'draft' | 'active' | 'completed';
+  parameters: any[];
+  type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
+  purpose: 'goal' | 'feedback' | 'performance';
+}
 
 export default function PerformanceCycles() {
   const { user } = useClerkAuth();
   const { toast } = useToast();
-  
-  // Start with empty cycles - these will be loaded from database
-  const [cycles, setCycles] = useState<ReviewCycle[]>([]);
+  const { reviewCycles, isLoading, createReviewCycle } = useRealReviewCycles();
   
   const isAdmin = user?.role === "admin";
   
@@ -26,14 +34,53 @@ export default function PerformanceCycles() {
       </div>
     );
   }
+
+  // Transform database cycles to match expected format
+  const transformedCycles: ReviewCycle[] = reviewCycles.map(cycle => ({
+    id: cycle.id,
+    name: cycle.name,
+    startDate: new Date(cycle.start_date),
+    endDate: new Date(cycle.end_date),
+    status: cycle.status as 'draft' | 'active' | 'completed',
+    parameters: cycle.parameters || [],
+    type: cycle.type as 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual',
+    purpose: cycle.purpose as 'goal' | 'feedback' | 'performance'
+  }));
   
-  const handleCreateCycle = (newCycle: ReviewCycle) => {
-    setCycles(prev => [...prev, newCycle]);
-    toast({
-      title: "Cycle created",
-      description: `${newCycle.name} has been successfully created`,
-    });
+  const handleCreateCycle = async (newCycleData: Omit<ReviewCycle, 'id'>) => {
+    try {
+      await createReviewCycle({
+        name: newCycleData.name,
+        start_date: newCycleData.startDate.toISOString(),
+        end_date: newCycleData.endDate.toISOString(),
+        status: newCycleData.status,
+        type: newCycleData.type,
+        purpose: newCycleData.purpose,
+        parameters: newCycleData.parameters
+      });
+
+      toast({
+        title: "Cycle created",
+        description: `${newCycleData.name} has been successfully created`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to create cycle. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="flex items-center justify-center h-32">
+          <div className="text-muted-foreground">Loading performance cycles...</div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -45,7 +92,7 @@ export default function PerformanceCycles() {
       </div>
       
       <CycleManagement 
-        cycles={cycles}
+        cycles={transformedCycles}
         onCreateCycle={handleCreateCycle}
       />
     </div>
