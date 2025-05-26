@@ -10,11 +10,14 @@ interface TaskAssignee {
 interface TaskItemProps {
   id: number;
   title: string;
+  description: string;
   dueIn: string;
   type: string;
+  priority: string;
   assignee: TaskAssignee;
   action: string;
   iconType: string;
+  project: string;
 }
 
 export default function TasksList({ tasks }: { tasks: TaskItemProps[] }) {

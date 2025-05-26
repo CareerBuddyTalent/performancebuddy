@@ -15,11 +15,11 @@ export default function Home() {
   const { tasks, stats, isLoading: dashboardLoading } = useRealDashboardData();
   const { teamMembers, isLoading: teamLoading } = useRealPerformanceData();
 
-  // Mock favorites data (can be replaced with real data later)
+  // Generate favorites based on real data
   const favorites = [
-    { id: 1, title: "Annual Performance Review", subtitle: "Due in 3 days", type: "dashboard" as const },
-    { id: 2, title: "Team Goals Dashboard", subtitle: "Q4 2024", type: "chart" as const },
-    { id: 3, title: "Sarah Johnson", subtitle: "Direct Report", type: "person" as const, avatar: "/placeholder.svg" },
+    { id: 1, title: "Performance Dashboard", subtitle: "Track your goals", type: "dashboard" as const },
+    { id: 2, title: "Team Goals", subtitle: "Collaborate with team", type: "chart" as const },
+    { id: 3, title: "Skills Development", subtitle: "Improve your skills", type: "person" as const, avatar: "/placeholder.svg" },
   ];
 
   if (!user) {
@@ -51,7 +51,14 @@ export default function Home() {
       `${Math.ceil((new Date(task.due_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days` : 
       "No due date",
     dueDate: task.due_date || new Date().toISOString(),
-    project: task.type === 'goal' ? 'Goals' : task.type === 'review' ? 'Reviews' : 'Tasks'
+    project: task.type === 'goal' ? 'Goals' : task.type === 'review' ? 'Reviews' : 'Tasks',
+    assignee: {
+      name: user.name,
+      avatar: user.profilePicture || "/placeholder.svg",
+      initial: user.name.charAt(0)
+    },
+    action: "Complete",
+    iconType: task.type
   }));
 
   // Transform team members for display

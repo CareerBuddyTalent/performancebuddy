@@ -1,12 +1,12 @@
 
-import { useNotificationContext } from "@/context/NotificationContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotificationCard from "./NotificationCard";
+import { useRealNotifications } from "@/hooks/useRealNotifications";
 
 export default function NotificationsList() {
-  const { notifications } = useNotificationContext();
+  const { notifications, isLoading } = useRealNotifications();
 
-  if (!notifications) {
+  if (isLoading) {
     return (
       <div className="flex gap-4 overflow-x-auto pb-2 pt-2">
         {[1, 2, 3].map((i) => (
@@ -27,13 +27,21 @@ export default function NotificationsList() {
     );
   }
 
+  if (!notifications || notifications.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No notifications available
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-2 pt-2">
       {notifications.slice(0, 3).map((notification) => (
         <NotificationCard 
           key={notification.id} 
           notification={{
-            id: notification.id,
+            id: parseInt(notification.id.replace(/\D/g, '')) || Math.random(),
             title: notification.title,
             description: notification.description,
             days: Math.floor((Date.now() - notification.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
