@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       career_paths: {
         Row: {
           color: string | null
@@ -229,6 +268,62 @@ export type Database = {
           },
         ]
       }
+      development_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          employee_id: string
+          end_date: string
+          id: string
+          manager_id: string
+          objectives: Json | null
+          review_id: string | null
+          skills_focus: string[] | null
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          end_date: string
+          id?: string
+          manager_id: string
+          objectives?: Json | null
+          review_id?: string | null
+          skills_focus?: string[] | null
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          end_date?: string
+          id?: string
+          manager_id?: string
+          objectives?: Json | null
+          review_id?: string | null
+          skills_focus?: string[] | null
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_plans_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "performance_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           content: string
@@ -256,6 +351,155 @@ export type Database = {
           recipient_id?: string
           sender_id?: string
           type?: string
+        }
+        Relationships: []
+      }
+      feedback_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          is_anonymous: boolean | null
+          recipient_id: string
+          requester_id: string
+          reviewer_id: string
+          status: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          recipient_id: string
+          requester_id: string
+          reviewer_id: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          recipient_id?: string
+          requester_id?: string
+          reviewer_id?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_requests_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "review_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_integrations: {
+        Row: {
+          created_at: string
+          entity_id: string
+          goal_id: string
+          id: string
+          integration_type: string
+          last_synced: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          goal_id: string
+          id?: string
+          integration_type: string
+          last_synced?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          goal_id?: string
+          id?: string
+          integration_type?: string
+          last_synced?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      goal_metrics: {
+        Row: {
+          created_at: string
+          current_value: number | null
+          goal_id: string
+          id: string
+          name: string
+          target_value: number
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number | null
+          goal_id: string
+          id?: string
+          name: string
+          target_value: number
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number | null
+          goal_id?: string
+          id?: string
+          name?: string
+          target_value?: number
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      goal_milestones: {
+        Row: {
+          completed_date: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          goal_id: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -492,6 +736,42 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean | null
+          feedback_received: boolean | null
+          goal_deadlines: boolean | null
+          id: string
+          push_notifications: boolean | null
+          review_reminders: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean | null
+          feedback_received?: boolean | null
+          goal_deadlines?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          review_reminders?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean | null
+          feedback_received?: boolean | null
+          goal_deadlines?: boolean | null
+          id?: string
+          push_notifications?: boolean | null
+          review_reminders?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       okrs: {
         Row: {
           created_at: string
@@ -543,6 +823,42 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_benchmarks: {
+        Row: {
+          benchmark_value: number
+          category: string
+          created_at: string
+          department: string | null
+          id: string
+          metric_name: string
+          percentile: number | null
+          role_level: string | null
+          updated_at: string
+        }
+        Insert: {
+          benchmark_value: number
+          category: string
+          created_at?: string
+          department?: string | null
+          id?: string
+          metric_name: string
+          percentile?: number | null
+          role_level?: string | null
+          updated_at?: string
+        }
+        Update: {
+          benchmark_value?: number
+          category?: string
+          created_at?: string
+          department?: string | null
+          id?: string
+          metric_name?: string
+          percentile?: number | null
+          role_level?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       performance_reviews: {
         Row: {
           created_at: string
@@ -579,6 +895,42 @@ export type Database = {
           reviewer_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      performance_trends: {
+        Row: {
+          created_at: string
+          feedback_sentiment: number | null
+          goal_completion_rate: number | null
+          id: string
+          overall_score: number | null
+          period_end: string
+          period_start: string
+          skill_scores: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_sentiment?: number | null
+          goal_completion_rate?: number | null
+          id?: string
+          overall_score?: number | null
+          period_end: string
+          period_start: string
+          skill_scores?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_sentiment?: number | null
+          goal_completion_rate?: number | null
+          id?: string
+          overall_score?: number | null
+          period_end?: string
+          period_start?: string
+          skill_scores?: Json | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -690,6 +1042,48 @@ export type Database = {
         }
         Relationships: []
       }
+      review_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          metadata: Json | null
+          name: string
+          type: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          metadata?: Json | null
+          name: string
+          type: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          metadata?: Json | null
+          name?: string
+          type?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       role_skills: {
         Row: {
           created_at: string | null
@@ -721,6 +1115,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      skill_assessments: {
+        Row: {
+          assessment_date: string
+          assessment_type: string
+          assessor_id: string
+          competency_level: number
+          created_at: string
+          id: string
+          notes: string | null
+          skill_id: string
+          user_id: string
+        }
+        Insert: {
+          assessment_date?: string
+          assessment_type: string
+          assessor_id: string
+          competency_level: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          skill_id: string
+          user_id: string
+        }
+        Update: {
+          assessment_date?: string
+          assessment_type?: string
+          assessor_id?: string
+          competency_level?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          skill_id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       skills: {
         Row: {
@@ -854,6 +1284,94 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      template_questions: {
+        Row: {
+          created_at: string
+          description: string | null
+          goal_ids: string[] | null
+          id: string
+          options: string[] | null
+          order_position: number
+          rating_scale: Json | null
+          required: boolean | null
+          section_id: string
+          skill_ids: string[] | null
+          text: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          goal_ids?: string[] | null
+          id?: string
+          options?: string[] | null
+          order_position: number
+          rating_scale?: Json | null
+          required?: boolean | null
+          section_id: string
+          skill_ids?: string[] | null
+          text: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          goal_ids?: string[] | null
+          id?: string
+          options?: string[] | null
+          order_position?: number
+          rating_scale?: Json | null
+          required?: boolean | null
+          section_id?: string
+          skill_ids?: string[] | null
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "template_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_position: number
+          template_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_position: number
+          template_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_position?: number
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "review_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

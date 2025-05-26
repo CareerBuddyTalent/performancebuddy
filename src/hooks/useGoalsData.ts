@@ -35,7 +35,7 @@ export function useGoalsData() {
           createdAt: new Date(goal.created_at),
           updatedAt: new Date(goal.updated_at),
           level: goal.level as "individual" | "team" | "company",
-          metrics: [] // Will be implemented later with proper metrics table
+          metrics: [] // Will be populated by enhanced goals hook
         })) || [];
 
         setGoals(formattedGoals);
@@ -124,6 +124,7 @@ export function useGoalsData() {
 
   const deleteGoal = async (goalId: string) => {
     try {
+      // Delete related milestones and metrics first (handled by CASCADE)
       const { error } = await supabase
         .from('goals')
         .delete()
