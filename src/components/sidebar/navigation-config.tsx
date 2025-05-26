@@ -6,7 +6,9 @@ import {
   ClipboardCheck,
   Target,
   Settings,
-  BarChart3
+  BarChart3,
+  Building2,
+  Home
 } from "lucide-react";
 
 // Define navigation item type
@@ -23,6 +25,12 @@ export const navigationItems: NavigationItem[] = [
     path: '/dashboard', 
     label: 'Dashboard', 
     icon: LayoutDashboard, 
+    roles: ['admin', 'manager', 'employee'] 
+  },
+  { 
+    path: '/home', 
+    label: 'Home', 
+    icon: Home, 
     roles: ['admin', 'manager', 'employee'] 
   },
   { 
@@ -50,6 +58,12 @@ export const navigationItems: NavigationItem[] = [
     roles: ['admin', 'manager', 'employee'] 
   },
   { 
+    path: '/companies', 
+    label: 'Companies', 
+    icon: Building2, 
+    roles: ['admin'] 
+  },
+  { 
     path: '/testing', 
     label: 'Test Dashboard', 
     icon: BarChart3, 
@@ -72,13 +86,13 @@ export const getNavigationItemsByGroup = (items: NavigationItem[], userRole: str
   
   return {
     mainNavItems: filteredNavItems.filter(item => 
-      ['/dashboard', '/performance', '/okrs', '/users', '/surveys'].includes(item.path)
+      ['/dashboard', '/home', '/performance', '/okrs', '/users', '/surveys'].includes(item.path)
     ),
     
     workNavItems: [],
     
     adminNavItems: filteredNavItems.filter(item => 
-      ['/testing', '/settings', '/companies'].includes(item.path)
+      ['/companies', '/testing', '/settings'].includes(item.path)
     )
   };
 };
