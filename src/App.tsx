@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-
 import { Toaster } from "sonner";
 import { ClerkAuthProvider } from "@/context/ClerkAuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { NotificationProvider } from "@/components/notifications/NotificationSystem";
+import { ReminderSystem } from "@/components/automation/ReminderSystem";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import PageLayout from "@/components/PageLayout";
 import Index from "@/pages/Index";
@@ -29,65 +31,68 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <ClerkAuthProvider>
-          <Router>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              
-              {/* Protected routes */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <PageLayout>
-                      <Outlet />
-                    </PageLayout>
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="home" element={<Home />} />
-                <Route path="performance" element={<Performance />} />
-                <Route path="performance/reviews" element={<Reviews />} />
-                <Route path="performance/templates" element={<ReviewTemplates />} />
-                <Route path="okrs" element={<OKRs />} />
-                <Route path="okrs/alignment" element={<OKRAlignment />} />
-                <Route path="skills" element={<Skills />} />
+          <NotificationProvider>
+            <Router>
+              <ReminderSystem />
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                
+                {/* Protected routes */}
                 <Route
-                  path="users"
+                  path="/"
                   element={
-                    <ProtectedRoute requiredRoles={["admin", "manager"]}>
-                      <UserManagement />
+                    <ProtectedRoute>
+                      <PageLayout>
+                        <Outlet />
+                      </PageLayout>
                     </ProtectedRoute>
                   }
-                />
-                <Route
-                  path="companies"
-                  element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
-                      <CompanyManagement />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="settings" element={<Settings />} />
-                <Route 
-                  path="testing" 
-                  element={
-                    <ProtectedRoute requiredRoles={["admin"]}>
-                      <TestingDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-              </Route>
-              
-              {/* 404 page */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-          <Toaster position="top-right" />
+                >
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="home" element={<Home />} />
+                  <Route path="performance" element={<Performance />} />
+                  <Route path="performance/reviews" element={<Reviews />} />
+                  <Route path="performance/templates" element={<ReviewTemplates />} />
+                  <Route path="okrs" element={<OKRs />} />
+                  <Route path="okrs/alignment" element={<OKRAlignment />} />
+                  <Route path="skills" element={<Skills />} />
+                  <Route
+                    path="users"
+                    element={
+                      <ProtectedRoute requiredRoles={["admin", "manager"]}>
+                        <UserManagement />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="companies"
+                    element={
+                      <ProtectedRoute requiredRoles={["admin"]}>
+                        <CompanyManagement />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="settings" element={<Settings />} />
+                  <Route 
+                    path="testing" 
+                    element={
+                      <ProtectedRoute requiredRoles={["admin"]}>
+                        <TestingDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+                
+                {/* 404 page */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Router>
+            <Toaster position="top-right" />
+          </NotificationProvider>
         </ClerkAuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
