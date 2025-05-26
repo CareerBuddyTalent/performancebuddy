@@ -1,29 +1,25 @@
 
 import { useAuth } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import Header from "@/components/landing/Header";
 import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import CTA from "@/components/landing/CTA";
 import LandingFooter from "@/components/landing/LandingFooter";
+import { GlobalLoading } from "@/components/ui/global-loading";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, isLoading, isClerkAvailable } = useClerkAuth();
 
   // Show loading while checking auth status
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+  if (!isLoaded || isLoading) {
+    return <GlobalLoading message="Loading..." />;
   }
 
   // Redirect authenticated users to dashboard
-  if (isSignedIn) {
+  if (isSignedIn || isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -35,6 +31,15 @@ export default function Index() {
       <Features />
       <CTA />
       <LandingFooter />
+      
+      {/* Show demo mode indicator when Clerk is not available */}
+      {!isClerkAvailable && (
+        <div className="fixed bottom-4 right-4 bg-yellow-100 border border-yellow-300 rounded-lg p-3 text-sm">
+          <p className="text-yellow-800">
+            🚧 Demo Mode: Authentication service unavailable
+          </p>
+        </div>
+      )}
     </div>
   );
 }
