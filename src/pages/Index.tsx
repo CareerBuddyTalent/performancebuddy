@@ -13,8 +13,8 @@ export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();
   const { isAuthenticated, isLoading, isClerkAvailable } = useClerkAuth();
 
-  // Show loading while checking auth status
-  if (!isLoaded || isLoading) {
+  // Show loading while checking auth status, but with timeout
+  if ((!isLoaded || isLoading) && isClerkAvailable) {
     return <GlobalLoading message="Loading..." />;
   }
 

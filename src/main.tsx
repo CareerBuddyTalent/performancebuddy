@@ -9,11 +9,13 @@ import env, { validateEnvironment } from '@/config/env'
 // Validate environment variables
 const envValidation = validateEnvironment();
 
-if (!envValidation.isValid) {
-  console.error('Environment validation failed:', envValidation.issues);
+// Only block app loading in development if critical services are completely unavailable
+if (!envValidation.isValid && env.NODE_ENV === 'development') {
+  // Check if we have any working configuration (either custom or defaults)
+  const hasWorkingConfig = env.SUPABASE_URL && env.SUPABASE_ANON_KEY;
   
-  // Show environment issues in development
-  if (env.NODE_ENV === 'development') {
+  if (!hasWorkingConfig) {
+    console.error('Environment validation failed:', envValidation.issues);
     document.body.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto;">
         <h1 style="color: #e74c3c;">Configuration Error</h1>
@@ -34,6 +36,9 @@ if (!envValidation.isValid) {
       </div>
     `;
     throw new Error('Missing required environment variables');
+  } else {
+    // Show warning but continue loading
+    console.warn('Some environment variables are using defaults:', envValidation.issues);
   }
 }
 
@@ -50,31 +55,59 @@ if (!rootElement) {
 
 const root = createRoot(rootElement);
 
-// Render app with error handling
-try {
-  if (PUBLISHABLE_KEY) {
-    root.render(
-      <ClerkProvider 
-        publishableKey={PUBLISHABLE_KEY}
-        appearance={{
-          variables: {
-            colorPrimary: '#3b82f6'
-          }
-        }}
-      >
-        <App />
-      </ClerkProvider>
-    );
-  } else {
-    // Fallback when Clerk key is missing
-    root.render(<App />);
+// Enhanced error handling for app rendering
+function renderApp() {
+  try {
+    if (PUBLISHABLE_KEY) {
+      // Try to render with Clerk
+      root.render(
+        <ClerkProvider 
+          publishableKey={PUBLISHABLE_KEY}
+          appearance={{
+            variables: {
+              colorPrimary: '#3b82f6'
+            }
+          }}
+        >
+          <App />
+        </ClerkProvider>
+      );
+    } else {
+      // Fallback without Clerk
+      console.warn('No Clerk key available, using fallback authentication');
+      root.render(<App />);
+    }
+  } catch (error) {
+    console.error('Failed to render app with primary configuration:', error);
+    
+    // Final fallback - render without any external providers
+    try {
+      root.render(<App />);
+    } catch (fallbackError) {
+      console.error('Failed to render app with fallback:', fallbackError);
+      root.render(
+        <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+          <h1>Application Error</h1>
+          <p>Unable to load the application. Please refresh the page or contact support.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{ 
+              padding: '10px 20px', 
+              backgroundColor: '#3b82f6', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '5px',
+              cursor: 'pointer',
+              marginTop: '20px'
+            }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
   }
-} catch (error) {
-  console.error('Failed to render app:', error);
-  root.render(
-    <div style={{ padding: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Application Error</h1>
-      <p>Unable to load the application. Please refresh the page or contact support.</p>
-    </div>
-  );
 }
+
+// Render the app
+renderApp();

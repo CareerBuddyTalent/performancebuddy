@@ -107,17 +107,24 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   }, [clerkUser, syncAndSetUser]);
 
   useEffect(() => {
-    // Check if Clerk is working
+    // Check if Clerk is working with improved error handling
     const checkClerk = async () => {
       try {
         if (!env.CLERK_PUBLISHABLE_KEY) {
+          console.warn('No Clerk publishable key found, using fallback auth');
           setClerkError(true);
           setIsLoading(false);
           return;
         }
 
-        // Wait a bit to see if Clerk loads
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Wait for Clerk to initialize
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        while (attempts < maxAttempts && !isLoaded) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          attempts++;
+        }
         
         if (isLoaded) {
           if (clerkUser) {
@@ -127,12 +134,13 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
             setIsLoading(false);
           }
         } else {
-          // Clerk didn't load, use fallback
+          // Clerk didn't load after reasonable time, use fallback
+          console.warn('Clerk failed to load, using fallback authentication');
           setClerkError(true);
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Clerk check failed:', error);
+        console.warn('Clerk initialization failed, using fallback:', error);
         setClerkError(true);
         setIsLoading(false);
       }

@@ -12,10 +12,11 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteProps) {
   const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useClerkAuth();
+  const { user, isAuthenticated, isLoading, isClerkAvailable } = useClerkAuth();
   const location = useLocation();
 
-  if (!isLoaded) {
+  // Show loading only if Clerk is available and still loading
+  if (isClerkAvailable && (!isLoaded || isLoading)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner size="lg" />
@@ -23,7 +24,10 @@ export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteP
     );
   }
 
-  if (!isSignedIn) {
+  // Check authentication based on available service
+  const userIsAuthenticated = isClerkAvailable ? isSignedIn : isAuthenticated;
+
+  if (!userIsAuthenticated) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
