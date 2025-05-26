@@ -1,6 +1,6 @@
 
 import { Goal } from "@/types";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ export default function PerformanceGoalTable({
   onUpdateStatus,
   onUpdateProgress
 }: PerformanceGoalTableProps) {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
 
   return (

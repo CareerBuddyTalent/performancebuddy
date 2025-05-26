@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Goal } from "@/types";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card } from "@/components/ui/card";
 import GoalListHeader from "../goals/GoalListHeader";
 import GoalTableWrapper from "../goals/GoalTableWrapper";
@@ -19,7 +19,7 @@ export default function PerformanceGoalsTab({
   onUpdateGoal, 
   onDeleteGoal 
 }: PerformanceGoalsTabProps) {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
 

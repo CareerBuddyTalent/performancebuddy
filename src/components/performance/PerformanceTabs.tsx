@@ -1,7 +1,7 @@
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { useNavigate } from "react-router-dom";
 import { hasPermission } from "@/types/performance-permissions";
 import PerformanceGoalsTab from "@/components/performance/tabs/PerformanceGoalsTab";
@@ -35,7 +35,7 @@ export default function PerformanceTabs({
   onUpdateGoal,
   onDeleteGoal
 }: PerformanceTabsProps) {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const navigate = useNavigate();
   
   if (!user) return null;

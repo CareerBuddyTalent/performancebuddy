@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Goal } from "@/types";
-import { useAuth } from "@/context/AuthContext";
+import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "@/hooks/use-toast";
 import { hasPermission } from "@/types/performance-permissions";
@@ -90,7 +90,7 @@ const initialGoals: Goal[] = [
 ];
 
 export default function PerformanceDashboard() {
-  const { user } = useAuth();
+  const { user } = useClerkAuth();
   const [activeTab, setActiveTab] = useState("goals");
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('quarter');
   const [performanceGoals, setPerformanceGoals] = useState<Goal[]>(initialGoals);

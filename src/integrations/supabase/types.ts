@@ -229,6 +229,78 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          recipient_id: string
+          sender_id: string
+          type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id: string
+          is_anonymous?: boolean | null
+          recipient_id: string
+          sender_id: string
+          type?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      goals: {
+        Row: {
+          aligned_with: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          level: string
+          progress: number | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aligned_with?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id: string
+          level?: string
+          progress?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aligned_with?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          level?: string
+          progress?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_import_urls: {
         Row: {
           company_name: string | null
@@ -420,6 +492,96 @@ export type Database = {
           },
         ]
       }
+      okrs: {
+        Row: {
+          created_at: string
+          current_value: number | null
+          description: string | null
+          due_date: string | null
+          id: string
+          level: string
+          parent_id: string | null
+          progress: number | null
+          status: string
+          target_value: number | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          id: string
+          level?: string
+          parent_id?: string | null
+          progress?: number | null
+          status?: string
+          target_value?: number | null
+          title: string
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          level?: string
+          parent_id?: string | null
+          progress?: number | null
+          status?: string
+          target_value?: number | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      performance_reviews: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          employee_id: string
+          feedback: string | null
+          id: string
+          overall_rating: number | null
+          ratings: Json | null
+          reviewer_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          employee_id: string
+          feedback?: string | null
+          id?: string
+          overall_rating?: number | null
+          ratings?: Json | null
+          reviewer_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          employee_id?: string
+          feedback?: string | null
+          id?: string
+          overall_rating?: number | null
+          ratings?: Json | null
+          reviewer_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -489,6 +651,45 @@ export type Database = {
           },
         ]
       }
+      review_cycles: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          name: string
+          parameters: Json | null
+          purpose: string
+          start_date: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id: string
+          name: string
+          parameters?: Json | null
+          purpose?: string
+          start_date: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          name?: string
+          parameters?: Json | null
+          purpose?: string
+          start_date?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       role_skills: {
         Row: {
           created_at: string | null
@@ -520,6 +721,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      skills: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id: string
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       survey_questions: {
         Row: {
@@ -651,6 +876,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_skills: {
+        Row: {
+          competency_level: number
+          created_at: string
+          id: string
+          skill_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          competency_level?: number
+          created_at?: string
+          id?: string
+          skill_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          competency_level?: number
+          created_at?: string
+          id?: string
+          skill_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -659,6 +911,10 @@ export type Database = {
       get_count: {
         Args: { x: number }
         Returns: number
+      }
+      get_current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_user_role: {
         Args: { user_id: string }
