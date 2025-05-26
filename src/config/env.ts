@@ -54,7 +54,7 @@ const env: EnvConfig = {
   // External services
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
+  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_live_Y2xlcmsucGVyZm9ybS50aGVjYXJlZXJidWRkeS5jb20k',
   
   // App metadata - for debugging and support
   BUILD_TIME: import.meta.env.VITE_BUILD_TIME || new Date().toISOString(),
