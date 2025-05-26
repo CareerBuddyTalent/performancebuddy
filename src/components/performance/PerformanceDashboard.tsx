@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Goal } from "@/types";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
@@ -52,10 +51,7 @@ export default function PerformanceDashboard() {
   const handleAddGoalSubmit = async (goalData: Omit<Goal, "id" | "createdAt" | "updatedAt">) => {
     if (canManageGoals) {
       try {
-        await createGoal({
-          ...goalData,
-          userId: user?.id || '',
-        });
+        await createGoal(goalData);
         
         toast({
           title: "Goal created",
