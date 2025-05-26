@@ -78,12 +78,12 @@ export class UserMigration {
         emailAddress: [user.email]
       });
 
-      if (existingUsers.length > 0) {
+      if (existingUsers.totalCount > 0) {
         console.log(`User ${user.email} already exists in Clerk`);
         return {
           success: true,
           email: user.email,
-          clerkUserId: existingUsers[0].id,
+          clerkUserId: existingUsers.data[0].id,
           error: 'User already exists'
         };
       }

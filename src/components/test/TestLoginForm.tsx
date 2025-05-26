@@ -6,7 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, ShieldCheck, Users } from "lucide-react";
-import { TestUser } from "@/utils/testingUtils";
+
+interface TestUser {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+}
 
 interface TestLoginFormProps {
   testUsers: TestUser[];

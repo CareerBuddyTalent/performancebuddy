@@ -2,12 +2,40 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TestLoginForm } from "@/components/test/TestLoginForm";
-import { RolePermissionsTable } from "@/components/test/RolePermissionsTable";
+import TestLoginForm from "@/components/test/TestLoginForm";
+import RolePermissionsTable from "@/components/test/RolePermissionsTable";
 import { UserMigrationPanel } from "@/components/admin/UserMigrationPanel";
-import { Database, Users, Settings, Migrate } from "lucide-react";
+import { Database, Users, Settings, ArrowRightLeft } from "lucide-react";
 
 export default function TestingDashboard() {
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Mock test users for testing
+  const testUsers = [
+    { id: '1', email: 'admin@test.com', password: 'admin123', name: 'Admin User', role: 'admin' },
+    { id: '2', email: 'manager@test.com', password: 'manager123', name: 'Manager User', role: 'manager' },
+    { id: '3', email: 'employee@test.com', password: 'employee123', name: 'Employee User', role: 'employee' }
+  ];
+
+  const handleTestLogin = async (email: string, password: string) => {
+    setIsLoading(true);
+    setAuthError(null);
+    
+    try {
+      // This would integrate with your actual auth system
+      console.log('Test login attempt:', { email, password });
+      // For now, just simulate success
+      setTimeout(() => {
+        setIsLoading(false);
+        console.log('Test login successful');
+      }, 1000);
+    } catch (error: any) {
+      setAuthError(error.message);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center gap-2 mb-6">
@@ -18,7 +46,7 @@ export default function TestingDashboard() {
       <Tabs defaultValue="migration" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="migration" className="flex items-center gap-2">
-            <Migrate className="h-4 w-4" />
+            <ArrowRightLeft className="h-4 w-4" />
             User Migration
           </TabsTrigger>
           <TabsTrigger value="auth" className="flex items-center gap-2">
@@ -48,7 +76,12 @@ export default function TestingDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TestLoginForm />
+              <TestLoginForm 
+                testUsers={testUsers}
+                onLogin={handleTestLogin}
+                isLoading={isLoading}
+                error={authError}
+              />
             </CardContent>
           </Card>
         </TabsContent>
