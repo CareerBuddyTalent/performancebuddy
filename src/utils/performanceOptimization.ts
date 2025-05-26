@@ -78,31 +78,42 @@ class PerformanceOptimizer {
 
   private monitorWebVitals(): void {
     // Monitor Largest Contentful Paint (LCP)
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (import.meta.env.DEV) {
-          console.log('LCP:', entry.startTime);
-        }
-      }
-    }).observe({ type: 'largest-contentful-paint', buffered: true });
+    if ('PerformanceObserver' in window) {
+      try {
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (import.meta.env.DEV) {
+              console.log('LCP:', entry.startTime);
+            }
+          }
+        }).observe({ type: 'largest-contentful-paint', buffered: true });
 
-    // Monitor First Input Delay (FID)
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (import.meta.env.DEV) {
-          console.log('FID:', entry.processingStart - entry.startTime);
-        }
-      }
-    }).observe({ type: 'first-input', buffered: true });
+        // Monitor First Input Delay (FID)
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const fidEntry = entry as PerformanceEventTiming;
+            if (import.meta.env.DEV && fidEntry.processingStart) {
+              console.log('FID:', fidEntry.processingStart - fidEntry.startTime);
+            }
+          }
+        }).observe({ type: 'first-input', buffered: true });
 
-    // Monitor Cumulative Layout Shift (CLS)
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (import.meta.env.DEV && !entry.hadRecentInput) {
-          console.log('CLS:', entry.value);
+        // Monitor Cumulative Layout Shift (CLS)
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const clsEntry = entry as any; // Layout shift entries don't have proper TypeScript definitions
+            if (import.meta.env.DEV && !clsEntry.hadRecentInput && clsEntry.value) {
+              console.log('CLS:', clsEntry.value);
+            }
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+      } catch (error) {
+        // Silently fail if PerformanceObserver is not supported
+        if (import.meta.env.DEV) {
+          console.warn('PerformanceObserver not fully supported:', error);
         }
       }
-    }).observe({ type: 'layout-shift', buffered: true });
+    }
   }
 }
 
