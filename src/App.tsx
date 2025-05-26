@@ -1,5 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { ClerkAuthProvider } from "@/context/ClerkAuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -11,20 +12,25 @@ import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import ForgotPassword from "@/pages/ForgotPassword";
-import Dashboard from "@/pages/Dashboard";
-import Home from "@/pages/Home";
-import Performance from "@/pages/Performance";
-import Skills from "@/pages/Skills";
-import Reviews from "@/pages/Reviews";
-import OKRs from "@/pages/OKRs";
-import OKRAlignment from "@/pages/OKRAlignment";
-import UserManagement from "@/pages/UserManagement";
-import CompanyManagement from "@/pages/CompanyManagement";
-import ReviewTemplates from "@/pages/ReviewTemplates";
-import Settings from "@/pages/Settings";
-import TestingDashboard from "@/pages/TestingDashboard";
-import NotFound from "@/pages/NotFound";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { GlobalLoading } from "@/components/ui/global-loading";
+
+// Lazy load pages
+import {
+  Dashboard,
+  Home,
+  Performance,
+  Skills,
+  Reviews,
+  OKRs,
+  OKRAlignment,
+  UserManagement,
+  CompanyManagement,
+  ReviewTemplates,
+  Settings,
+  TestingDashboard,
+  NotFound
+} from "@/pages/LazyPages";
 
 function App() {
   return (
@@ -41,13 +47,15 @@ function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 
-                {/* Protected routes */}
+                {/* Protected routes with lazy loading */}
                 <Route
                   path="/"
                   element={
                     <ProtectedRoute>
                       <PageLayout>
-                        <Outlet />
+                        <Suspense fallback={<GlobalLoading message="Loading page..." />}>
+                          <Outlet />
+                        </Suspense>
                       </PageLayout>
                     </ProtectedRoute>
                   }
@@ -88,7 +96,11 @@ function App() {
                 </Route>
                 
                 {/* 404 page */}
-                <Route path="*" element={<NotFound />} />
+                <Route path="*" element={
+                  <Suspense fallback={<GlobalLoading message="Loading..." />}>
+                    <NotFound />
+                  </Suspense>
+                } />
               </Routes>
             </Router>
             <Toaster position="top-right" />

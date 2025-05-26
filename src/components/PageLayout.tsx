@@ -6,7 +6,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import RoleGuard from "@/components/layout/RoleGuard";
 import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { GlobalLoading } from "@/components/ui/global-loading";
+import { DashboardSkeleton } from "@/components/ui/optimized-skeleton";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -17,7 +17,19 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
   const { isLoading, isAuthenticated } = useClerkAuth();
 
   if (isLoading) {
-    return <GlobalLoading message="Loading application..." fullScreen />;
+    return (
+      <div className="flex min-h-screen w-full bg-background">
+        <div className="w-64 border-r bg-card">
+          <div className="p-4">
+            <div className="h-8 w-32 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="h-14 border-b bg-background/95 animate-pulse" />
+          <DashboardSkeleton />
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
