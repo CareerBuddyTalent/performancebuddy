@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,7 +36,7 @@ export default function Settings() {
                     Update your profile information and manage your account.
                   </p>
                 </div>
-                <AccountSettingsForm user={user} />
+                <AccountSettingsForm />
               </div>
             </TabsContent>
             <TabsContent value="email">
@@ -46,7 +47,7 @@ export default function Settings() {
                     Manage your email preferences and notifications.
                   </p>
                 </div>
-                <EmailSettingsForm user={user} />
+                <EmailSettingsForm />
               </div>
             </TabsContent>
           </Tabs>

@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -32,13 +34,6 @@ export default function MyProfile() {
   const handleSaveClick = async () => {
     setIsLoading(true);
     try {
-      // Optimistically update the user's name and profile picture
-      const updatedUser = {
-        ...user,
-        name: name,
-        profilePicture: profilePicture,
-      };
-
       // Update the user's profile in the database
       const { error } = await supabase
         .from('profiles')

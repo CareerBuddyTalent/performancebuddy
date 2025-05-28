@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
-import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

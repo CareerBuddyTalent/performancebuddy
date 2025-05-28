@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { MessageSquareText, BarChart4 } from "lucide-react";
-import TakeSurveyDialog from "./surveys/TakeSurveyDialog";
+import { TakeSurveyDialog } from "./surveys/TakeSurveyDialog";
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 interface SurveyCardProps {
@@ -98,14 +98,12 @@ export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
         </CardFooter>
       </Card>
 
-      {showTakeSurvey && (
-        <TakeSurveyDialog
-          survey={survey}
-          open={showTakeSurvey}
-          onClose={() => setShowTakeSurvey(false)}
-          onSubmit={handleSubmitSurvey}
-        />
-      )}
+      <TakeSurveyDialog
+        survey={survey}
+        open={showTakeSurvey}
+        onOpenChange={setShowTakeSurvey}
+        onSubmit={handleSubmitSurvey}
+      />
     </>
   );
 }

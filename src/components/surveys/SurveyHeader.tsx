@@ -1,3 +1,4 @@
+
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { MoreHorizontal } from "lucide-react";
 import {
@@ -6,8 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { Survey } from "@/types/surveys";
-import SurveyActions from "./SurveyActions";
+import { SurveyActions } from "./SurveyActions";
 
 interface SurveyHeaderProps {
   survey: Survey;
@@ -18,14 +20,20 @@ interface SurveyHeaderProps {
 
 export default function SurveyHeader({ survey, onEdit, onDelete, onViewResults }: SurveyHeaderProps) {
   const { user } = useSupabaseAuth();
-  const canEdit = user?.role === 'admin' || user?.id === survey.creatorId;
+  const canEdit = user?.role === 'admin' || user?.id === survey.creator_id;
 
   return (
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-2xl font-bold">{survey.title}</h2>
       
       {canEdit ? (
-        <SurveyActions survey={survey} onEdit={onEdit} onDelete={onDelete} onViewResults={onViewResults} />
+        <SurveyActions 
+          surveyId={survey.id}
+          onEdit={() => onEdit(survey)} 
+          onDelete={onDelete} 
+          onShare={() => {}}
+          onViewResults={onViewResults} 
+        />
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -44,4 +52,3 @@ export default function SurveyHeader({ survey, onEdit, onDelete, onViewResults }
     </div>
   );
 }
-

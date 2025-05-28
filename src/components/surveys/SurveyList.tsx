@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import {
@@ -20,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Survey } from '@/types/surveys';
-import SurveyActions from './SurveyActions';
+import { SurveyActions } from './SurveyActions';
 
 interface SurveyListProps {
   surveys: Survey[];
@@ -60,10 +61,11 @@ export default function SurveyList({ surveys, onEdit, onDelete, onViewResponses 
                   <TableCell>{survey.status}</TableCell>
                   <TableCell className="text-right">
                     <SurveyActions
-                      survey={survey}
-                      onEdit={onEdit}
+                      surveyId={survey.id}
+                      onEdit={() => onEdit(survey)}
                       onDelete={onDelete}
-                      onViewResponses={onViewResponses}
+                      onShare={() => {}}
+                      onViewResults={onViewResponses}
                     />
                   </TableCell>
                 </TableRow>

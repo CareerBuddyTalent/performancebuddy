@@ -1,3 +1,4 @@
+
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
 export const SkillsUploader = () => {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import OKRDashboard from "@/components/okr/OKRDashboard";
@@ -13,11 +14,19 @@ export default function OKRs() {
   }
 
   return (
-    <OKRDashboard>
-      <PersonalOKRs userId={user.id} />
-      {user.role === 'manager' && (
-        <TeamObjectives managerId={user.id} />
-      )}
-    </OKRDashboard>
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold tracking-tight mb-6">OKRs Management</h1>
+      
+      <div className="space-y-6">
+        <PersonalOKRs />
+        
+        {user.role === 'manager' && (
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Team Objectives</h2>
+            <TeamObjectives />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

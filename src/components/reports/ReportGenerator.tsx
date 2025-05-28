@@ -1,66 +1,104 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-picker";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { Download, FileText, BarChart3, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { DateRange } from "react-day-picker";
 
-export default function ReportGenerator() {
-  const [reportType, setReportType] = useState("performance");
-  const [dateRange, setDateRange] = useState<Date | undefined>([new Date(2024, 0, 1), new Date()]);
-  const [includeDetails, setIncludeDetails] = useState(true);
+const ReportGenerator = () => {
   const { user } = useSupabaseAuth();
+  const { toast } = useToast();
+  const [reportType, setReportType] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateReport = () => {
-    alert(`Generating ${reportType} report for ${dateRange?.[0]?.toLocaleDateString()} - ${dateRange?.[1]?.toLocaleDateString()} with details: ${includeDetails}`);
+  const generateReport = async () => {
+    if (!reportType || !dateRange?.from || !dateRange?.to) {
+      toast({
+        title: "Error",
+        description: "Please select report type and date range",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Simulate report generation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Report Generated",
+        description: `${reportType} report has been generated successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate report",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
+
+  const reportTypes = [
+    { value: 'performance', label: 'Performance Report', icon: BarChart3 },
+    { value: 'attendance', label: 'Attendance Report', icon: Users },
+    { value: 'goals', label: 'Goals Report', icon: FileText },
+  ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Generate Report</CardTitle>
+        <CardTitle>Report Generator</CardTitle>
         <CardDescription>
-          Customize and generate performance reports for your team.
+          Generate comprehensive reports for your organization
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">Report Type</h3>
+          <label className="text-sm font-medium">Report Type</label>
           <Select value={reportType} onValueChange={setReportType}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a report type" />
+              <SelectValue placeholder="Select report type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="performance">Performance Report</SelectItem>
-              <SelectItem value="okr">OKR Report</SelectItem>
-              <SelectItem value="engagement">Engagement Report</SelectItem>
+              {reportTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  <div className="flex items-center">
+                    <type.icon className="mr-2 h-4 w-4" />
+                    {type.label}
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">Date Range</h3>
-          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="include-details"
-            checked={includeDetails}
-            onCheckedChange={() => setIncludeDetails(!includeDetails)}
+          <label className="text-sm font-medium">Date Range</label>
+          <DatePickerWithRange
+            value={dateRange}
+            onChange={setDateRange}
           />
-          <label
-            htmlFor="include-details"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Include Detailed Information
-          </label>
         </div>
 
-        <Button onClick={generateReport}>Generate Report</Button>
+        <Button 
+          onClick={generateReport} 
+          disabled={isGenerating || !reportType || !dateRange?.from || !dateRange?.to}
+          className="w-full"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {isGenerating ? 'Generating...' : 'Generate Report'}
+        </Button>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default ReportGenerator;

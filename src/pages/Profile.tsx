@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Phone, MapPin, Briefcase, Edit2, Save, X, Target, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRealSkillsData } from "@/hooks/useRealSkillsData";
-import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
 export default function Profile() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const { userSkills, isLoading: skillsLoading } = useRealSkillsData();
   const [isEditing, setIsEditing] = useState(false);
@@ -32,8 +31,8 @@ export default function Profile() {
       setProfileData({
         name: user.name || '',
         email: user.email || '',
-        department: user.department || '',
-        position: user.position || '',
+        department: '',
+        position: '',
         bio: '',
         phone: '',
         location: ''
@@ -54,8 +53,8 @@ export default function Profile() {
       setProfileData({
         name: user.name || '',
         email: user.email || '',
-        department: user.department || '',
-        position: user.position || '',
+        department: '',
+        position: '',
         bio: '',
         phone: '',
         location: ''

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +7,7 @@ import { useGoalsData } from './useGoalsData';
 
 export function useEnhancedGoalsData() {
   const { user } = useSupabaseAuth();
-  const { goals, isLoading: goalsLoading, error: goalsError, ...goalActions } = useGoalsData();
+  const { goals, isLoading: goalsLoading, error: goalsError, createGoal, updateGoal, deleteGoal } = useGoalsData();
   const [enhancedGoals, setEnhancedGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +94,8 @@ export function useEnhancedGoalsData() {
     goals: enhancedGoals,
     isLoading,
     error,
-    ...goalActions
+    createGoal,
+    updateGoal,
+    deleteGoal
   };
 }

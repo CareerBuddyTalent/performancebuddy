@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { SkillsUploader } from "@/components/reviews/SkillsUploader";
@@ -29,11 +30,7 @@ export default function ReviewSkills() {
         </p>
       </div>
       
-      <SkillsUploader 
-        skills={skills}
-        onSkillAdded={handleAddSkill}
-        onSkillDeleted={handleDeleteSkill}
-      />
+      <SkillsUploader />
     </div>
   );
 }
