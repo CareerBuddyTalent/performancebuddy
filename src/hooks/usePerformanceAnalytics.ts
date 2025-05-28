@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PerformanceTrend {
@@ -40,7 +39,7 @@ interface SkillAssessment {
 }
 
 export function usePerformanceAnalytics() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [trends, setTrends] = useState<PerformanceTrend[]>([]);
   const [benchmarks, setBenchmarks] = useState<PerformanceBenchmark[]>([]);
   const [skillAssessments, setSkillAssessments] = useState<SkillAssessment[]>([]);

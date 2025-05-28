@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Goal, Milestone } from '@/types';
 import { useGoalsData } from './useGoalsData';
 
 export function useEnhancedGoalsData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { goals, isLoading: goalsLoading, error: goalsError, ...goalActions } = useGoalsData();
   const [enhancedGoals, setEnhancedGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);

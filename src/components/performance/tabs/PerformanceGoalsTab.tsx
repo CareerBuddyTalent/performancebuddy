@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Goal } from "@/types";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -23,7 +22,7 @@ export default function PerformanceGoalsTab({
   onUpdateGoal, 
   onDeleteGoal 
 }: PerformanceGoalsTabProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   
   // Use enhanced goals data if no goals are passed as props

@@ -1,19 +1,47 @@
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Survey } from "@/types/surveys";
+import SurveyActions from "./SurveyActions";
 
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+interface SurveyHeaderProps {
+  survey: Survey;
+  onEdit: (survey: Survey) => void;
+  onDelete: (surveyId: string) => void;
+  onViewResults: (surveyId: string) => void;
+}
 
-export default function SurveyHeader() {
-  const { user } = useClerkAuth();
-  
+export default function SurveyHeader({ survey, onEdit, onDelete, onViewResults }: SurveyHeaderProps) {
+  const { user } = useSupabaseAuth();
+  const canEdit = user?.role === 'admin' || user?.id === survey.creatorId;
+
   return (
-    <div className="flex flex-col space-y-2">
-      <h1 className="text-3xl font-bold tracking-tight">
-        {user?.role === 'employee' ? 'Engagement Surveys' : 'Survey Management'}
-      </h1>
-      <p className="text-muted-foreground">
-        {user?.role === 'employee' 
-          ? 'Provide feedback through engagement surveys' 
-          : 'Create and manage employee engagement surveys'}
-      </p>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-2xl font-bold">{survey.title}</h2>
+      
+      {canEdit ? (
+        <SurveyActions survey={survey} onEdit={onEdit} onDelete={onDelete} onViewResults={onViewResults} />
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onViewResults(survey.id)}>
+              View Results
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }
+

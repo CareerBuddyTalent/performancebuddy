@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewCycle {
@@ -15,7 +14,7 @@ interface ReviewCycle {
 }
 
 export function useRealReviewCycles() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [reviewCycles, setReviewCycles] = useState<ReviewCycle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

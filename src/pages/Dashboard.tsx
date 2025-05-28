@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { useRealPerformanceData } from "@/hooks/useRealPerformanceData";
 import { BarChart3, Users, Target, TrendingUp } from "lucide-react";
 
 export default function Dashboard() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState("overview");
   
   const { tasks, stats, isLoading: dashboardLoading } = useRealDashboardData();

@@ -1,11 +1,11 @@
 
 import React, { useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSystem } from '@/components/notifications/NotificationSystem';
 
 export function ReminderSystem() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { sendNotification } = useNotificationSystem();
 
   useEffect(() => {

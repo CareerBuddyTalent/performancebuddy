@@ -1,137 +1,23 @@
-
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, Settings, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import OKRDashboard from "@/components/okr/OKRDashboard";
-import MyObjectives from "@/components/okr/MyObjectives";
+import PersonalOKRs from "@/pages/PersonalOKRs";
 import TeamObjectives from "@/components/okr/TeamObjectives";
-import CompanyObjectives from "@/components/okr/CompanyObjectives";
-import CreateOKRDialog from "@/components/okr/CreateOKRDialog";
-import OKRSettingsDialog from "@/components/okr/OKRSettingsDialog";
-import OKRPeriodSelector from "@/components/okr/OKRPeriodSelector";
-import OKRProgressDashboard from "@/components/okr/OKRProgressDashboard";
-import { getObjectiveHierarchy, Objective } from "@/services/objectiveService";
-import { useEffect } from "react";
 
 export default function OKRs() {
-  const [activeTab, setActiveTab] = useState("my-objectives");
-  const [isCreateOKROpen, setIsCreateOKROpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [objectives, setObjectives] = useState<Objective[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useClerkAuth();
-  
-  useEffect(() => {
-    const fetchAllObjectives = async () => {
-      try {
-        setLoading(true);
-        const data = await getObjectiveHierarchy();
-        setObjectives(data);
-      } catch (error) {
-        console.error("Error fetching objectives:", error);
-        toast.error("Failed to load objectives");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { user } = useSupabaseAuth();
+  const [activeTab, setActiveTab] = useState("my-okrs");
 
-    fetchAllObjectives();
-  }, []);
-  
-  if (!user) return null;
-
-  const isManager = user.role === 'manager' || user.role === 'admin';
-  const isAdmin = user.role === 'admin';
-
-  const handleCreateOKR = (newObjective: Objective) => {
-    setObjectives([newObjective, ...objectives]);
-    toast.success("Objective created successfully");
-    setIsCreateOKROpen(false);
-  };
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Objectives & Key Results</h1>
-          <p className="text-muted-foreground">Track and align your objectives with company goals</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <OKRPeriodSelector />
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/okrs/alignment">
-              Advanced Alignment <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
-          {(isManager || isAdmin) && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
-          )}
-          <Button onClick={() => setIsCreateOKROpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Objective
-          </Button>
-        </div>
-      </div>
-
-      <Card className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="my-objectives">My Objectives</TabsTrigger>
-            {isManager && <TabsTrigger value="team-objectives">Team Objectives</TabsTrigger>}
-            <TabsTrigger value="company-objectives">Company Objectives</TabsTrigger>
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="advanced-analytics">Advanced Analytics</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="my-objectives">
-            <MyObjectives userId={user.id} />
-          </TabsContent>
-
-          {isManager && (
-            <TabsContent value="team-objectives">
-              <TeamObjectives managerId={user.id} />
-            </TabsContent>
-          )}
-
-          <TabsContent value="company-objectives">
-            <CompanyObjectives />
-          </TabsContent>
-
-          <TabsContent value="dashboard">
-            <OKRDashboard />
-          </TabsContent>
-          
-          <TabsContent value="advanced-analytics">
-            <OKRProgressDashboard objectives={objectives} />
-          </TabsContent>
-        </Tabs>
-      </Card>
-
-      <CreateOKRDialog
-        open={isCreateOKROpen}
-        onOpenChange={setIsCreateOKROpen}
-        onCreateOKR={handleCreateOKR}
-        userId={user.id}
-      />
-
-      {(isManager || isAdmin) && (
-        <OKRSettingsDialog 
-          open={isSettingsOpen} 
-          onOpenChange={setIsSettingsOpen} 
-        />
+    <OKRDashboard>
+      <PersonalOKRs userId={user.id} />
+      {user.role === 'manager' && (
+        <TeamObjectives managerId={user.id} />
       )}
-    </div>
+    </OKRDashboard>
   );
 }

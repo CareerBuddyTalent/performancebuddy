@@ -1,12 +1,12 @@
-
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { StarIcon } from "lucide-react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Separator } from "@/components/ui/separator";
+import { CheckCircle2, Target, User } from "lucide-react";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { toast } from "sonner";
 
 interface SelfReviewFormProps {
@@ -15,7 +15,7 @@ interface SelfReviewFormProps {
 }
 
 export default function SelfReviewForm({ cycleId, onSubmit }: SelfReviewFormProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const [achievements, setAchievements] = useState("");

@@ -1,106 +1,104 @@
-import { User } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Building, Users, LineChart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import UserSkills from "./UserSkills";
-import UserValues from "./UserValues";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User, Mail, Calendar, Building } from "lucide-react";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
 interface UserProfileProps {
-  user: User;
-  averageRating: number;
-  userReviews: any[];
-  userGoals: any[];
-  userSkills: any[];
-  getPerformanceColor: (rating: number) => string;
+  userId: string;
 }
 
-export default function UserProfile({
-  user,
-  averageRating,
-  userReviews,
-  userGoals,
-  userSkills,
-  getPerformanceColor
-}: UserProfileProps) {
-  const { user: currentUser } = useClerkAuth();
-  const canViewDetails = currentUser?.role === 'admin' || currentUser?.role === 'manager';
+export default function UserProfile({ userId }: UserProfileProps) {
+  const { user } = useSupabaseAuth();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [profileData, setProfileData] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    role: "Software Engineer",
+    company: "TechCorp",
+    location: "San Francisco, CA",
+    startDate: "2022-03-15",
+    skills: ["JavaScript", "React", "Node.js", "SQL"],
+  });
+
+  useEffect(() => {
+    // Fetch user profile data based on userId (replace with actual data fetching)
+    // For now, using dummy data
+  }, [userId]);
 
   return (
-    <div className="space-y-6">
-      <Card className="md:w-1/3">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center">
-            <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={user.profilePicture} alt={user.name} />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <h2 className="text-2xl font-bold">{user.name}</h2>
-            <Badge className="mt-2 capitalize">{user.role}</Badge>
-            <p className="text-muted-foreground mt-1">{user.position || "No position set"}</p>
-            
-            <div className="w-full mt-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>{user.email}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Building className="h-4 w-4 text-muted-foreground" />
-                <span>{user.department || "No department"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>Reports to: {user.manager || "No manager"}</span>
-              </div>
-            </div>
-            
-            <div className="w-full mt-6 pt-6 border-t">
-              <div className="text-lg font-medium mb-2">Performance Overview</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Average Rating</div>
-                  <div className={`text-xl font-bold ${getPerformanceColor(averageRating)}`}>
-                    {averageRating.toFixed(1)}/5
-                  </div>
-                </div>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Reviews</div>
-                  <div className="text-xl font-bold">{userReviews.length}</div>
-                </div>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Active Goals</div>
-                  <div className="text-xl font-bold">
-                    {userGoals.filter(g => g.status !== "completed").length}
-                  </div>
-                </div>
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <div className="text-xs text-muted-foreground">Skills</div>
-                  <div className="text-xl font-bold">{userSkills.length}</div>
-                </div>
-              </div>
-              
-              {canViewDetails && (
-                <div className="mt-6">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/dashboard?userId=${user.id}`} className="inline-flex items-center">
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Performance Analytics
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
+    <Card className="space-y-4">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold tracking-tight">User Profile</CardTitle>
+        <CardDescription>View and manage your profile information</CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <div className="rounded-full overflow-hidden w-24 h-24 border-2 border-primary/20">
+            <img
+              src="https://images.unsplash.com/photo-1502823403499-6ccfcf4cdca9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
+              alt="Profile"
+              className="object-cover w-full h-full"
+            />
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6">
-        <UserValues userName={user.name} />
-        <UserSkills userName={user.name} userSkills={userSkills} />
-      </div>
-    </div>
+          <div>
+            <h2 className="text-lg font-semibold">{profileData.name}</h2>
+            <p className="text-muted-foreground">{profileData.role} at {profileData.company}</p>
+          </div>
+        </div>
+        
+        <Tabs defaultValue={activeTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile" className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><User className="h-4 w-4" /><span>Full Name</span></div>
+                <div className="text-lg">{profileData.name}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Mail className="h-4 w-4" /><span>Email Address</span></div>
+                <div className="text-lg">{profileData.email}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Building className="h-4 w-4" /><span>Company</span></div>
+                <div className="text-lg">{profileData.company}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Calendar className="h-4 w-4" /><span>Start Date</span></div>
+                <div className="text-lg">{new Date(profileData.startDate).toLocaleDateString()}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">Location</div>
+                <div className="text-lg">{profileData.location}</div>
+              </div>
+            </div>
+            <Button>Edit Profile</Button>
+          </TabsContent>
+          
+          <TabsContent value="skills" className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {profileData.skills.map((skill, index) => (
+                <Badge key={index}>{skill}</Badge>
+              ))}
+            </div>
+            <Button>Edit Skills</Button>
+          </TabsContent>
+          
+          <TabsContent value="activity" className="space-y-2">
+            <div>
+              <p>Activity feed will appear here.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

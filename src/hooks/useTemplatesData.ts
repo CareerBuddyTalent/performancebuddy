@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ReviewTemplate {
@@ -42,7 +41,7 @@ interface TemplateQuestion {
 }
 
 export function useTemplatesData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [templates, setTemplates] = useState<ReviewTemplate[]>([]);
   const [sections, setSections] = useState<TemplateSection[]>([]);
   const [questions, setQuestions] = useState<TemplateQuestion[]>([]);

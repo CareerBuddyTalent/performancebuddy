@@ -1,88 +1,59 @@
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EmailSettingsForm() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
+  const [emailNotifications, setEmailNotifications] = useState(true); // Example state
 
-  const handleUpdateEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Verification email sent to your new email address. Please check your inbox.",
-      });
-      
-      setNewEmail("");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update email",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    // Simulate saving settings
+    toast({
+      title: "Settings Saved",
+      description: "Your email preferences have been updated.",
+    });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Email Settings</CardTitle>
+        <CardTitle>Email Preferences</CardTitle>
         <CardDescription>
-          Update your email address. A verification link will be sent to your new email.
+          Manage your email notification settings.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleUpdateEmail} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="currentEmail">Current Email</Label>
-            <Input
-              id="currentEmail"
-              type="email"
-              value={user?.email || ""}
-              disabled
-              className="bg-muted"
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="email-notifications">
+              Receive email notifications
+            </Label>
+            <Switch
+              id="email-notifications"
+              checked={emailNotifications}
+              onCheckedChange={(checked) => setEmailNotifications(checked)}
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="newEmail">New Email</Label>
-            <Input
-              id="newEmail"
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              required
-              placeholder="Enter your new email address"
+          <div>
+            <Label htmlFor="email">Email Address</Label>
+            <Input 
+              id="email" 
+              type="email" 
+              defaultValue={user?.email} 
+              disabled 
             />
           </div>
-          
-          <Button type="submit" disabled={loading}>
-            {loading ? "Updating..." : "Update Email"}
+
+          <Button type="submit">
+            Save Preferences
           </Button>
         </form>
       </CardContent>

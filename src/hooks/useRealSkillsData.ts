@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Skill {
@@ -23,7 +22,7 @@ interface UserSkill {
 }
 
 export function useRealSkillsData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
   const [isLoading, setIsLoading] = useState(true);

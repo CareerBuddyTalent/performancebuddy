@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { SkillsUploader } from "@/components/reviews/SkillsUploader";
 import { toast } from "sonner";
 import { ReviewSkill } from "@/types";
 import { initialSkills } from "@/data/reviewSkillsData";
 
 export default function ReviewSkills() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [skills, setSkills] = useState<ReviewSkill[]>(initialSkills);
   
   const handleAddSkill = (newSkill: ReviewSkill) => {

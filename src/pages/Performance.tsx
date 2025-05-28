@@ -1,114 +1,128 @@
-
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { hasPermission } from "@/types/performance-permissions";
-import { Plus, Settings } from "lucide-react";
-import { toast } from "sonner";
-import PerformanceDashboard from "@/components/performance/PerformanceDashboard";
-import EmployeeGoals from "@/pages/EmployeeGoals";
-import Reviews from "@/pages/Reviews";
-import Skills from "@/pages/Skills";
-import CreateReviewDialog from "@/components/CreateReviewDialog";
-import ManageCyclesDialog from "@/components/performance/ManageCyclesDialog";
-import GoalSettingsDialog from "@/components/performance/GoalSettingsDialog";
-import { useRealReviewCycles } from "@/hooks/useRealReviewCycles";
+import { Badge } from "@/components/ui/badge";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import PerformanceGoalsTab from "@/components/performance/tabs/PerformanceGoalsTab";
+import PerformanceReviewsTab from "@/components/performance/tabs/PerformanceReviewsTab";
+import { Goal } from "@/types";
 
 export default function Performance() {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [isCreateReviewOpen, setIsCreateReviewOpen] = useState(false);
-  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
-  const { user } = useClerkAuth();
-  const { reviewCycles } = useRealReviewCycles();
-  
-  if (!user) return null;
+  const { user } = useSupabaseAuth();
+  const [activeTab, setActiveTab] = useState("goals");
+  const [goals, setGoals] = useState<Goal[]>([]);
 
-  const handleCreateReview = (review: any) => {
-    toast.success("Review created successfully");
-    setIsCreateReviewOpen(false);
+  useEffect(() => {
+    // Fetch goals from database or use a default set
+    // Example: fetchGoals().then(setGoals);
+  }, []);
+
+  const handleAddGoal = (goal: Goal) => {
+    setGoals([...goals, goal]);
   };
 
-  // Transform review cycles to match expected format
-  const transformedCycles = reviewCycles.map(cycle => ({
-    id: cycle.id,
-    name: cycle.name,
-    startDate: new Date(cycle.start_date),
-    endDate: new Date(cycle.end_date),
-    status: cycle.status as 'draft' | 'active' | 'completed',
-    parameters: cycle.parameters || [],
-    type: cycle.type as 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual',
-    purpose: cycle.purpose as 'goal' | 'feedback' | 'performance'
-  }));
+  const handleUpdateGoal = (updatedGoal: Goal) => {
+    setGoals(goals.map(goal => goal.id === updatedGoal.id ? updatedGoal : goal));
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    setGoals(goals.filter(goal => goal.id !== goalId));
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Performance Management</h1>
-        {(user.role === 'manager' || user.role === 'admin') && (
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsConfigureOpen(true)}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Configure
-            </Button>
-            <Button onClick={() => setIsCreateReviewOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Review
-            </Button>
-          </div>
-        )}
+    <div className="container mx-auto py-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Performance</h1>
+        <p className="text-muted-foreground">
+          Track and manage your performance and development
+        </p>
       </div>
 
-      <Card className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="goals">Goals</TabsTrigger>
-            {hasPermission(user.role, 'view_analytics') && (
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            )}
-            <TabsTrigger value="skills">Skills</TabsTrigger>
-          </TabsList>
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Overview</CardTitle>
+          <CardDescription>
+            Review your goals, feedback, and progress
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardContent className="flex flex-row items-center justify-between space-y-0 p-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Goals
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {goals.length}
+                  </div>
+                </div>
+                {/* Placeholder for Goal Icon */}
+              </CardContent>
+            </Card>
 
-          <TabsContent value="overview">
-            <PerformanceDashboard />
-          </TabsContent>
+            <Card>
+              <CardContent className="flex flex-row items-center justify-between space-y-0 p-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Reviews
+                  </div>
+                  <div className="text-2xl font-bold">
+                    3
+                  </div>
+                </div>
+                {/* Placeholder for Review Icon */}
+              </CardContent>
+            </Card>
 
-          <TabsContent value="goals">
-            <EmployeeGoals />
-          </TabsContent>
+            <Card>
+              <CardContent className="flex flex-row items-center justify-between space-y-0 p-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Skills
+                  </div>
+                  <div className="text-2xl font-bold">
+                    12
+                  </div>
+                </div>
+                {/* Placeholder for Skills Icon */}
+              </CardContent>
+            </Card>
 
-          {hasPermission(user.role, 'view_analytics') && (
-            <TabsContent value="reviews">
-              <Reviews />
-            </TabsContent>
-          )}
-
-          <TabsContent value="skills">
-            <Skills />
-          </TabsContent>
-        </Tabs>
+            <Card>
+              <CardContent className="flex flex-row items-center justify-between space-y-0 p-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Progress
+                  </div>
+                  <div className="text-2xl font-bold">
+                    75%
+                  </div>
+                </div>
+                {/* Placeholder for Progress Icon */}
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
       </Card>
 
-      {(user.role === 'manager' || user.role === 'admin') && (
-        <CreateReviewDialog
-          open={isCreateReviewOpen}
-          onOpenChange={setIsCreateReviewOpen}
-          onCreateReview={handleCreateReview}
-          cycles={transformedCycles} 
-          currentUser={user}
-        />
-      )}
-
-      <GoalSettingsDialog 
-        open={isConfigureOpen} 
-        onOpenChange={setIsConfigureOpen} 
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="goals">Goals</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+        </TabsList>
+        <TabsContent value="goals" className="space-y-6">
+          <PerformanceGoalsTab
+            goals={goals}
+            onAddGoal={handleAddGoal}
+            onUpdateGoal={handleUpdateGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
+        </TabsContent>
+        <TabsContent value="reviews" className="space-y-6">
+          <PerformanceReviewsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

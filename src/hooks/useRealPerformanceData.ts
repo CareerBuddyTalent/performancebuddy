@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface PerformanceReview {
@@ -30,7 +29,7 @@ interface TeamMember {
 }
 
 export function useRealPerformanceData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [reviews, setReviews] = useState<PerformanceReview[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);

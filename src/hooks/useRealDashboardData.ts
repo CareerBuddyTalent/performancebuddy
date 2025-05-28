@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardTask {
@@ -23,7 +22,7 @@ interface DashboardStats {
 }
 
 export function useRealDashboardData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [tasks, setTasks] = useState<DashboardTask[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalGoals: 0,

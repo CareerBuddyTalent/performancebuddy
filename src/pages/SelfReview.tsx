@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Calendar, FileText, Clock, CheckCircle } from "lucide-react";
 import SelfReviewForm from "@/components/reviews/SelfReviewForm";
 
 export default function SelfReview() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [selectedCycle, setSelectedCycle] = useState<string | null>(null);
 
   // Mock review cycles - replace with real data

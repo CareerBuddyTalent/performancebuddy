@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface OKR {
@@ -21,7 +20,7 @@ export interface OKR {
 }
 
 export function useRealOKRsData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [okrs, setOkrs] = useState<OKR[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

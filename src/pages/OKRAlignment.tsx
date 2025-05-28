@@ -1,119 +1,72 @@
-import { useState, useEffect } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { Spinner } from "@/components/ui/spinner";
-import OKRAlignmentEditor from "@/components/okr/OKRAlignmentEditor";
+import React, { useState, useEffect } from "react";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import OKRHierarchyTree from "@/components/okr/OKRHierarchyTree";
-import { getObjectiveHierarchy, updateObjectiveAlignment, Objective } from "@/services/objectiveService";
+import OKRAlignmentView from "@/components/okr/OKRAlignmentView";
+import CreateOKRDialog from "@/components/okr/CreateOKRDialog";
+import { Objective, getUserObjectives } from "@/services/objectiveService";
 
 export default function OKRAlignment() {
-  const { user } = useClerkAuth();
-  const { toast } = useToast();
+  const { user } = useSupabaseAuth();
   const [objectives, setObjectives] = useState<Objective[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"editor" | "tree">("editor");
+  const [selectedObjective, setSelectedObjective] = useState<Objective | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchObjectives = async () => {
-      try {
-        setLoading(true);
-        const data = await getObjectiveHierarchy();
-        setObjectives(data);
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to load objectives",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
+      if (user) {
+        const userObjectives = await getUserObjectives(user.id);
+        setObjectives(userObjectives);
       }
     };
 
     fetchObjectives();
-  }, [toast]);
+  }, [user]);
 
-  const handleAlignmentUpdate = async (objectiveId: string, parentId: string | null) => {
-    try {
-      await updateObjectiveAlignment(objectiveId, parentId);
-      
-      // Update local state to reflect the change
-      setObjectives(prevObjectives => 
-        prevObjectives.map(obj => 
-          obj.id === objectiveId ? { ...obj, parent_id: parentId } : obj
-        )
-      );
-      
-      return;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update alignment",
-        variant: "destructive"
-      });
-      throw error;
-    }
+  const handleCreateObjective = (newObjective: Objective) => {
+    setObjectives(prevObjectives => [...prevObjectives, newObjective]);
   };
 
   const handleViewObjective = (objective: Objective) => {
-    // Navigate to objective detail page or open details dialog
-    console.log("View objective", objective);
+    setSelectedObjective(objective);
   };
 
-  if (!user) return null;
-
-  const isAdmin = user.role === 'admin' || user.role === 'manager';
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+  const handleCreateDialogOpen = () => {
+    setCreateDialogOpen(true);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">OKR Alignment</h1>
-          <p className="text-muted-foreground">Align objectives across your organization</p>
+    <div className="container mx-auto py-6">
+      <h1 className="text-2xl font-bold tracking-tight mb-4">OKR Alignment</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="col-span-1">
+          <OKRHierarchyTree
+            objectives={objectives}
+            onCreateObjective={handleCreateDialogOpen}
+            onViewObjective={handleViewObjective}
+          />
         </div>
-        <Tabs value={view} onValueChange={(v) => setView(v as "editor" | "tree")}>
-          <TabsList>
-            <TabsTrigger value="editor">Drag & Drop Editor</TabsTrigger>
-            <TabsTrigger value="tree">Hierarchy View</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Objective Hierarchy</CardTitle>
-          <CardDescription>
-            {view === "editor" 
-              ? "Drag and drop objectives to create alignments" 
-              : "View and navigate the complete objective hierarchy"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {view === "editor" ? (
-            <OKRAlignmentEditor 
-              objectives={objectives}
-              onAlignmentUpdate={handleAlignmentUpdate}
-            />
-          ) : (
-            <OKRHierarchyTree
-              objectives={objectives}
-              onCreateObjective={isAdmin ? (parentId) => console.log("Create with parent:", parentId) : undefined}
+        
+        <div className="col-span-1">
+          {selectedObjective ? (
+            <OKRAlignmentView
+              objectives={[selectedObjective]}
               onViewObjective={handleViewObjective}
             />
+          ) : (
+            <p className="text-muted-foreground">Select an objective to view details.</p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {user && (
+        <CreateOKRDialog
+          open={createDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          onCreateOKR={handleCreateObjective}
+          userId={user.id}
+        />
+      )}
     </div>
   );
 }

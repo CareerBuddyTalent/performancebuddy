@@ -1,95 +1,98 @@
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReviewTemplate, ReviewTemplateType } from "@/types/templates";
-import TemplateCard from "@/components/templates/TemplateCard";
-import CreateTemplateDialog from "@/components/templates/dialogs/CreateTemplateDialog";
-import { mockTemplates } from "@/components/templates/mockTemplateData";
-import { hasPermission } from "@/types/performance-permissions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export default function ReviewTemplates() {
-  const { user } = useClerkAuth();
-  const [templates, setTemplates] = useState<ReviewTemplate[]>(mockTemplates);
-  const [activeTab, setActiveTab] = useState<ReviewTemplateType | 'all'>('all');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { user } = useSupabaseAuth();
+  const [templates, setTemplates] = useState([
+    { id: "1", name: "360 Review", description: "Comprehensive review from multiple perspectives" },
+    { id: "2", name: "Annual Performance Review", description: "Yearly evaluation of employee performance" },
+  ]);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplateDescription, setNewTemplateDescription] = useState("");
 
-  if (!user) return null;
-  
-  const filteredTemplates = activeTab === 'all' 
-    ? templates 
-    : templates.filter(t => t.type === activeTab);
-
-  const handleCreateTemplate = (template: ReviewTemplate) => {
-    setTemplates([...templates, template]);
-    setIsCreateDialogOpen(false);
+  const handleAddTemplate = () => {
+    if (newTemplateName) {
+      const newTemplate = {
+        id: Date.now().toString(),
+        name: newTemplateName,
+        description: newTemplateDescription,
+      };
+      setTemplates([...templates, newTemplate]);
+      setNewTemplateName("");
+      setNewTemplateDescription("");
+    }
   };
-
-  const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter(t => t.id !== id));
-  };
-  
-  const canManageTemplates = hasPermission(user.role, 'manage_templates');
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Review Templates</h1>
-        
-        {canManageTemplates && (
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Template
-          </Button>
-        )}
-      </div>
-      
+    <div className="container mx-auto py-6">
       <Card>
         <CardHeader>
           <CardTitle>Review Templates</CardTitle>
+          <CardDescription>Manage and create review templates for your organization.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs 
-            value={activeTab} 
-            onValueChange={(v) => setActiveTab(v as ReviewTemplateType | 'all')}
-            className="space-y-4"
-          >
-            <TabsList>
-              <TabsTrigger value="all">All Templates</TabsTrigger>
-              <TabsTrigger value="self">Self Review</TabsTrigger>
-              <TabsTrigger value="peer">Peer Review</TabsTrigger>
-              <TabsTrigger value="manager">Manager Review</TabsTrigger>
-              <TabsTrigger value="360">360° Review</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value={activeTab} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredTemplates.map(template => (
-                  <TemplateCard 
-                    key={template.id} 
-                    template={template} 
-                    onDelete={canManageTemplates ? handleDeleteTemplate : undefined}
-                  />
-                ))}
+          <div className="grid gap-4">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-1">
+                <Label htmlFor="templateName">Template Name</Label>
+                <Input
+                  id="templateName"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  placeholder="e.g., 360 Review"
+                />
               </div>
-              
-              {filteredTemplates.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No templates found for this category
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              <div className="col-span-1">
+                <Label htmlFor="templateDescription">Description</Label>
+                <Input
+                  id="templateDescription"
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                  placeholder="e.g., Comprehensive review"
+                />
+              </div>
+              <div className="col-span-1 flex items-end">
+                <Button onClick={handleAddTemplate}>Add Template</Button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {templates.map((template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">{template.id}</TableCell>
+                      <TableCell>{template.name}</TableCell>
+                      <TableCell>{template.description}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </CardContent>
       </Card>
-
-      <CreateTemplateDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onCreateTemplate={handleCreateTemplate}
-      />
     </div>
   );
 }

@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +8,7 @@ import { Plus, FileText, Calendar, TrendingUp, User } from "lucide-react";
 import { useRealPerformanceData } from "@/hooks/useRealPerformanceData";
 
 export default function Reviews() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { reviews, isLoading } = useRealPerformanceData();
 
   if (!user) {

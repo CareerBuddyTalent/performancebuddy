@@ -1,100 +1,92 @@
-
-import { useState } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { useToast } from "@/components/ui/use-toast";
-import { useRealReviewCycles } from "@/hooks/useRealReviewCycles";
-import CycleManagement from "@/components/cycles/CycleManagement";
-
-interface ReviewCycle {
-  id: string;
-  name: string;
-  startDate: Date;
-  endDate: Date;
-  status: 'draft' | 'active' | 'completed';
-  parameters: any[];
-  type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
-  purpose: 'goal' | 'feedback' | 'performance';
-}
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { CalendarDateRangePicker } from "@/components/ui/calendar"
 
 export default function PerformanceCycles() {
-  const { user } = useClerkAuth();
-  const { toast } = useToast();
-  const { reviewCycles, isLoading, createReviewCycle } = useRealReviewCycles();
-  
-  const isAdmin = user?.role === "admin";
-  
-  // Only allow admin and managers to create cycles
-  if (!isAdmin && user?.role !== "manager") {
-    return (
-      <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold tracking-tight">Performance Cycles</h1>
-        <p className="text-muted-foreground mt-2">
-          You don't have permission to manage performance cycles.
-        </p>
-      </div>
-    );
-  }
+  const { user } = useSupabaseAuth();
+  const [cycles, setCycles] = useState([
+    {
+      id: "1",
+      name: "Q1 2024",
+      startDate: new Date("2024-01-01"),
+      endDate: new Date("2024-03-31"),
+      status: "active",
+    },
+    {
+      id: "2",
+      name: "Q2 2024",
+      startDate: new Date("2024-04-01"),
+      endDate: new Date("2024-06-30"),
+      status: "scheduled",
+    },
+  ]);
 
-  // Transform database cycles to match expected format
-  const transformedCycles: ReviewCycle[] = reviewCycles.map(cycle => ({
-    id: cycle.id,
-    name: cycle.name,
-    startDate: new Date(cycle.start_date),
-    endDate: new Date(cycle.end_date),
-    status: cycle.status as 'draft' | 'active' | 'completed',
-    parameters: cycle.parameters || [],
-    type: cycle.type as 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual',
-    purpose: cycle.purpose as 'goal' | 'feedback' | 'performance'
-  }));
-  
-  const handleCreateCycle = async (newCycleData: Omit<ReviewCycle, 'id'>) => {
-    try {
-      await createReviewCycle({
-        name: newCycleData.name,
-        start_date: newCycleData.startDate.toISOString(),
-        end_date: newCycleData.endDate.toISOString(),
-        status: newCycleData.status,
-        type: newCycleData.type,
-        purpose: newCycleData.purpose,
-        parameters: newCycleData.parameters
-      });
-
-      toast({
-        title: "Cycle created",
-        description: `${newCycleData.name} has been successfully created`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to create cycle. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-center h-32">
-          <div className="text-muted-foreground">Loading performance cycles...</div>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Performance Cycles</h1>
-        <p className="text-muted-foreground">
-          Manage performance, goal, and feedback review cycles across the organization
-        </p>
-      </div>
-      
-      <CycleManagement 
-        cycles={transformedCycles}
-        onCreateCycle={handleCreateCycle}
-      />
+    <div className="container mx-auto py-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Review Cycles</CardTitle>
+          <CardDescription>
+            Manage and schedule performance review cycles for your organization.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div className="flex items-center space-x-4">
+              <Calendar className="mr-2 h-4 w-4" />
+              <div>
+                <Label htmlFor="from">From</Label>
+                <Input type="date" id="from" className="w-full" />
+              </div>
+              <div>
+                <Label htmlFor="to">To</Label>
+                <Input type="date" id="to" className="w-full" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Cycles</h4>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Name</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>End Date</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {cycles.map((cycle) => (
+                      <TableRow key={cycle.id}>
+                        <TableCell className="font-medium">{cycle.name}</TableCell>
+                        <TableCell>{cycle.startDate.toLocaleDateString()}</TableCell>
+                        <TableCell>{cycle.endDate.toLocaleDateString()}</TableCell>
+                        <TableCell>{cycle.status}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            <Button>Create New Cycle</Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

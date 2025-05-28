@@ -1,100 +1,82 @@
-import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
-import { Survey } from "@/types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import SurveyGrid from "./SurveyGrid";
-import EmployeeSurveyTabs from "./EmployeeSurveyTabs";
-import SurveyFilters from "./SurveyFilters";
-import SurveyActions from "./SurveyActions";
-import CreateSurveyDialog from "./CreateSurveyDialog";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Survey } from '@/types/surveys';
+import SurveyActions from './SurveyActions';
 
 interface SurveyListProps {
   surveys: Survey[];
-  onCreateSurvey: (survey: Partial<Survey>) => void;
-  isLoading?: boolean;
-  error?: string;
+  onEdit: (survey: Survey) => void;
+  onDelete: (surveyId: string) => void;
+  onViewResponses: (surveyId: string) => void;
 }
 
-export default function SurveyList({ 
-  surveys, 
-  onCreateSurvey, 
-  isLoading = false, 
-  error 
-}: SurveyListProps) {
-  const { user } = useClerkAuth();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);
-
-  if (!user) return null;
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-muted-foreground">Loading surveys...</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive" className="my-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-
-  const canCreateSurvey = user.role === 'admin' || user.role === 'manager';
-
-  const filteredSurveys = surveys.filter(survey => {
-    const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         survey.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || survey.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const activeSurveys = filteredSurveys.filter(s => s.status === 'active');
-  const completedSurveys = filteredSurveys.filter(s => 
-    s.status === 'closed' && s.responses.some(r => r.user_id === user.id)
-  );
-  const pendingSurveys = filteredSurveys.filter(s => 
-    s.status === 'active' && !s.responses.some(r => r.user_id === user.id)
-  );
+export default function SurveyList({ surveys, onEdit, onDelete, onViewResponses }: SurveyListProps) {
+  const { user } = useSupabaseAuth();
+  const canEdit = user?.role === 'admin' || user?.role === 'manager';
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <SurveyFilters
-          searchQuery={searchQuery}
-          statusFilter={statusFilter}
-          onSearchChange={setSearchQuery}
-          onStatusChange={setStatusFilter}
-          showStatusFilter={user.role !== 'employee'}
-        />
-        <SurveyActions onCreateClick={() => setIsCreateSurveyOpen(true)} />
-      </div>
-
-      {user.role === 'employee' ? (
-        <EmployeeSurveyTabs
-          pendingSurveys={pendingSurveys}
-          completedSurveys={completedSurveys}
-          activeSurveys={activeSurveys}
-        />
-      ) : (
-        <SurveyGrid 
-          surveys={filteredSurveys} 
-          emptyMessage="No surveys matching your filters."
-        />
-      )}
-
-      <CreateSurveyDialog
-        open={isCreateSurveyOpen}
-        onClose={() => setIsCreateSurveyOpen(false)}
-        onCreateSurvey={onCreateSurvey}
-      />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Surveys</CardTitle>
+        <CardDescription>
+          Manage and view surveys created by your organization.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Title</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {surveys.map((survey) => (
+                <TableRow key={survey.id}>
+                  <TableCell className="font-medium">{survey.title}</TableCell>
+                  <TableCell>{survey.description}</TableCell>
+                  <TableCell>{survey.status}</TableCell>
+                  <TableCell className="text-right">
+                    <SurveyActions
+                      survey={survey}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onViewResponses={onViewResponses}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        {surveys.length === 0 && (
+          <div className="text-center p-4">
+            No surveys found.
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

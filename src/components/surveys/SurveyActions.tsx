@@ -1,39 +1,59 @@
-import { useState } from "react";
-import { Plus, BarChart4 } from "lucide-react";
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import SurveyAnalytics from "./analytics/SurveyAnalytics";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { Edit, Trash2, Users, BarChart3 } from "lucide-react";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
 interface SurveyActionsProps {
-  onCreateClick: () => void;
+  surveyId: string;
+  onEdit: (surveyId: string) => void;
+  onDelete: (surveyId: string) => void;
+  onShare: (surveyId: string) => void;
+  onViewResults: (surveyId: string) => void;
 }
 
-export default function SurveyActions({ onCreateClick }: SurveyActionsProps) {
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const { user } = useClerkAuth();
-  
-  // Only allow admin and manager roles to create surveys
-  const canCreateSurvey = user && (user.role === 'admin' || user.role === 'manager');
+export function SurveyActions({
+  surveyId,
+  onEdit,
+  onDelete,
+  onShare,
+  onViewResults,
+}: SurveyActionsProps) {
+  const { user } = useSupabaseAuth();
+  const isAdmin = user?.role === 'admin';
 
   return (
-    <>
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setShowAnalytics(true)}>
-          <BarChart4 className="mr-2 h-4 w-4" />
-          Analytics
-        </Button>
-        {canCreateSurvey && (
-          <Button onClick={onCreateClick}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Survey
-          </Button>
-        )}
-      </div>
-
-      <SurveyAnalytics 
-        open={showAnalytics} 
-        onClose={() => setShowAnalytics(false)} 
-      />
-    </>
+    <div className="flex items-center space-x-2">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onEdit(surveyId)}
+        disabled={!isAdmin}
+      >
+        <Edit className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onDelete(surveyId)}
+        disabled={!isAdmin}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onShare(surveyId)}
+      >
+        <Users className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onViewResults(surveyId)}
+      >
+        <BarChart3 className="h-4 w-4" />
+      </Button>
+    </div>
   );
 }
+

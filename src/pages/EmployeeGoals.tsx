@@ -1,5 +1,5 @@
-
-import { useState } from "react";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { useClerkAuth } from "@/context/ClerkAuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import GoalFormDialog from "@/components/performance/GoalFormDialog";
 import { Goal } from "@/types";
 
 export default function EmployeeGoals() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { goals, isLoading, createGoal, updateGoal } = useEnhancedGoalsData();
   const [showCreateGoal, setShowCreateGoal] = useState(false);
 

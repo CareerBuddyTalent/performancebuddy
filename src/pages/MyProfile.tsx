@@ -1,255 +1,139 @@
-
-import { useState, useEffect } from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import React, { useState } from 'react';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Mail, Phone, MapPin, Briefcase, Edit2, Save, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { Edit, Check } from "lucide-react";
+import { toast } from "sonner";
 
 export default function MyProfile() {
-  const { user } = useClerkAuth();
-  const { toast } = useToast();
+  const { user, refreshUser } = useSupabaseAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: '',
-    email: '',
-    department: '',
-    position: '',
-    bio: '',
-    phone: '',
-    location: ''
-  });
-
-  useEffect(() => {
-    if (user) {
-      setProfileData({
-        name: user.name || '',
-        email: user.email || '',
-        department: user.department || '',
-        position: user.position || '',
-        bio: '',
-        phone: '',
-        location: ''
-      });
-    }
-  }, [user]);
-
-  const handleSave = () => {
-    // In a real app, this would save to Supabase
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully.",
-    });
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    if (user) {
-      setProfileData({
-        name: user.name || '',
-        email: user.email || '',
-        department: user.department || '',
-        position: user.position || '',
-        bio: '',
-        phone: '',
-        location: ''
-      });
-    }
-    setIsEditing(false);
-  };
+  const [name, setName] = useState(user?.name || "");
+  const [profilePicture, setProfilePicture] = useState(user?.profilePicture || "");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!user) {
-    return (
-      <div className="container mx-auto py-6">
-        <Card>
-          <CardContent className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">Please log in to view your profile.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+    setName(user.name);
+    setProfilePicture(user.profilePicture || "");
+  };
+
+  const handleSaveClick = async () => {
+    setIsLoading(true);
+    try {
+      // Optimistically update the user's name and profile picture
+      const updatedUser = {
+        ...user,
+        name: name,
+        profilePicture: profilePicture,
+      };
+
+      // Update the user's profile in the database
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          name: name,
+          profile_picture: profilePicture,
+          updated_at: new Date(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error("Error updating profile:", error);
+        toast.error("Failed to update profile. Please try again.");
+      } else {
+        toast.success("Profile updated successfully!");
+        await refreshUser();
+      }
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast.error(error.message || "Failed to update profile. Please try again.");
+    } finally {
+      setIsEditing(false);
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto py-6 space-y-6 max-w-4xl">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your personal information and preferences
-          </p>
-        </div>
-        {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)}>
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit Profile
-          </Button>
-        ) : (
-          <div className="flex space-x-2">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save
+    <div className="container mx-auto py-10">
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold">My Profile</CardTitle>
+          {!isEditing ? (
+            <Button variant="outline" onClick={handleEditClick}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
             </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Overview */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="text-center">
-            <Avatar className="w-24 h-24 mx-auto">
-              <AvatarImage src={user.profilePicture} alt={user.name} />
-              <AvatarFallback className="text-2xl">
-                {user.name?.split(' ').map(n => n[0]).join('') || 'U'}
-              </AvatarFallback>
+          ) : (
+            <div className="space-x-2">
+              <Button variant="secondary" onClick={handleCancelClick} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveClick} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={profilePicture || user.profilePicture} alt={user.name} />
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <CardTitle className="mt-4">{profileData.name}</CardTitle>
-            <CardDescription>{profileData.position}</CardDescription>
-            <Badge variant="outline" className="mt-2">{user.role}</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center text-sm">
-                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                {profileData.email}
-              </div>
-              <div className="flex items-center text-sm">
-                <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
-                {profileData.department || 'No department set'}
-              </div>
-              {profileData.phone && (
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {profileData.phone}
-                </div>
-              )}
-              {profileData.location && (
-                <div className="flex items-center text-sm">
-                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {profileData.location}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Profile Details */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>
-              Update your personal and professional details
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Full Name</label>
-                <Input
-                  value={profileData.name}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Email</label>
-                <Input
-                  value={profileData.email}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                  disabled={!isEditing}
-                  type="email"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Department</label>
-                <Input
-                  value={profileData.department}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, department: e.target.value }))}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Position</label>
-                <Input
-                  value={profileData.position}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, position: e.target.value }))}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Phone</label>
-                <Input
-                  value={profileData.phone}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                  disabled={!isEditing}
-                  type="tel"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Location</label>
-                <Input
-                  value={profileData.location}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
-                  disabled={!isEditing}
-                />
-              </div>
-            </div>
-            
             <div>
-              <label className="text-sm font-medium">Bio</label>
-              <Textarea
-                value={profileData.bio}
-                onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                disabled={!isEditing}
-                rows={4}
-                placeholder="Tell us about yourself..."
-              />
+              <CardTitle className="text-lg font-medium">{user.name}</CardTitle>
+              <CardDescription className="text-muted-foreground">{user.email}</CardDescription>
+              <CardDescription className="text-muted-foreground capitalize">{user.role}</CardDescription>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Goals Completed</p>
-              <p className="text-2xl font-bold">12</p>
+          {isEditing && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="profilePicture">Profile Picture URL</Label>
+                <Input
+                  id="profilePicture"
+                  type="url"
+                  placeholder="URL to your profile picture"
+                  value={profilePicture}
+                  onChange={(e) => setProfilePicture(e.target.value)}
+                />
+              </div>
             </div>
-            <User className="h-8 w-8 text-blue-600" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Reviews Completed</p>
-              <p className="text-2xl font-bold">5</p>
-            </div>
-            <Briefcase className="h-8 w-8 text-green-600" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="flex items-center justify-between p-6">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Feedback Given</p>
-              <p className="text-2xl font-bold">8</p>
-            </div>
-            <Mail className="h-8 w-8 text-purple-600" />
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

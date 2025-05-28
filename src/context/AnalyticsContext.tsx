@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { useLocation } from 'react-router-dom';
 import analytics from '@/services/analytics';
 import env from '@/config/env';
@@ -16,7 +15,7 @@ const AnalyticsContext = createContext<AnalyticsContextType>({
 export const useAnalytics = () => useContext(AnalyticsContext);
 
 export const AnalyticsProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const location = useLocation();
   
   // Initialize analytics with user when available

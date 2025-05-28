@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Phone, MapPin, Briefcase, Edit2, Save, X, Target, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRealSkillsData } from "@/hooks/useRealSkillsData";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
 export default function Profile() {
   const { user } = useClerkAuth();

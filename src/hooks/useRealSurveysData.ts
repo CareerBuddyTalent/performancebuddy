@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Survey {
@@ -27,7 +26,7 @@ export interface SurveyQuestion {
 }
 
 export function useRealSurveysData() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

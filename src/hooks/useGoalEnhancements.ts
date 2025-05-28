@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 interface GoalMilestone {
@@ -37,7 +36,7 @@ interface GoalIntegration {
 }
 
 export function useGoalEnhancements(goalId?: string) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [milestones, setMilestones] = useState<GoalMilestone[]>([]);
   const [metrics, setMetrics] = useState<GoalMetric[]>([]);
   const [integrations, setIntegrations] = useState<GoalIntegration[]>([]);
