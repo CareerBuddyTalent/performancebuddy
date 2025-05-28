@@ -1,7 +1,7 @@
 
 import { ReactNode, useEffect, memo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { GlobalLoading } from "@/components/ui/global-loading";
 import analytics from "@/services/analytics";
 
@@ -11,7 +11,7 @@ interface RoleGuardProps {
 }
 
 function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
-  const { user, isAuthenticated, isLoading } = useClerkAuth();
+  const { user, isAuthenticated, isLoading } = useSupabaseAuth();
   const location = useLocation();
 
   useEffect(() => {

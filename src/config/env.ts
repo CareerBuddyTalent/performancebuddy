@@ -22,7 +22,6 @@ interface EnvConfig {
   // External services
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
-  CLERK_PUBLISHABLE_KEY: string;
   
   // App metadata
   BUILD_TIME: string;
@@ -32,7 +31,6 @@ interface EnvConfig {
 // Debugging to help identify environment variable issues
 console.log('Environment variables debug:', {
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? 'configured' : 'using default',
-  CLERK_PUBLISHABLE_KEY: 'configured (hardcoded)',
   MODE: import.meta.env.MODE || 'not set',
   DEV: import.meta.env.DEV ? 'true' : 'false',
   PROD: import.meta.env.PROD ? 'true' : 'false',
@@ -55,9 +53,6 @@ const env: EnvConfig = {
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://eubxxtqbyrlivnenhyjk.supabase.co',
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
   
-  // Clerk - Using the provided publishable key
-  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_live_Y2xlcmsucGVyZm9ybS50aGVjYXJlZXJidWRkeS5jb20k',
-  
   // App metadata - for debugging and support
   BUILD_TIME: import.meta.env.VITE_BUILD_TIME || new Date().toISOString(),
   BUILD_COMMIT: import.meta.env.VITE_BUILD_COMMIT || 'dev',
@@ -66,11 +61,6 @@ const env: EnvConfig = {
 // Improved validation functions
 export const validateEnvironment = () => {
   const issues: string[] = [];
-  
-  // Clerk is required for proper authentication
-  if (!env.CLERK_PUBLISHABLE_KEY) {
-    issues.push('VITE_CLERK_PUBLISHABLE_KEY is required for authentication. Get your key from https://go.clerk.com/lovable');
-  }
   
   if (!env.SUPABASE_URL) {
     issues.push('Supabase URL is missing and no default available');
@@ -84,11 +74,6 @@ export const validateEnvironment = () => {
     isValid: issues.length === 0,
     issues
   };
-};
-
-// Helper to check if Clerk is properly configured
-export const isClerkConfigured = () => {
-  return !!env.CLERK_PUBLISHABLE_KEY && env.CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 };
 
 // Convenience function to check if we're in production

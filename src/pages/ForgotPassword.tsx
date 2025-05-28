@@ -1,23 +1,21 @@
 
-import { useAuth } from "@clerk/clerk-react";
 import { Navigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useClerk } from "@clerk/clerk-react";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { toast } from "sonner";
 
 export default function ForgotPassword() {
-  const { isSignedIn } = useAuth();
-  const clerk = useClerk();
+  const { isAuthenticated, resetPassword } = useSupabaseAuth();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
   // Redirect to dashboard if already signed in
-  if (isSignedIn) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -27,14 +25,15 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
     try {
-      await clerk.client?.signIn?.create({
-        strategy: "reset_password_email_code",
-        identifier: email,
-      });
-      setEmailSent(true);
-      toast.success("Password reset email sent! Check your inbox.");
+      const success = await resetPassword(email);
+      if (success) {
+        setEmailSent(true);
+        toast.success("Password reset email sent! Check your inbox.");
+      } else {
+        toast.error("Failed to send reset email. Please try again.");
+      }
     } catch (error: any) {
-      toast.error(error.errors?.[0]?.message || "Failed to send reset email");
+      toast.error("Failed to send reset email");
     } finally {
       setIsLoading(false);
     }

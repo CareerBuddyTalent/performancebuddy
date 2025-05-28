@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
-import { ClerkAuthProvider } from "@/context/ClerkAuthContext";
+import { SupabaseAuthProvider } from "@/context/SupabaseAuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { NotificationProvider } from "@/components/notifications/NotificationSystem";
 import { ReminderSystem } from "@/components/automation/ReminderSystem";
@@ -36,7 +36,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <ClerkAuthProvider>
+        <SupabaseAuthProvider>
           <NotificationProvider>
             <Router>
               <ReminderSystem />
@@ -105,7 +105,7 @@ function App() {
             </Router>
             <Toaster position="top-right" />
           </NotificationProvider>
-        </ClerkAuthProvider>
+        </SupabaseAuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

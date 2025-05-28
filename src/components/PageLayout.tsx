@@ -5,7 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import RoleGuard from "@/components/layout/RoleGuard";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { DashboardSkeleton } from "@/components/ui/optimized-skeleton";
 
 interface PageLayoutProps {
@@ -14,7 +14,7 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ children, allowedRoles = ['admin', 'manager', 'employee'] }: PageLayoutProps) {
-  const { isLoading, isAuthenticated } = useClerkAuth();
+  const { isLoading, isAuthenticated } = useSupabaseAuth();
 
   if (isLoading) {
     return (
