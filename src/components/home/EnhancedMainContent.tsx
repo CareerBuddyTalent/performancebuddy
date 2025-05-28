@@ -8,7 +8,7 @@ import TaskCounters from "./TaskCounters";
 import TeamMembersSection from "./TeamMembersSection";
 import NotificationsList from "./NotificationsList";
 import TeamReviewStatus from "./TeamReviewStatus";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 interface EnhancedMainContentProps {
   tasks: any[];
@@ -31,7 +31,7 @@ export default function EnhancedMainContent({
   activeTab,
   setActiveTab,
 }: EnhancedMainContentProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const isManager = user?.role === 'manager';
   const isEmployee = user?.role === 'employee';
 

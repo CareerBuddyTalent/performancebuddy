@@ -1,6 +1,6 @@
 
 import { User } from "@/types";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 interface HomeHeaderProps {
   user: User;

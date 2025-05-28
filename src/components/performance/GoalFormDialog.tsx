@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { Goal } from "@/types";
 import { toast } from "sonner";
 
@@ -21,7 +21,7 @@ export default function GoalFormDialog({
   onSave, 
   goal 
 }: GoalFormDialogProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [title, setTitle] = useState(goal?.title || "");
   const [description, setDescription] = useState(goal?.description || "");
   const [dueDate, setDueDate] = useState(

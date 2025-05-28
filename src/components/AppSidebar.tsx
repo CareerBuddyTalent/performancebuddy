@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
 import SidebarNavGroup from "@/components/sidebar/SidebarNavGroup";
 import SidebarFooterContent from "@/components/sidebar/SidebarFooterContent";
@@ -8,7 +8,7 @@ import SidebarLogo from "@/components/sidebar/SidebarLogo";
 import { navigationItems, getNavigationItemsByGroup } from "@/components/sidebar/navigation-config";
 
 export default function AppSidebar() {
-  const { user, logout } = useClerkAuth();
+  const { user, logout } = useSupabaseAuth();
   
   if (!user) return null;
   

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useClerkAuth } from '@/context/ClerkAuthContext';
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -33,7 +33,7 @@ export const useNotificationSystem = () => {
 };
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const checkForNotifications = async () => {

@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Goal } from "@/types";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { toast } from "@/hooks/use-toast";
 import { hasPermission } from "@/types/performance-permissions";
 import PerformanceHeader from "./dashboard/PerformanceHeader";
@@ -10,7 +11,7 @@ import GoalManagement from "./dashboard/GoalManagement";
 import { useEnhancedGoalsData } from "@/hooks/useEnhancedGoalsData";
 
 export default function PerformanceDashboard() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState("goals");
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'quarter' | 'year'>('quarter');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);

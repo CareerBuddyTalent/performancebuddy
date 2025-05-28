@@ -1,6 +1,6 @@
 
 import { Goal } from "@/types";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import {
   Table,
   TableBody,
@@ -26,7 +26,7 @@ export default function PerformanceGoalTable({
   onUpdateStatus,
   onUpdateProgress
 }: PerformanceGoalTableProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const canEdit = user?.role === 'admin' || user?.role === 'manager';
 
   return (

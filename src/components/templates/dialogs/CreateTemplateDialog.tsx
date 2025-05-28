@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { ReviewTemplate } from "@/types/templates";
 import { toast } from "sonner";
 
@@ -20,7 +20,7 @@ export default function CreateTemplateDialog({
   onOpenChange,
   onCreateTemplate
 }: CreateTemplateDialogProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"self" | "manager" | "peer" | "360">("self");

@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { MessageSquareText, BarChart4 } from "lucide-react";
 import TakeSurveyDialog from "./surveys/TakeSurveyDialog";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 interface SurveyCardProps {
   survey: Survey;
@@ -17,7 +17,7 @@ interface SurveyCardProps {
 
 export default function SurveyCard({ survey, onClick }: SurveyCardProps) {
   const [showTakeSurvey, setShowTakeSurvey] = useState(false);
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   
   const hasResponded = survey.responses.some(r => r.user_id === user?.id);
   

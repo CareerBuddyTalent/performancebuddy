@@ -14,10 +14,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 export default function AppHeader() {
-  const { user, logout } = useClerkAuth();
+  const { user, logout } = useSupabaseAuth();
 
   if (!user) return null;
 

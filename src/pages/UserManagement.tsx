@@ -12,10 +12,10 @@ import DepartmentManagement from "@/components/DepartmentManagement";
 import UserPerformanceRanking from "@/components/UserPerformanceRanking";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 export default function UserManagement() {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("allusers");
@@ -55,27 +55,28 @@ export default function UserManagement() {
           department: profile.department,
           position: profile.position,
           profilePicture: profile.profile_picture,
+          joinDate: new Date(profile.created_at),
           manager: profile.manager,
-          companyId: profile.company_id || undefined
+          skills: [],
+          isActive: true
         }));
 
         setUsers(transformedUsers);
-        
+        setFilteredUsers(transformedUsers);
+
         // Extract unique departments
-        const depts = Array.from(
-          new Set(
-            transformedUsers
-              .map(user => user.department)
-              .filter(Boolean) as string[]
-          )
-        );
-        setDepartments(depts);
+        const uniqueDepartments = [...new Set(transformedUsers
+          .map(user => user.department)
+          .filter(Boolean)
+        )] as string[];
+        
+        setDepartments(uniqueDepartments);
 
       } catch (error: any) {
         console.error('Error fetching users:', error);
         toast({
           title: "Error",
-          description: "Failed to load users.",
+          description: "Failed to load users. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -83,10 +84,8 @@ export default function UserManagement() {
       }
     };
 
-    if (user) {
-      fetchUsers();
-    }
-  }, [user, toast]);
+    fetchUsers();
+  }, [toast]);
 
   useEffect(() => {
     let companyUsers = users;

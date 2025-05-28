@@ -1,3 +1,4 @@
+
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import TasksList from "./TasksList";
@@ -5,7 +6,7 @@ import TaskCounters from "./TaskCounters";
 import TeamMembersSection from "./TeamMembersSection";
 import NotificationsList from "./NotificationsList";
 import TeamReviewStatus from "./TeamReviewStatus";
-import { useClerkAuth } from "@/context/ClerkAuthContext";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 
 interface MainContentProps {
   tasks: any[];
@@ -28,7 +29,7 @@ export default function MainContent({
   activeTab,
   setActiveTab,
 }: MainContentProps) {
-  const { user } = useClerkAuth();
+  const { user } = useSupabaseAuth();
   const isManager = user?.role === 'manager';
   const isEmployee = user?.role === 'employee';
 
