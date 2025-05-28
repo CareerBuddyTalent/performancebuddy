@@ -31,8 +31,8 @@ export function EnhancedLoginForm({ onSubmit, isLoading, authError, clearAuthErr
   const watchedPassword = form.watch("password");
 
   // Debounce form validation to improve performance
-  const [debouncedEmail, setDebouncedEmail] = useDebounce(watchedEmail, 300);
-  const [debouncedPassword, setDebouncedPassword] = useDebounce(watchedPassword, 300);
+  const [debouncedEmail] = useDebounce(watchedEmail, 300);
+  const [debouncedPassword] = useDebounce(watchedPassword, 300);
 
   useEffect(() => {
     if (authError) {

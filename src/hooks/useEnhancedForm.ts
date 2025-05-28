@@ -13,10 +13,10 @@ export function useEnhancedForm<T extends Record<string, any>>(
 ) {
   const { debounceMs = 300, persistKey, initialValues = {} } = options;
   
-  // Use localStorage if persistKey is provided
+  // Use localStorage if persistKey is provided, otherwise use regular useState
   const [formData, setFormData] = persistKey 
-    ? useLocalStorage(persistKey, initialValues)
-    : useState(initialValues);
+    ? useLocalStorage(persistKey, initialValues as T)
+    : useState(initialValues as T);
   
   const [isSubmitting, toggleSubmitting] = useToggle(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,7 +25,8 @@ export function useEnhancedForm<T extends Record<string, any>>(
   const [debouncedFormData] = useDebounce(formData, debounceMs);
   
   const updateField = (field: keyof T, value: any) => {
-    setFormData((prev: T) => ({ ...prev, [field]: value }));
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
     // Clear error when field is updated
     if (errors[field as string]) {
       setErrors(prev => ({ ...prev, [field as string]: '' }));
@@ -41,13 +42,13 @@ export function useEnhancedForm<T extends Record<string, any>>(
   };
   
   const reset = () => {
-    setFormData(initialValues);
+    setFormData(initialValues as T);
     setErrors({});
   };
   
   return {
-    formData: formData as T,
-    debouncedFormData: debouncedFormData as T,
+    formData: formData || initialValues,
+    debouncedFormData: debouncedFormData || initialValues,
     errors,
     isSubmitting,
     updateField,
