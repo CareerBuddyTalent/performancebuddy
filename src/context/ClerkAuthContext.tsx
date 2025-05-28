@@ -28,6 +28,7 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   const { user: clerkUser } = useUser();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const getCachedRole = useCallback((userId: string): string | null => {
     const cached = roleCache.get(userId);
@@ -40,6 +41,28 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   const setCachedRole = useCallback((userId: string, role: string) => {
     roleCache.set(userId, { role, timestamp: Date.now() });
   }, []);
+
+  // Add a timeout for loading to prevent infinite loading states
+  useEffect(() => {
+    if (isLoading && !loadingTimeout) {
+      const timeout = setTimeout(() => {
+        console.warn('Clerk auth loading timeout reached - forcing ready state');
+        setIsLoading(false);
+      }, 8000); // 8 second timeout
+      setLoadingTimeout(timeout);
+    }
+
+    if (!isLoading && loadingTimeout) {
+      clearTimeout(loadingTimeout);
+      setLoadingTimeout(null);
+    }
+
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+    };
+  }, [isLoading, loadingTimeout]);
 
   const syncAndSetUser = useCallback(async (clerkUser: any) => {
     try {
@@ -106,7 +129,7 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   }, [clerkUser, syncAndSetUser]);
 
   useEffect(() => {
-    // Wait for Clerk to initialize
+    // Wait for Clerk to initialize with timeout protection
     if (isLoaded) {
       if (clerkUser) {
         syncAndSetUser(clerkUser);
@@ -114,6 +137,16 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
         setUser(null);
         setIsLoading(false);
       }
+    } else {
+      // Set a reasonable timeout for Clerk to load
+      const timeout = setTimeout(() => {
+        if (!isLoaded) {
+          console.warn('Clerk failed to load within timeout, proceeding without authentication');
+          setIsLoading(false);
+        }
+      }, 6000);
+
+      return () => clearTimeout(timeout);
     }
   }, [isLoaded, clerkUser, syncAndSetUser]);
 
@@ -131,7 +164,7 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
 
   const value: ClerkAuthContextType = useMemo(() => ({
     user,
-    isLoading: isLoading || !isLoaded,
+    isLoading: isLoading || (!isLoaded && isLoading),
     isAuthenticated: !!isSignedIn && !!user,
     logout,
     refreshUser,
@@ -162,7 +195,7 @@ const FallbackWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 export const ClerkAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Check if Clerk is properly configured
+  // Check if Clerk is properly configured with additional error handling
   if (!isClerkConfigured()) {
     console.warn('Clerk not configured, using fallback authentication');
     return (
@@ -172,7 +205,17 @@ export const ClerkAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
     );
   }
 
-  return <ClerkAuthProviderInner>{children}</ClerkAuthProviderInner>;
+  // Wrap in error boundary for Clerk
+  try {
+    return <ClerkAuthProviderInner>{children}</ClerkAuthProviderInner>;
+  } catch (error) {
+    console.error('Clerk provider failed to initialize:', error);
+    return (
+      <FallbackAuthProvider>
+        <FallbackWrapper>{children}</FallbackWrapper>
+      </FallbackAuthProvider>
+    );
+  }
 };
 
 export const useClerkAuth = () => {
