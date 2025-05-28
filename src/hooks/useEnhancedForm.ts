@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useDebounce, useToggle, useLocalStorage } from 'react-use';
+import { useToggle, useLocalStorage } from 'react-use';
 
 interface UseEnhancedFormOptions {
   debounceMs?: number;
@@ -11,7 +11,7 @@ interface UseEnhancedFormOptions {
 export function useEnhancedForm<T extends Record<string, any>>(
   options: UseEnhancedFormOptions = {}
 ) {
-  const { debounceMs = 300, persistKey, initialValues = {} } = options;
+  const { persistKey, initialValues = {} } = options;
   
   // Use localStorage if persistKey is provided, otherwise use regular useState
   const [formData, setFormData] = persistKey 
@@ -20,9 +20,6 @@ export function useEnhancedForm<T extends Record<string, any>>(
   
   const [isSubmitting, toggleSubmitting] = useToggle(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  // Debounced validation
-  const [debouncedFormData] = useDebounce(formData, debounceMs);
   
   const updateField = (field: keyof T, value: any) => {
     const newData = { ...formData, [field]: value };
@@ -48,7 +45,6 @@ export function useEnhancedForm<T extends Record<string, any>>(
   
   return {
     formData: formData || initialValues,
-    debouncedFormData: debouncedFormData || initialValues,
     errors,
     isSubmitting,
     updateField,

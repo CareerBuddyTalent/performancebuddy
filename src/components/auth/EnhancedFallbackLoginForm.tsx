@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDebounce, useToggle } from "react-use";
+import { useToggle } from "react-use";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,12 +16,6 @@ export function EnhancedFallbackLoginForm() {
   const [showPassword, toggleShowPassword] = useToggle(false);
   const { login } = useClerkAuth();
   const navigate = useNavigate();
-
-  // Debounce email validation
-  const [debouncedEmail] = useDebounce(() => {
-    // Could add email validation logic here
-    return email;
-  }, 300, [email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

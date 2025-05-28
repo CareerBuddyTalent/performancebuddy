@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDebounce, useToggle } from "react-use";
+import { useToggle } from "react-use";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -30,15 +30,11 @@ export function EnhancedLoginForm({ onSubmit, isLoading, authError, clearAuthErr
   const watchedEmail = form.watch("email");
   const watchedPassword = form.watch("password");
 
-  // Debounce form validation to improve performance
-  const [debouncedEmail] = useDebounce(watchedEmail, 300);
-  const [debouncedPassword] = useDebounce(watchedPassword, 300);
-
   useEffect(() => {
     if (authError) {
       clearAuthError();
     }
-  }, [debouncedEmail, debouncedPassword, authError, clearAuthError]);
+  }, [watchedEmail, watchedPassword, authError, clearAuthError]);
 
   return (
     <Form {...form}>
