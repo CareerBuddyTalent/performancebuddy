@@ -4,10 +4,20 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import App from './App.tsx'
 import './index.css'
 import { performanceOptimizer } from '@/utils/performanceOptimization'
-import env, { validateEnvironment } from '@/config/env'
+import env, { validateEnvironment, isClerkConfigured } from '@/config/env'
 
 // Validate environment variables
 const envValidation = validateEnvironment();
+
+// Show setup instructions if Clerk is not configured
+if (!isClerkConfigured()) {
+  console.warn('⚠️ Clerk Authentication Setup Required');
+  console.log('📋 To enable full authentication features:');
+  console.log('1. Visit https://go.clerk.com/lovable to create a Clerk account');
+  console.log('2. Get your publishable key from the Clerk dashboard');
+  console.log('3. Set VITE_CLERK_PUBLISHABLE_KEY in your environment');
+  console.log('4. The app will continue in demo mode until configured');
+}
 
 // Only block app loading in development if critical services are completely unavailable
 if (!envValidation.isValid && env.NODE_ENV === 'development') {
@@ -28,7 +38,7 @@ if (!envValidation.isValid && env.NODE_ENV === 'development') {
           <summary>How to fix this</summary>
           <p>You need to set these environment variables:</p>
           <ul>
-            <li><strong>VITE_CLERK_PUBLISHABLE_KEY</strong>: Get this from your Clerk dashboard</li>
+            <li><strong>VITE_CLERK_PUBLISHABLE_KEY</strong>: Get this from your Clerk dashboard at https://go.clerk.com/lovable</li>
             <li><strong>VITE_SUPABASE_URL</strong>: Your Supabase project URL</li>
             <li><strong>VITE_SUPABASE_ANON_KEY</strong>: Your Supabase anonymous key</li>
           </ul>
@@ -58,8 +68,8 @@ const root = createRoot(rootElement);
 // Enhanced error handling for app rendering
 function renderApp() {
   try {
-    if (PUBLISHABLE_KEY) {
-      // Try to render with Clerk
+    if (isClerkConfigured()) {
+      // Render with Clerk when properly configured
       root.render(
         <ClerkProvider 
           publishableKey={PUBLISHABLE_KEY}
@@ -73,8 +83,8 @@ function renderApp() {
         </ClerkProvider>
       );
     } else {
-      // Fallback without Clerk
-      console.warn('No Clerk key available, using fallback authentication');
+      // Fallback without Clerk when not configured
+      console.warn('Clerk not configured, using fallback authentication');
       root.render(<App />);
     }
   } catch (error) {

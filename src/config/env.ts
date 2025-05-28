@@ -31,8 +31,8 @@ interface EnvConfig {
 
 // Debugging to help identify environment variable issues
 console.log('Environment variables debug:', {
-  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'using default',
-  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'using default',
+  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? 'configured' : 'using default',
+  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ? 'configured' : 'NOT SET - using fallback auth',
   MODE: import.meta.env.MODE || 'not set',
   DEV: import.meta.env.DEV ? 'true' : 'false',
   PROD: import.meta.env.PROD ? 'true' : 'false',
@@ -51,10 +51,12 @@ const env: EnvConfig = {
   // Feature flags
   ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
   
-  // External services - using working defaults
+  // External services
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://eubxxtqbyrlivnenhyjk.supabase.co',
   SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
-  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_live_Y2xlcmsucGVyZm9ybS50aGVjYXJlZXJidWRkeS5jb20k',
+  
+  // Clerk - NO fallback key to force proper setup
+  CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '',
   
   // App metadata - for debugging and support
   BUILD_TIME: import.meta.env.VITE_BUILD_TIME || new Date().toISOString(),
@@ -65,9 +67,9 @@ const env: EnvConfig = {
 export const validateEnvironment = () => {
   const issues: string[] = [];
   
-  // Only report issues if both custom and default values are missing
+  // Clerk is required for proper authentication
   if (!env.CLERK_PUBLISHABLE_KEY) {
-    issues.push('Clerk publishable key is missing and no default available');
+    issues.push('VITE_CLERK_PUBLISHABLE_KEY is required for authentication. Get your key from https://go.clerk.com/lovable');
   }
   
   if (!env.SUPABASE_URL) {
@@ -82,6 +84,11 @@ export const validateEnvironment = () => {
     isValid: issues.length === 0,
     issues
   };
+};
+
+// Helper to check if Clerk is properly configured
+export const isClerkConfigured = () => {
+  return !!env.CLERK_PUBLISHABLE_KEY && env.CLERK_PUBLISHABLE_KEY.startsWith('pk_');
 };
 
 // Convenience function to check if we're in production

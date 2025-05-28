@@ -4,7 +4,7 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 import { User } from '@/types';
 import { RoleSyncService } from '@/services/roleSync';
 import { FallbackAuthProvider, useFallbackAuth } from './FallbackAuthContext';
-import env from '@/config/env';
+import env, { isClerkConfigured } from '@/config/env';
 
 interface ClerkAuthContextType {
   user: User | null;
@@ -28,7 +28,6 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   const { user: clerkUser } = useUser();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [clerkError, setClerkError] = useState(false);
 
   const getCachedRole = useCallback((userId: string): string | null => {
     const cached = roleCache.get(userId);
@@ -107,46 +106,15 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
   }, [clerkUser, syncAndSetUser]);
 
   useEffect(() => {
-    // Check if Clerk is working with improved error handling
-    const checkClerk = async () => {
-      try {
-        if (!env.CLERK_PUBLISHABLE_KEY) {
-          console.warn('No Clerk publishable key found, using fallback auth');
-          setClerkError(true);
-          setIsLoading(false);
-          return;
-        }
-
-        // Wait for Clerk to initialize
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        while (attempts < maxAttempts && !isLoaded) {
-          await new Promise(resolve => setTimeout(resolve, 200));
-          attempts++;
-        }
-        
-        if (isLoaded) {
-          if (clerkUser) {
-            await syncAndSetUser(clerkUser);
-          } else {
-            setUser(null);
-            setIsLoading(false);
-          }
-        } else {
-          // Clerk didn't load after reasonable time, use fallback
-          console.warn('Clerk failed to load, using fallback authentication');
-          setClerkError(true);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.warn('Clerk initialization failed, using fallback:', error);
-        setClerkError(true);
+    // Wait for Clerk to initialize
+    if (isLoaded) {
+      if (clerkUser) {
+        syncAndSetUser(clerkUser);
+      } else {
+        setUser(null);
         setIsLoading(false);
       }
-    };
-
-    checkClerk();
+    }
   }, [isLoaded, clerkUser, syncAndSetUser]);
 
   const logout = useCallback(async () => {
@@ -163,12 +131,12 @@ const ClerkAuthProviderInner: React.FC<{ children: ReactNode }> = ({ children })
 
   const value: ClerkAuthContextType = useMemo(() => ({
     user,
-    isLoading: isLoading,
-    isAuthenticated: !!isSignedIn && !!user && !clerkError,
+    isLoading: isLoading || !isLoaded,
+    isAuthenticated: !!isSignedIn && !!user,
     logout,
     refreshUser,
-    isClerkAvailable: !clerkError
-  }), [user, isLoading, isSignedIn, logout, refreshUser, clerkError]);
+    isClerkAvailable: true
+  }), [user, isLoading, isLoaded, isSignedIn, logout, refreshUser]);
 
   return (
     <ClerkAuthContext.Provider value={value}>
@@ -194,8 +162,9 @@ const FallbackWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 export const ClerkAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Check if Clerk is available
-  if (!env.CLERK_PUBLISHABLE_KEY) {
+  // Check if Clerk is properly configured
+  if (!isClerkConfigured()) {
+    console.warn('Clerk not configured, using fallback authentication');
     return (
       <FallbackAuthProvider>
         <FallbackWrapper>{children}</FallbackWrapper>
