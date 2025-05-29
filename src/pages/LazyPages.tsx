@@ -16,3 +16,8 @@ export const Surveys = lazy(() => import('./Surveys'));
 export const Settings = lazy(() => import('./Settings'));
 export const TestingDashboard = lazy(() => import('./TestingDashboard'));
 export const NotFound = lazy(() => import('./NotFound'));
+
+// Phase 4: Advanced Features
+export const Learning = lazy(() => import('./Learning'));
+export const Workflows = lazy(() => import('./Workflows'));
+export const Integrations = lazy(() => import('./Integrations'));

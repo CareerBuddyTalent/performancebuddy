@@ -31,10 +31,13 @@ import {
   Surveys,
   Settings,
   TestingDashboard,
-  NotFound
+  NotFound,
+  Learning,
+  Workflows,
+  Integrations
 } from "@/pages/LazyPages";
 
-// Import the new collaboration page
+// Import the collaboration page
 import Collaboration from "@/pages/Collaboration";
 
 function App() {
@@ -76,6 +79,23 @@ function App() {
                     <Route path="collaboration" element={<Collaboration />} />
                     <Route path="skills" element={<Skills />} />
                     <Route path="surveys" element={<Surveys />} />
+                    <Route path="learning" element={<Learning />} />
+                    <Route 
+                      path="workflows" 
+                      element={
+                        <ProtectedRoute requiredRoles={["admin", "manager"]}>
+                          <Workflows />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="integrations" 
+                      element={
+                        <ProtectedRoute requiredRoles={["admin"]}>
+                          <Integrations />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route
                       path="users"
                       element={

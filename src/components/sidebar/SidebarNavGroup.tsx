@@ -19,8 +19,8 @@ export default function SidebarNavGroup({ title, items }: SidebarNavGroupProps) 
       <div className="space-y-1">
         {items.map((item) => (
           <Link 
-            key={item.path} 
-            to={item.path}
+            key={item.href} 
+            to={item.href}
             className="flex items-center px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
           >
             {item.icon && (

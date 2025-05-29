@@ -13,7 +13,10 @@ import {
   BookOpen,
   Calendar,
   Users2,
-  Heart
+  Heart,
+  Zap,
+  Puzzle,
+  GraduationCap
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -21,7 +24,7 @@ export interface NavigationItem {
   label: string;
   href: string;
   icon: any;
-  group: 'main' | 'work' | 'admin';
+  group: 'main' | 'work' | 'admin' | 'advanced';
   roles: string[];
   badge?: string;
 }
@@ -92,6 +95,30 @@ export const navigationItems: NavigationItem[] = [
     roles: ['employee', 'manager', 'admin']
   },
   {
+    id: 'learning',
+    label: 'Learning',
+    href: '/learning',
+    icon: GraduationCap,
+    group: 'advanced',
+    roles: ['employee', 'manager', 'admin']
+  },
+  {
+    id: 'workflows',
+    label: 'Workflows',
+    href: '/workflows',
+    icon: Zap,
+    group: 'advanced',
+    roles: ['manager', 'admin']
+  },
+  {
+    id: 'integrations',
+    label: 'Integrations',
+    href: '/integrations',
+    icon: Puzzle,
+    group: 'advanced',
+    roles: ['admin']
+  },
+  {
     id: 'users',
     label: 'Users',
     href: '/users',
@@ -123,6 +150,7 @@ export function getNavigationItemsByGroup(items: NavigationItem[], userRole: str
   return {
     mainNavItems: filteredItems.filter(item => item.group === 'main'),
     workNavItems: filteredItems.filter(item => item.group === 'work'),
+    advancedNavItems: filteredItems.filter(item => item.group === 'advanced'),
     adminNavItems: filteredItems.filter(item => item.group === 'admin')
   };
 }

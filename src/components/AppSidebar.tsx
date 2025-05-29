@@ -12,7 +12,7 @@ export default function AppSidebar() {
   
   if (!user) return null;
   
-  const { mainNavItems, workNavItems, adminNavItems } = getNavigationItemsByGroup(
+  const { mainNavItems, workNavItems, advancedNavItems, adminNavItems } = getNavigationItemsByGroup(
     navigationItems,
     user.role
   );
@@ -31,6 +31,13 @@ export default function AppSidebar() {
           <SidebarNavGroup 
             title="Work" 
             items={workNavItems} 
+          />
+        )}
+
+        {advancedNavItems.length > 0 && (
+          <SidebarNavGroup 
+            title="Advanced" 
+            items={advancedNavItems} 
           />
         )}
 
