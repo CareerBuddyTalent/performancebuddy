@@ -1,104 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Calendar, Building } from "lucide-react";
-import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 
-interface UserProfileProps {
-  userId: string;
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Mail, MapPin, Calendar, Star, Target, Award } from "lucide-react";
+import { User, Goal, Skill, Review } from "@/types";
+
+export interface UserProfileProps {
+  user: User;
+  averageRating: number;
+  userReviews: Review[];
+  userGoals: Goal[];
+  userSkills: Skill[];
+  getPerformanceColor: (rating: number) => string;
 }
 
-export default function UserProfile({ userId }: UserProfileProps) {
-  const { user } = useSupabaseAuth();
-  const [activeTab, setActiveTab] = useState("profile");
-  const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "Software Engineer",
-    company: "TechCorp",
-    location: "San Francisco, CA",
-    startDate: "2022-03-15",
-    skills: ["JavaScript", "React", "Node.js", "SQL"],
-  });
-
-  useEffect(() => {
-    // Fetch user profile data based on userId (replace with actual data fetching)
-    // For now, using dummy data
-  }, [userId]);
+export default function UserProfile({ 
+  user, 
+  averageRating, 
+  userReviews, 
+  userGoals, 
+  userSkills, 
+  getPerformanceColor 
+}: UserProfileProps) {
+  const initials = user.name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
 
   return (
-    <Card className="space-y-4">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold tracking-tight">User Profile</CardTitle>
-        <CardDescription>View and manage your profile information</CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <div className="rounded-full overflow-hidden w-24 h-24 border-2 border-primary/20">
-            <img
-              src="https://images.unsplash.com/photo-1502823403499-6ccfcf4cdca9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80"
-              alt="Profile"
-              className="object-cover w-full h-full"
-            />
+    <div className="md:w-1/3">
+      <Card>
+        <CardHeader className="text-center">
+          <Avatar className="h-24 w-24 mx-auto mb-4">
+            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+          </Avatar>
+          <CardTitle className="text-xl">{user.name}</CardTitle>
+          <CardDescription>{user.role}</CardDescription>
+          <Badge variant="outline" className="w-fit mx-auto">
+            {user.department}
+          </Badge>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2 text-sm">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <span>{user.email}</span>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold">{profileData.name}</h2>
-            <p className="text-muted-foreground">{profileData.role} at {profileData.company}</p>
+          
+          {user.location && (
+            <div className="flex items-center space-x-2 text-sm">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span>{user.location}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-2 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span>Joined {new Date(user.joinDate || Date.now()).toLocaleDateString()}</span>
           </div>
-        </div>
-        
-        <Tabs defaultValue={activeTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="skills">Skills</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
           
-          <TabsContent value="profile" className="space-y-2">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><User className="h-4 w-4" /><span>Full Name</span></div>
-                <div className="text-lg">{profileData.name}</div>
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold flex items-center justify-center space-x-1">
+                <Star className={`h-5 w-5 ${getPerformanceColor(averageRating)}`} />
+                <span className={getPerformanceColor(averageRating)}>
+                  {averageRating.toFixed(1)}
+                </span>
               </div>
-              <div>
-                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Mail className="h-4 w-4" /><span>Email Address</span></div>
-                <div className="text-lg">{profileData.email}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Building className="h-4 w-4" /><span>Company</span></div>
-                <div className="text-lg">{profileData.company}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-muted-foreground flex items-center space-x-2"><Calendar className="h-4 w-4" /><span>Start Date</span></div>
-                <div className="text-lg">{new Date(profileData.startDate).toLocaleDateString()}</div>
-              </div>
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">Location</div>
-                <div className="text-lg">{profileData.location}</div>
-              </div>
+              <div className="text-xs text-muted-foreground">Avg Rating</div>
             </div>
-            <Button>Edit Profile</Button>
-          </TabsContent>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{userReviews.length}</div>
+              <div className="text-xs text-muted-foreground">Reviews</div>
+            </div>
+          </div>
           
-          <TabsContent value="skills" className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {profileData.skills.map((skill, index) => (
-                <Badge key={index}>{skill}</Badge>
-              ))}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold flex items-center justify-center space-x-1">
+                <Target className="h-5 w-5 text-green-600" />
+                <span className="text-green-600">{userGoals.length}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">Goals</div>
             </div>
-            <Button>Edit Skills</Button>
-          </TabsContent>
-          
-          <TabsContent value="activity" className="space-y-2">
-            <div>
-              <p>Activity feed will appear here.</p>
+            <div className="text-center">
+              <div className="text-2xl font-bold flex items-center justify-center space-x-1">
+                <Award className="h-5 w-5 text-purple-600" />
+                <span className="text-purple-600">{userSkills.length}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">Skills</div>
             </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

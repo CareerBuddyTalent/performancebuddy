@@ -23,7 +23,7 @@ export default function OKRs() {
         {user.role === 'manager' && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Team Objectives</h2>
-            <TeamObjectives />
+            <TeamObjectives managerId={user.id} />
           </div>
         )}
       </div>

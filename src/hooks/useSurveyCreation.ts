@@ -44,8 +44,8 @@ export const useSurveyCreation = (onCreateSurvey: (survey: Partial<Survey>) => v
       const surveyData: Partial<Survey> = {
         title: data.title,
         description: data.description,
-        start_date: data.startDate,
-        end_date: data.endDate,
+        start_date: new Date(data.startDate),
+        end_date: new Date(data.endDate),
         status: 'draft',
         questions,
         responses: [],

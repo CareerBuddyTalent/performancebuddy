@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Survey } from "@/types";
-import SurveyHeader from "@/components/surveys/SurveyHeader";
 import SurveyList from "@/components/surveys/SurveyList";
 
 // Sample survey data
@@ -192,33 +190,36 @@ export default function Surveys() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   
-  const handleCreateSurvey = (newSurvey: Partial<Survey>) => {
-    try {
-      const survey = {
-        ...newSurvey,
-        id: String(surveys.length + 1),
-        questions: [],
-        responses: [],
-        creator_id: "user1",
-        created_at: new Date(),
-        updated_at: new Date()
-      } as Survey;
-      
-      setSurveys([...surveys, survey]);
-    } catch (err) {
-      setError("Failed to create survey. Please try again.");
-    }
+  const handleEdit = (survey: Survey) => {
+    console.log("Edit survey:", survey.id);
+  };
+  
+  const handleDelete = (surveyId: string) => {
+    setSurveys(surveys.filter(s => s.id !== surveyId));
+  };
+  
+  const handleViewResults = (surveyId: string) => {
+    console.log("View results for survey:", surveyId);
   };
   
   return (
     <div className="space-y-6">
-      <SurveyHeader />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Surveys</h1>
+          <p className="text-muted-foreground">
+            Create and manage surveys for employee feedback
+          </p>
+        </div>
+      </div>
+      
       <Separator />
+      
       <SurveyList 
         surveys={surveys}
-        onCreateSurvey={handleCreateSurvey}
-        isLoading={isLoading}
-        error={error}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onViewResponses={handleViewResults}
       />
     </div>
   );
