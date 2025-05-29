@@ -11,69 +11,89 @@ import {
   Section,
   Text,
   Hr,
-  Img,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
 
-interface WelcomeEmailProps {
+interface NotificationEmailProps {
   name: string;
+  title: string;
+  message: string;
+  type: 'review_reminder' | 'goal_deadline' | 'feedback_received' | 'survey_reminder' | 'cycle_started' | 'general';
+  actionUrl?: string;
+  actionText?: string;
 }
 
-export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
+const typeIcons = {
+  review_reminder: '📋',
+  goal_deadline: '🎯',
+  feedback_received: '💬',
+  survey_reminder: '📊',
+  cycle_started: '🚀',
+  general: '🔔',
+};
+
+const typeColors = {
+  review_reminder: '#3b82f6',
+  goal_deadline: '#f59e0b',
+  feedback_received: '#10b981',
+  survey_reminder: '#8b5cf6',
+  cycle_started: '#f97316',
+  general: '#6b7280',
+};
+
+export const NotificationEmail = ({ name, title, message, type, actionUrl, actionText }: NotificationEmailProps) => (
   <Html>
     <Head />
-    <Preview>Welcome to PerformPath - Your journey to peak performance starts here!</Preview>
+    <Preview>{title}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
           <Heading style={logo}>PerformPath</Heading>
         </Section>
         
-        <Heading style={h1}>Welcome to PerformPath, {name}!</Heading>
+        <Section style={iconSection}>
+          <Text style={{...icon, color: typeColors[type]}}>{typeIcons[type]}</Text>
+        </Section>
         
-        <Text style={hero}>
-          🎉 Congratulations on joining our performance management platform! 
-          We're excited to help you track goals, receive valuable feedback, and accelerate your career growth.
-        </Text>
+        <Heading style={h1}>{title}</Heading>
+        
+        <Text style={greeting}>Hi {name},</Text>
+        
+        <Text style={text}>{message}</Text>
 
-        <Section style={featureSection}>
-          <Heading style={h2}>What you can do with PerformPath:</Heading>
-          <Text style={feature}>📊 <strong>Track Performance:</strong> Set and monitor your goals with real-time progress tracking</Text>
-          <Text style={feature}>💬 <strong>Get Feedback:</strong> Receive continuous feedback from peers and managers</Text>
-          <Text style={feature}>🎯 <strong>Manage OKRs:</strong> Align your objectives with company goals</Text>
-          <Text style={feature}>📈 <strong>View Analytics:</strong> Get insights into your performance trends</Text>
-          <Text style={feature}>🚀 <strong>Career Development:</strong> Create development plans and track skills</Text>
-        </Section>
-
-        <Section style={ctaSection}>
-          <Button style={button} href="https://performpath.app/dashboard">
-            Get Started Now
-          </Button>
-        </Section>
+        {actionUrl && actionText && (
+          <Section style={ctaSection}>
+            <Button style={{...button, backgroundColor: typeColors[type]}} href={actionUrl}>
+              {actionText}
+            </Button>
+          </Section>
+        )}
 
         <Hr style={hr} />
 
         <Section style={quickLinksSection}>
-          <Heading style={h3}>Quick Links:</Heading>
-          <Link href="https://performpath.app/performance" style={quickLink}>
-            📋 My Performance Dashboard
+          <Text style={h3}>Quick Access:</Text>
+          <Link href="https://performpath.app/dashboard" style={quickLink}>
+            🏠 Dashboard
           </Link>
-          <Link href="https://performpath.app/okrs" style={quickLink}>
-            🎯 Set Your First Goals
+          <Link href="https://performpath.app/performance" style={quickLink}>
+            📈 Performance
           </Link>
           <Link href="https://performpath.app/reviews" style={quickLink}>
-            ⭐ View Review Cycles
+            ⭐ Reviews
           </Link>
           <Link href="https://performpath.app/settings" style={quickLink}>
-            ⚙️ Account Settings
+            ⚙️ Settings
           </Link>
         </Section>
 
         <Hr style={hr} />
 
         <Text style={footer}>
-          Need help getting started? Our support team is here to help.<br />
-          Email us at <Link href="mailto:support@performpath.app" style={supportLink}>support@performpath.app</Link>
+          You're receiving this email because you have notifications enabled in your PerformPath account.<br />
+          <Link href="https://performpath.app/settings" style={settingsLink}>
+            Manage your email preferences
+          </Link>
         </Text>
 
         <Text style={signature}>
@@ -85,7 +105,7 @@ export const WelcomeEmail = ({ name }: WelcomeEmailProps) => (
   </Html>
 )
 
-export default WelcomeEmail
+export default NotificationEmail
 
 const main = {
   backgroundColor: '#f6f9fc',
@@ -113,49 +133,46 @@ const logo = {
   letterSpacing: '-0.5px',
 }
 
-const h1 = {
-  color: '#1a1a1a',
-  fontSize: '28px',
-  fontWeight: '700',
-  lineHeight: '36px',
-  margin: '30px 40px 20px',
+const iconSection = {
   textAlign: 'center' as const,
+  margin: '30px 0 20px',
 }
 
-const h2 = {
+const icon = {
+  fontSize: '48px',
+  margin: '0',
+}
+
+const h1 = {
   color: '#1a1a1a',
-  fontSize: '20px',
-  fontWeight: '600',
-  lineHeight: '28px',
-  margin: '30px 0 15px',
+  fontSize: '24px',
+  fontWeight: '700',
+  lineHeight: '32px',
+  margin: '20px 40px',
+  textAlign: 'center' as const,
 }
 
 const h3 = {
   color: '#1a1a1a',
-  fontSize: '18px',
+  fontSize: '16px',
   fontWeight: '600',
   lineHeight: '24px',
   margin: '20px 0 10px',
 }
 
-const hero = {
-  color: '#4f46e5',
+const greeting = {
+  color: '#374151',
   fontSize: '18px',
   lineHeight: '28px',
-  margin: '20px 40px 30px',
-  textAlign: 'center' as const,
+  margin: '20px 40px 10px',
   fontWeight: '500',
 }
 
-const featureSection = {
-  margin: '30px 40px',
-}
-
-const feature = {
+const text = {
   color: '#374151',
   fontSize: '16px',
   lineHeight: '26px',
-  margin: '12px 0',
+  margin: '16px 40px',
 }
 
 const ctaSection = {
@@ -164,15 +181,14 @@ const ctaSection = {
 }
 
 const button = {
-  backgroundColor: '#4f46e5',
   borderRadius: '8px',
   color: '#fff',
-  fontSize: '18px',
+  fontSize: '16px',
   fontWeight: '600',
   textDecoration: 'none',
   textAlign: 'center' as const,
   display: 'inline-block',
-  padding: '16px 32px',
+  padding: '14px 28px',
   margin: '0 auto',
 }
 
@@ -185,7 +201,7 @@ const quickLink = {
   fontSize: '14px',
   textDecoration: 'none',
   display: 'block',
-  margin: '8px 0',
+  margin: '6px 0',
   fontWeight: '500',
 }
 
@@ -196,13 +212,13 @@ const hr = {
 
 const footer = {
   color: '#6b7280',
-  fontSize: '14px',
-  lineHeight: '22px',
+  fontSize: '12px',
+  lineHeight: '20px',
   margin: '30px 40px 20px',
   textAlign: 'center' as const,
 }
 
-const supportLink = {
+const settingsLink = {
   color: '#4f46e5',
   textDecoration: 'none',
   fontWeight: '500',
