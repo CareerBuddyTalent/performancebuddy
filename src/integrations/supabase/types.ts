@@ -915,6 +915,53 @@ export type Database = {
         }
         Relationships: []
       }
+      kpi_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          goal_id: string | null
+          id: string
+          notes: string | null
+          period_end: string
+          period_start: string
+          template_id: string | null
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          goal_id?: string | null
+          id?: string
+          notes?: string | null
+          period_end: string
+          period_start: string
+          template_id?: string | null
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          goal_id?: string | null
+          id?: string
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          template_id?: string | null
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_entries_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_goal_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mock_users: {
         Row: {
           company_id: string | null
@@ -1054,45 +1101,60 @@ export type Database = {
       }
       performance_analytics: {
         Row: {
+          baseline_value: number | null
           benchmark_value: number | null
           created_at: string | null
           entity_id: string
           entity_type: string
+          frequency: string | null
           id: string
+          kpi_category: string | null
           metadata: Json | null
           metric_name: string
           metric_value: number | null
           percentile_ranking: number | null
           period_end: string | null
           period_start: string | null
+          target_value: number | null
+          team_id: string | null
           trend_direction: string | null
         }
         Insert: {
+          baseline_value?: number | null
           benchmark_value?: number | null
           created_at?: string | null
           entity_id: string
           entity_type: string
+          frequency?: string | null
           id?: string
+          kpi_category?: string | null
           metadata?: Json | null
           metric_name: string
           metric_value?: number | null
           percentile_ranking?: number | null
           period_end?: string | null
           period_start?: string | null
+          target_value?: number | null
+          team_id?: string | null
           trend_direction?: string | null
         }
         Update: {
+          baseline_value?: number | null
           benchmark_value?: number | null
           created_at?: string | null
           entity_id?: string
           entity_type?: string
+          frequency?: string | null
           id?: string
+          kpi_category?: string | null
           metadata?: Json | null
           metric_name?: string
           metric_value?: number | null
           percentile_ranking?: number | null
           period_end?: string | null
           period_start?: string | null
+          target_value?: number | null
+          team_id?: string | null
           trend_direction?: string | null
         }
         Relationships: []
@@ -1400,6 +1462,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      recurring_goal_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          department: string | null
+          description: string | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          role: string | null
+          target_value: number | null
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          department?: string | null
+          description?: string | null
+          frequency: string
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          target_value?: number | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          department?: string | null
+          description?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string | null
+          target_value?: number | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       review_assignments: {
         Row: {
@@ -1870,6 +1977,48 @@ export type Database = {
           target_audience?: string | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      team_kpi_aggregations: {
+        Row: {
+          average_value: number
+          created_at: string
+          frequency: string
+          id: string
+          improvement_percentage: number | null
+          member_count: number
+          metric_name: string
+          period: string
+          team_id: string
+          top_performer: string | null
+          total_value: number
+        }
+        Insert: {
+          average_value: number
+          created_at?: string
+          frequency: string
+          id?: string
+          improvement_percentage?: number | null
+          member_count: number
+          metric_name: string
+          period: string
+          team_id: string
+          top_performer?: string | null
+          total_value: number
+        }
+        Update: {
+          average_value?: number
+          created_at?: string
+          frequency?: string
+          id?: string
+          improvement_percentage?: number | null
+          member_count?: number
+          metric_name?: string
+          period?: string
+          team_id?: string
+          top_performer?: string | null
+          total_value?: number
         }
         Relationships: []
       }

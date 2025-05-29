@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import { RecurringGoalsManager } from './RecurringGoalsManager';
 import { KPIEntryDashboard } from './KPIEntryDashboard';
 import { TeamKPIDashboard } from './TeamKPIDashboard';
+import { AdvancedAnalyticsDashboard } from './AdvancedAnalyticsDashboard';
 
 export function KPITrackingDashboard() {
   return (
@@ -23,7 +24,7 @@ export function KPITrackingDashboard() {
           <TabsTrigger value="entry">KPI Entry</TabsTrigger>
           <TabsTrigger value="recurring">Recurring Goals</TabsTrigger>
           <TabsTrigger value="team">Team Performance</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="analytics">Advanced Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="entry">
@@ -39,19 +40,7 @@ export function KPITrackingDashboard() {
         </TabsContent>
 
         <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>KPI Analytics</CardTitle>
-              <CardDescription>
-                Advanced analytics and insights for your KPIs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Advanced analytics features coming soon...
-              </p>
-            </CardContent>
-          </Card>
+          <AdvancedAnalyticsDashboard />
         </TabsContent>
       </Tabs>
     </div>
