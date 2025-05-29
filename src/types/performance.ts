@@ -1,8 +1,19 @@
+
 export interface PerformanceParameter {
   id: string;
   name: string;
   description: string;
   category: string;
+}
+
+export interface ReviewParameter {
+  id: string;
+  name: string;
+  description: string;
+  category: "technical" | "soft" | "performance" | "goals" | "custom";
+  required: boolean;
+  maxScore: number;
+  weight?: number;
 }
 
 export interface ReviewCycle {
@@ -11,7 +22,7 @@ export interface ReviewCycle {
   startDate: Date;
   endDate: Date;
   status: 'draft' | 'active' | 'completed';
-  parameters: string[]; // ids of parameters
+  parameters: string[] | ReviewParameter[];
   type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
   purpose: 'goal' | 'feedback' | 'performance';
 }
@@ -21,6 +32,7 @@ export interface PerformanceReview {
   employeeId: string;
   reviewerId: string;
   cycleId: string;
+  templateId?: string;
   status: 'not_started' | 'in_progress' | 'submitted' | 'acknowledged';
   ratings: {
     parameterId: string;
@@ -31,7 +43,7 @@ export interface PerformanceReview {
   feedback: string;
   createdAt: Date;
   updatedAt: Date;
-  improvementPlan?: ImprovementPlan; // Optional improvement plan
+  improvementPlan?: ImprovementPlan;
 }
 
 export interface Review {
@@ -70,6 +82,6 @@ export interface ImprovementPlan {
     id: string;
     date: Date;
     notes: string;
-    attendees: string[]; // User IDs
+    attendees: string[];
   }[];
 }
