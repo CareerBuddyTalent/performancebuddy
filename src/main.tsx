@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { performanceOptimizer } from '@/utils/performanceOptimization'
 import env, { validateEnvironment } from '@/config/env'
+import { SupabaseAuthProvider } from '@/context/SupabaseAuthContext'
 
 // Validate environment variables
 const envValidation = validateEnvironment();
@@ -51,5 +52,9 @@ if (!rootElement) {
 
 const root = createRoot(rootElement);
 
-// Render the app
-root.render(<App />);
+// Render the app wrapped with SupabaseAuthProvider
+root.render(
+  <SupabaseAuthProvider>
+    <App />
+  </SupabaseAuthProvider>
+);

@@ -56,7 +56,8 @@ const navigationItems = [
 ];
 
 export function PageLayout({ children }: PageLayoutProps) {
-  const { signOut: handleSignOut, user } = useSupabaseAuth();
+  const { logout, user } = useSupabaseAuth();
+
   const location = useLocation();
 
   const activeLink = (href: string) => {
@@ -89,7 +90,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                       <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleSignOut()}>
+                    <DropdownMenuItem onClick={() => logout()}>
                       Log out
                       <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                     </DropdownMenuItem>
