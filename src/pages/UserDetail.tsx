@@ -128,7 +128,13 @@ export default function UserDetail() {
     .filter(review => review.employeeId === userId)
     .map(review => ({
       ...review,
-      ratings: review.ratings || [], // Ensure ratings property exists
+      ratings: [], // Initialize empty ratings array as required by interface
+      status: (review.status === 'not_started' || review.status === 'in_progress' || 
+               review.status === 'submitted' || review.status === 'acknowledged') 
+               ? review.status 
+               : 'not_started' as const, // Type-cast to expected literal types
+      createdAt: new Date(review.createdAt),
+      updatedAt: new Date(review.updatedAt)
     }));
     
   const averageRating = userReviews.length > 0
