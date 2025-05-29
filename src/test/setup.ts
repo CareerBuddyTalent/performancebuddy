@@ -15,20 +15,29 @@ Object.defineProperty(process.env, 'VITE_SUPABASE_ANON_KEY', {
 })
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
+class MockIntersectionObserver {
+  root = null
+  rootMargin = ''
+  thresholds = []
+  
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+  takeRecords() { return [] }
+}
+
+global.IntersectionObserver = MockIntersectionObserver as any
+
+// Mock ResizeObserver
+class MockResizeObserver {
   constructor() {}
   disconnect() {}
   observe() {}
   unobserve() {}
 }
 
-// Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-}
+global.ResizeObserver = MockResizeObserver as any
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

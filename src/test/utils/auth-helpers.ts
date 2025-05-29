@@ -1,4 +1,6 @@
 
+import { vi } from 'vitest'
+
 export const mockUser = {
   id: 'test-user-id',
   email: 'test@example.com',
