@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useSupabaseAuth } from './context/SupabaseAuthContext';
@@ -26,7 +25,8 @@ import {
   Integrations,
   Enterprise,
   PerformanceManagement,
-  KPITracking
+  KPITracking,
+  AutomatedReviews
 } from './pages/LazyPages';
 
 function App() {
@@ -64,6 +64,7 @@ function App() {
             <Route path="dashboard" element={<Suspense fallback={<div>Loading...</div>}><Dashboard /></Suspense>} />
             <Route path="performance" element={<Suspense fallback={<div>Loading...</div>}><Performance /></Suspense>} />
             <Route path="kpi-tracking" element={<Suspense fallback={<div>Loading...</div>}><KPITracking /></Suspense>} />
+            <Route path="automated-reviews" element={<Suspense fallback={<div>Loading...</div>}><AutomatedReviews /></Suspense>} />
             <Route path="performance-management" element={<Suspense fallback={<div>Loading...</div>}><PerformanceManagement /></Suspense>} />
             <Route path="skills" element={<Suspense fallback={<div>Loading...</div>}><Skills /></Suspense>} />
             <Route path="performance/reviews" element={<Suspense fallback={<div>Loading...</div>}><Reviews /></Suspense>} />

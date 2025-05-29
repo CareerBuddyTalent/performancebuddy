@@ -8,15 +8,15 @@ import { TeamPerformanceLeaderboard } from '@/components/analytics/TeamPerforman
 import { TeamGoalCascading } from '@/components/analytics/TeamGoalCascading';
 import { BarChart3, Brain, Trophy, TreePine } from 'lucide-react';
 
-// Mock time-series data
+// Mock time-series data with proper typing
 const mockTimeSeriesData = [
-  { date: '2024-01-01', value: 85, baseline: 80, target: 95, trend: 'up' },
-  { date: '2024-01-02', value: 87, baseline: 80, target: 95, trend: 'up' },
-  { date: '2024-01-03', value: 82, baseline: 80, target: 95, trend: 'down' },
-  { date: '2024-01-04', value: 89, baseline: 80, target: 95, trend: 'up' },
-  { date: '2024-01-05', value: 91, baseline: 80, target: 95, trend: 'up' },
-  { date: '2024-01-06', value: 88, baseline: 80, target: 95, trend: 'down' },
-  { date: '2024-01-07', value: 93, baseline: 80, target: 95, trend: 'up' },
+  { date: '2024-01-01', value: 85, baseline: 80, target: 95, trend: 'up' as const },
+  { date: '2024-01-02', value: 87, baseline: 80, target: 95, trend: 'up' as const },
+  { date: '2024-01-03', value: 82, baseline: 80, target: 95, trend: 'down' as const },
+  { date: '2024-01-04', value: 89, baseline: 80, target: 95, trend: 'up' as const },
+  { date: '2024-01-05', value: 91, baseline: 80, target: 95, trend: 'up' as const },
+  { date: '2024-01-06', value: 88, baseline: 80, target: 95, trend: 'down' as const },
+  { date: '2024-01-07', value: 93, baseline: 80, target: 95, trend: 'up' as const },
 ];
 
 export function AdvancedAnalyticsDashboard() {
@@ -67,7 +67,8 @@ export function AdvancedAnalyticsDashboard() {
                 ...d,
                 value: d.value - 10,
                 baseline: d.baseline - 10,
-                target: d.target - 10
+                target: d.target - 10,
+                trend: d.trend
               }))}
               metric="Code Reviews"
               unit=" reviews"
@@ -81,7 +82,8 @@ export function AdvancedAnalyticsDashboard() {
                 ...d,
                 value: d.value + 5,
                 baseline: d.baseline + 5,
-                target: d.target + 5
+                target: d.target + 5,
+                trend: d.trend
               }))}
               metric="CSAT Score"
               unit="%"
@@ -95,7 +97,8 @@ export function AdvancedAnalyticsDashboard() {
                 ...d,
                 value: d.value - 5,
                 baseline: d.baseline - 5,
-                target: d.target - 5
+                target: d.target - 5,
+                trend: d.trend
               }))}
               metric="Completion Rate"
               unit="%"
