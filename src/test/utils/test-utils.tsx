@@ -7,12 +7,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // Import testing utilities - screen and waitFor are from @testing-library/dom
 import userEvent from '@testing-library/user-event'
 
-// These are re-exported by @testing-library/react but let's import them directly to avoid issues
+// Create a more complete screen mock
 const screen = {
   getByTestId: (id: string) => document.querySelector(`[data-testid="${id}"]`) as Element,
   getByText: (text: string) => document.querySelector(`*:contains("${text}")`) as Element,
+  getByRole: (role: string) => document.querySelector(`[role="${role}"]`) as Element,
   queryByTestId: (id: string) => document.querySelector(`[data-testid="${id}"]`),
+  queryByRole: (role: string) => document.querySelector(`[role="${role}"]`),
   findByTestId: async (id: string) => document.querySelector(`[data-testid="${id}"]`) as Element,
+  findByRole: async (role: string) => document.querySelector(`[role="${role}"]`) as Element,
 }
 
 const waitFor = async (callback: () => void, options?: { timeout?: number }) => {

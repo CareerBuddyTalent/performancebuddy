@@ -60,8 +60,35 @@ export function useSecurityAudit() {
     }
   }, []);
 
+  const logPermissionEvent = useCallback(async (resource: string, action: string, granted: boolean, metadata?: Record<string, any>) => {
+    try {
+      if (process.env.NODE_ENV === 'development' && !import.meta.env.VITE_ENABLE_AUDIT_LOGS) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from('audit_log')
+        .insert({
+          action: `permission_${action}`,
+          table_name: resource,
+          record_id: null,
+          user_id: (await supabase.auth.getUser()).data.user?.id || 'anonymous',
+          old_values: null,
+          new_values: { granted, ...metadata },
+          user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
+        });
+
+      if (error) {
+        console.error('Failed to log permission event:', error);
+      }
+    } catch (err) {
+      console.error('Permission audit logging failed:', err);
+    }
+  }, []);
+
   return {
     logAuthEvent,
     logDataAccess,
+    logPermissionEvent,
   };
 }

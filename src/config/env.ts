@@ -17,6 +17,7 @@ const env = {
   // Feature flags
   ENABLE_MOCK_DATA: import.meta.env.VITE_ENABLE_MOCK_DATA === 'true',
   ENABLE_DEBUG_LOGS: import.meta.env.VITE_ENABLE_DEBUG_LOGS === 'true' && import.meta.env.NODE_ENV === 'development',
+  ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
   
   // Security settings
   SESSION_TIMEOUT_MINUTES: parseInt(import.meta.env.VITE_SESSION_TIMEOUT_MINUTES || '60'),
@@ -24,9 +25,11 @@ const env = {
 };
 
 // Validate required environment variables
-const validateEnv = () => {
+export const validateEnvironment = () => {
   const required = ['SUPABASE_URL', 'SUPABASE_ANON_KEY'];
   const missing = required.filter(key => !env[key as keyof typeof env]);
+  
+  const issues = missing.map(key => `Missing ${key}`);
   
   if (missing.length > 0) {
     console.error('Missing required environment variables:', missing);
@@ -36,7 +39,16 @@ const validateEnv = () => {
     }
   }
   
-  return missing.length === 0;
+  return {
+    isValid: missing.length === 0,
+    issues
+  };
+};
+
+// Legacy validation function
+const validateEnv = () => {
+  const validation = validateEnvironment();
+  return validation.isValid;
 };
 
 // Validate on import
