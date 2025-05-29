@@ -48,6 +48,92 @@ export type Database = {
         }
         Relationships: []
       }
+      calibration_participants: {
+        Row: {
+          calibrated_rating: number | null
+          created_at: string | null
+          current_rating: number | null
+          employee_id: string
+          id: string
+          justification: string | null
+          session_id: string | null
+        }
+        Insert: {
+          calibrated_rating?: number | null
+          created_at?: string | null
+          current_rating?: number | null
+          employee_id: string
+          id?: string
+          justification?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          calibrated_rating?: number | null
+          created_at?: string | null
+          current_rating?: number | null
+          employee_id?: string
+          id?: string
+          justification?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_sessions: {
+        Row: {
+          bell_curve_settings: Json | null
+          created_at: string | null
+          department: string | null
+          description: string | null
+          forced_ranking_enabled: boolean | null
+          id: string
+          manager_id: string
+          name: string
+          participants: Json | null
+          rating_distribution: Json | null
+          session_date: string
+          status: Database["public"]["Enums"]["calibration_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          bell_curve_settings?: Json | null
+          created_at?: string | null
+          department?: string | null
+          description?: string | null
+          forced_ranking_enabled?: boolean | null
+          id?: string
+          manager_id: string
+          name: string
+          participants?: Json | null
+          rating_distribution?: Json | null
+          session_date: string
+          status?: Database["public"]["Enums"]["calibration_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          bell_curve_settings?: Json | null
+          created_at?: string | null
+          department?: string | null
+          description?: string | null
+          forced_ranking_enabled?: boolean | null
+          id?: string
+          manager_id?: string
+          name?: string
+          participants?: Json | null
+          rating_distribution?: Json | null
+          session_date?: string
+          status?: Database["public"]["Enums"]["calibration_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       career_paths: {
         Row: {
           color: string | null
@@ -268,6 +354,105 @@ export type Database = {
           },
         ]
       }
+      competency_assessments: {
+        Row: {
+          assessment_date: string | null
+          assessor_id: string
+          competency_id: string | null
+          created_at: string | null
+          current_level: Database["public"]["Enums"]["competency_level"] | null
+          development_actions: Json | null
+          employee_id: string
+          evidence: string | null
+          framework_id: string | null
+          id: string
+          next_review_date: string | null
+          target_level: Database["public"]["Enums"]["competency_level"] | null
+        }
+        Insert: {
+          assessment_date?: string | null
+          assessor_id: string
+          competency_id?: string | null
+          created_at?: string | null
+          current_level?: Database["public"]["Enums"]["competency_level"] | null
+          development_actions?: Json | null
+          employee_id: string
+          evidence?: string | null
+          framework_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          target_level?: Database["public"]["Enums"]["competency_level"] | null
+        }
+        Update: {
+          assessment_date?: string | null
+          assessor_id?: string
+          competency_id?: string | null
+          created_at?: string | null
+          current_level?: Database["public"]["Enums"]["competency_level"] | null
+          development_actions?: Json | null
+          employee_id?: string
+          evidence?: string | null
+          framework_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          target_level?: Database["public"]["Enums"]["competency_level"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_assessments_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "framework_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_assessments_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "competency_frameworks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competency_frameworks: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          department: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_level: string | null
+          role_family: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          department?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_level?: string | null
+          role_family?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          department?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_level?: string | null
+          role_family?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       development_plans: {
         Row: {
           created_at: string
@@ -400,6 +585,50 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "review_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      framework_competencies: {
+        Row: {
+          behavioral_indicators: Json | null
+          category: string | null
+          competency_name: string
+          created_at: string | null
+          description: string | null
+          framework_id: string | null
+          id: string
+          level_definitions: Json | null
+          weight_percentage: number | null
+        }
+        Insert: {
+          behavioral_indicators?: Json | null
+          category?: string | null
+          competency_name: string
+          created_at?: string | null
+          description?: string | null
+          framework_id?: string | null
+          id?: string
+          level_definitions?: Json | null
+          weight_percentage?: number | null
+        }
+        Update: {
+          behavioral_indicators?: Json | null
+          category?: string | null
+          competency_name?: string
+          created_at?: string | null
+          description?: string | null
+          framework_id?: string | null
+          id?: string
+          level_definitions?: Json | null
+          weight_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "framework_competencies_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "competency_frameworks"
             referencedColumns: ["id"]
           },
         ]
@@ -823,6 +1052,51 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_analytics: {
+        Row: {
+          benchmark_value: number | null
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          metadata: Json | null
+          metric_name: string
+          metric_value: number | null
+          percentile_ranking: number | null
+          period_end: string | null
+          period_start: string | null
+          trend_direction: string | null
+        }
+        Insert: {
+          benchmark_value?: number | null
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          metric_name: string
+          metric_value?: number | null
+          percentile_ranking?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          trend_direction?: string | null
+        }
+        Update: {
+          benchmark_value?: number | null
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number | null
+          percentile_ranking?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          trend_direction?: string | null
+        }
+        Relationships: []
+      }
       performance_benchmarks: {
         Row: {
           benchmark_value: number
@@ -934,6 +1208,107 @@ export type Database = {
         }
         Relationships: []
       }
+      pip_milestones: {
+        Row: {
+          completion_date: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          evidence_required: string | null
+          evidence_submitted: string | null
+          id: string
+          manager_notes: string | null
+          pip_workflow_id: string | null
+          status: Database["public"]["Enums"]["pip_milestone_status"] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          evidence_required?: string | null
+          evidence_submitted?: string | null
+          id?: string
+          manager_notes?: string | null
+          pip_workflow_id?: string | null
+          status?: Database["public"]["Enums"]["pip_milestone_status"] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          evidence_required?: string | null
+          evidence_submitted?: string | null
+          id?: string
+          manager_notes?: string | null
+          pip_workflow_id?: string | null
+          status?: Database["public"]["Enums"]["pip_milestone_status"] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pip_milestones_pip_workflow_id_fkey"
+            columns: ["pip_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "pip_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pip_workflows: {
+        Row: {
+          created_at: string | null
+          employee_id: string
+          end_date: string | null
+          escalation_triggers: Json | null
+          expected_outcomes: Json | null
+          hr_partner_id: string | null
+          id: string
+          manager_id: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["workflow_status"] | null
+          success_criteria: Json | null
+          trigger_reason: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_id: string
+          end_date?: string | null
+          escalation_triggers?: Json | null
+          expected_outcomes?: Json | null
+          hr_partner_id?: string | null
+          id?: string
+          manager_id: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"] | null
+          success_criteria?: Json | null
+          trigger_reason: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_id?: string
+          end_date?: string | null
+          escalation_triggers?: Json | null
+          expected_outcomes?: Json | null
+          hr_partner_id?: string | null
+          id?: string
+          manager_id?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"] | null
+          success_criteria?: Json | null
+          trigger_reason?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1026,6 +1401,56 @@ export type Database = {
           },
         ]
       }
+      review_assignments: {
+        Row: {
+          created_at: string | null
+          id: string
+          invitation_sent_at: string | null
+          last_reminder_at: string | null
+          orchestration_id: string | null
+          reminder_count: number | null
+          review_data: Json | null
+          reviewer_id: string
+          reviewer_type: string
+          status: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invitation_sent_at?: string | null
+          last_reminder_at?: string | null
+          orchestration_id?: string | null
+          reminder_count?: number | null
+          review_data?: Json | null
+          reviewer_id: string
+          reviewer_type: string
+          status?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invitation_sent_at?: string | null
+          last_reminder_at?: string | null
+          orchestration_id?: string | null
+          reminder_count?: number | null
+          review_data?: Json | null
+          reviewer_id?: string
+          reviewer_type?: string
+          status?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_assignments_orchestration_id_fkey"
+            columns: ["orchestration_id"]
+            isOneToOne: false
+            referencedRelation: "review_orchestrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_cycles: {
         Row: {
           created_at: string
@@ -1062,6 +1487,51 @@ export type Database = {
           status?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      review_orchestrations: {
+        Row: {
+          anonymity_level: string | null
+          created_at: string | null
+          due_date: string | null
+          employee_id: string
+          id: string
+          orchestrator_id: string
+          review_cycle_id: string | null
+          review_type: string | null
+          reviewer_selection_method: string | null
+          status: Database["public"]["Enums"]["workflow_status"] | null
+          updated_at: string | null
+          weighting_scheme: Json | null
+        }
+        Insert: {
+          anonymity_level?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          employee_id: string
+          id?: string
+          orchestrator_id: string
+          review_cycle_id?: string | null
+          review_type?: string | null
+          reviewer_selection_method?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"] | null
+          updated_at?: string | null
+          weighting_scheme?: Json | null
+        }
+        Update: {
+          anonymity_level?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          employee_id?: string
+          id?: string
+          orchestrator_id?: string
+          review_cycle_id?: string | null
+          review_type?: string | null
+          reviewer_selection_method?: string | null
+          status?: Database["public"]["Enums"]["workflow_status"] | null
+          updated_at?: string | null
+          weighting_scheme?: Json | null
         }
         Relationships: []
       }
@@ -1196,6 +1666,101 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      succession_candidates: {
+        Row: {
+          candidate_id: string
+          created_at: string | null
+          development_needs: Json | null
+          development_plan_id: string | null
+          id: string
+          readiness_level:
+            | Database["public"]["Enums"]["succession_readiness"]
+            | null
+          readiness_timeline: string | null
+          risk_factors: Json | null
+          strengths: Json | null
+          succession_plan_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string | null
+          development_needs?: Json | null
+          development_plan_id?: string | null
+          id?: string
+          readiness_level?:
+            | Database["public"]["Enums"]["succession_readiness"]
+            | null
+          readiness_timeline?: string | null
+          risk_factors?: Json | null
+          strengths?: Json | null
+          succession_plan_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string | null
+          development_needs?: Json | null
+          development_plan_id?: string | null
+          id?: string
+          readiness_level?:
+            | Database["public"]["Enums"]["succession_readiness"]
+            | null
+          readiness_timeline?: string | null
+          risk_factors?: Json | null
+          strengths?: Json | null
+          succession_plan_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_candidates_succession_plan_id_fkey"
+            columns: ["succession_plan_id"]
+            isOneToOne: false
+            referencedRelation: "succession_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      succession_plans: {
+        Row: {
+          business_criticality: string | null
+          created_at: string | null
+          created_by: string
+          current_incumbent: string | null
+          department: string | null
+          id: string
+          position_title: string
+          risk_level: string | null
+          succession_coverage: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_criticality?: string | null
+          created_at?: string | null
+          created_by: string
+          current_incumbent?: string | null
+          department?: string | null
+          id?: string
+          position_title: string
+          risk_level?: string | null
+          succession_coverage?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_criticality?: string | null
+          created_at?: string | null
+          created_by?: string
+          current_incumbent?: string | null
+          department?: string | null
+          id?: string
+          position_title?: string
+          risk_level?: string | null
+          succession_coverage?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1444,6 +2009,48 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_notifications: {
+        Row: {
+          action_required: boolean | null
+          action_url: string | null
+          created_at: string | null
+          id: string
+          message: string | null
+          notification_type: string
+          read_at: string | null
+          recipient_id: string
+          sent_at: string | null
+          workflow_id: string
+          workflow_type: string
+        }
+        Insert: {
+          action_required?: boolean | null
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          notification_type: string
+          read_at?: string | null
+          recipient_id: string
+          sent_at?: string | null
+          workflow_id: string
+          workflow_type: string
+        }
+        Update: {
+          action_required?: boolean | null
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          notification_type?: string
+          read_at?: string | null
+          recipient_id?: string
+          sent_at?: string | null
+          workflow_id?: string
+          workflow_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1504,8 +2111,31 @@ export type Database = {
       }
     }
     Enums: {
+      calibration_status:
+        | "scheduled"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      competency_level:
+        | "novice"
+        | "developing"
+        | "proficient"
+        | "advanced"
+        | "expert"
+      pip_milestone_status:
+        | "not_started"
+        | "in_progress"
+        | "completed"
+        | "overdue"
+        | "cancelled"
       question_type: "multiple_choice" | "text" | "rating"
+      succession_readiness:
+        | "not_ready"
+        | "emerging"
+        | "ready_now"
+        | "ready_plus"
       user_role: "admin" | "manager" | "employee"
+      workflow_status: "draft" | "active" | "paused" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1621,8 +2251,35 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      calibration_status: [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      competency_level: [
+        "novice",
+        "developing",
+        "proficient",
+        "advanced",
+        "expert",
+      ],
+      pip_milestone_status: [
+        "not_started",
+        "in_progress",
+        "completed",
+        "overdue",
+        "cancelled",
+      ],
       question_type: ["multiple_choice", "text", "rating"],
+      succession_readiness: [
+        "not_ready",
+        "emerging",
+        "ready_now",
+        "ready_plus",
+      ],
       user_role: ["admin", "manager", "employee"],
+      workflow_status: ["draft", "active", "paused", "completed", "cancelled"],
     },
   },
 } as const

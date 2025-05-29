@@ -24,3 +24,6 @@ export const Integrations = lazy(() => import('./Integrations'));
 
 // Phase 5: Enterprise Features
 export const Enterprise = lazy(() => import('./Enterprise'));
+
+// Advanced Performance Management
+export const PerformanceManagement = lazy(() => import('./PerformanceManagement'));

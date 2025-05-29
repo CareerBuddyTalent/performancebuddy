@@ -43,7 +43,8 @@ import {
   Learning,
   Workflows,
   Integrations,
-  Enterprise
+  Enterprise,
+  PerformanceManagement
 } from './pages/LazyPages';
 
 function App() {
@@ -86,6 +87,11 @@ function App() {
                           <Route path="/surveys" element={<Surveys />} />
                           
                           {/* Advanced features */}
+                          <Route path="/performance-management" element={
+                            <RoleGuard allowedRoles={['manager', 'admin']}>
+                              <PerformanceManagement />
+                            </RoleGuard>
+                          } />
                           <Route path="/learning" element={
                             <RoleGuard allowedRoles={['employee', 'manager', 'admin']}>
                               <Learning />

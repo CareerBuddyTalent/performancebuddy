@@ -17,7 +17,8 @@ import {
   Zap,
   Puzzle,
   GraduationCap,
-  Shield
+  Shield,
+  TrendingUp
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -54,6 +55,15 @@ export const navigationItems: NavigationItem[] = [
     icon: Target,
     group: 'work',
     roles: ['employee', 'manager', 'admin']
+  },
+  {
+    id: 'performance-management',
+    label: 'Advanced Performance',
+    href: '/performance-management',
+    icon: TrendingUp,
+    group: 'advanced',
+    roles: ['manager', 'admin'],
+    badge: 'New'
   },
   {
     id: 'okrs',
