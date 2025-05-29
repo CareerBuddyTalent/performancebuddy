@@ -34,6 +34,9 @@ import {
   NotFound
 } from "@/pages/LazyPages";
 
+// Import the new collaboration page
+import Collaboration from "@/pages/Collaboration";
+
 function App() {
   return (
     <ErrorBoundary>
@@ -70,6 +73,7 @@ function App() {
                     <Route path="performance/templates" element={<ReviewTemplates />} />
                     <Route path="okrs" element={<OKRs />} />
                     <Route path="okrs/alignment" element={<OKRAlignment />} />
+                    <Route path="collaboration" element={<Collaboration />} />
                     <Route path="skills" element={<Skills />} />
                     <Route path="surveys" element={<Surveys />} />
                     <Route
