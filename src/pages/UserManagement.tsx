@@ -13,6 +13,7 @@ import UserPerformanceRanking from "@/components/UserPerformanceRanking";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
+import { RoleSyncService } from "@/services/roleSync";
 
 export default function UserManagement() {
   const { user } = useSupabaseAuth();
@@ -34,7 +35,7 @@ export default function UserManagement() {
       try {
         setIsLoading(true);
         
-        // Fetch users with their roles
+        // Fetch users with their roles using the enhanced function
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select(`
@@ -125,15 +126,8 @@ export default function UserManagement() {
 
       if (profileError) throw profileError;
 
-      // Create user role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: newUser.id,
-          role: newUser.role
-        });
-
-      if (roleError) throw roleError;
+      // Use the new role sync service to set the role
+      await RoleSyncService.updateUserRole(newUser.id, newUser.role);
 
       const userWithCompany = {
         ...newUser,
@@ -169,28 +163,18 @@ export default function UserManagement() {
 
   const handleUpdateUser = async (updatedUser: User) => {
     try {
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          name: updatedUser.name,
-          department: updatedUser.department,
-          position: updatedUser.position,
-          manager: updatedUser.manager
-        })
-        .eq('id', updatedUser.id);
+      // Update profile using the new service
+      await RoleSyncService.updateUserProfile(
+        updatedUser.name,
+        updatedUser.department,
+        updatedUser.position,
+        updatedUser.manager
+      );
 
-      if (profileError) throw profileError;
-
-      // Update role if changed
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .upsert({
-          user_id: updatedUser.id,
-          role: updatedUser.role
-        });
-
-      if (roleError) throw roleError;
+      // Update role if user is admin
+      if (isAdmin) {
+        await RoleSyncService.updateUserRole(updatedUser.id, updatedUser.role);
+      }
 
       setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
       toast({

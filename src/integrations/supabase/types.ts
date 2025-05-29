@@ -1457,6 +1457,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_profile_with_role: {
+        Args: { user_id_param: string }
+        Returns: {
+          id: string
+          email: string
+          name: string
+          department: string
+          position: string
+          manager: string
+          role: Database["public"]["Enums"]["user_role"]
+          created_at: string
+        }[]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -1469,13 +1482,19 @@ export type Database = {
         Args: { company_id: string }
         Returns: boolean
       }
-      sync_clerk_user_profile: {
+      update_user_profile: {
         Args: {
-          user_id_param: string
-          email_param: string
-          name_param: string
-          role_param?: string
-          profile_picture_param?: string
+          profile_name?: string
+          profile_department?: string
+          profile_position?: string
+          profile_manager?: string
+        }
+        Returns: undefined
+      }
+      update_user_role: {
+        Args: {
+          target_user_id: string
+          new_role: Database["public"]["Enums"]["user_role"]
         }
         Returns: undefined
       }
