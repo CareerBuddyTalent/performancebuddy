@@ -1,7 +1,7 @@
 
 import { Navigate, Link } from "react-router-dom";
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
-import { SupabaseLoginForm } from "@/components/auth/SupabaseLoginForm";
+import { SecureLoginForm } from "@/components/auth/SecureLoginForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Login() {
@@ -23,7 +23,7 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SupabaseLoginForm />
+            <SecureLoginForm />
             <div className="mt-4 text-center space-y-2">
               <Link 
                 to="/signup" 

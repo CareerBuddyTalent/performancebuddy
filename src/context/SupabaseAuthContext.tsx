@@ -3,6 +3,7 @@ import React, { createContext, useContext, ReactNode, useEffect, useState, useCa
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
+import { useSecurityAudit } from '@/hooks/useSecurityAudit';
 
 interface SupabaseAuthContextType {
   user: User | null;
@@ -13,6 +14,7 @@ interface SupabaseAuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
+  sessionTimeLeft: number | null;
 }
 
 const SupabaseAuthContext = createContext<SupabaseAuthContextType | undefined>(undefined);
@@ -21,6 +23,8 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionTimeLeft, setSessionTimeLeft] = useState<number | null>(null);
+  const { logAuthEvent } = useSecurityAudit();
 
   const convertSupabaseUser = useCallback(async (supabaseUser: SupabaseUser): Promise<User> => {
     // Get user profile from profiles table
@@ -46,70 +50,116 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
     };
   }, []);
 
+  // Session timeout management
+  useEffect(() => {
+    if (!session) {
+      setSessionTimeLeft(null);
+      return;
+    }
+
+    const updateTimeLeft = () => {
+      const expiresAt = session.expires_at ? session.expires_at * 1000 : Date.now() + (60 * 60 * 1000); // 1 hour default
+      const timeLeft = expiresAt - Date.now();
+      setSessionTimeLeft(Math.max(0, timeLeft));
+
+      // Auto-logout 5 minutes before expiry
+      if (timeLeft <= 5 * 60 * 1000 && timeLeft > 0) {
+        console.warn('Session expiring soon, please save your work');
+      }
+    };
+
+    updateTimeLeft();
+    const interval = setInterval(updateTimeLeft, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [session]);
+
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
       if (error) {
         console.error('Login error:', error);
+        await logAuthEvent('login', false);
         return false;
       }
 
-      return !!data.user;
+      if (data.user) {
+        await logAuthEvent('login', true);
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Login failed:', error);
+      await logAuthEvent('login', false);
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logAuthEvent]);
 
   const signup = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim().toLowerCase(),
         password,
         options: {
           data: {
-            name: name
+            name: name.trim()
           }
         }
       });
 
       if (error) {
         console.error('Signup error:', error);
+        await logAuthEvent('signup', false);
         return false;
       }
 
-      return !!data.user;
+      if (data.user) {
+        await logAuthEvent('signup', true);
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error('Signup failed:', error);
+      await logAuthEvent('signup', false);
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logAuthEvent]);
 
   const resetPassword = useCallback(async (email: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        {
+          redirectTo: `${window.location.origin}/reset-password`
+        }
+      );
       
       if (error) {
         console.error('Password reset error:', error);
+        await logAuthEvent('password_reset', false);
         return false;
       }
 
+      await logAuthEvent('password_reset', true);
       return true;
     } catch (error) {
       console.error('Password reset failed:', error);
+      await logAuthEvent('password_reset', false);
       return false;
     }
-  }, []);
+  }, [logAuthEvent]);
 
   const logout = useCallback(async () => {
     try {
@@ -117,10 +167,12 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
       if (error) {
         console.error('Logout error:', error);
       }
+      await logAuthEvent('logout', true);
     } catch (error) {
       console.error('Logout failed:', error);
+      await logAuthEvent('logout', false);
     }
-  }, []);
+  }, [logAuthEvent]);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -142,13 +194,16 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         setSession(session);
         
         if (session?.user) {
-          try {
-            const convertedUser = await convertSupabaseUser(session.user);
-            setUser(convertedUser);
-          } catch (error) {
-            console.error('Error converting user:', error);
-            setUser(null);
-          }
+          // Use setTimeout to prevent potential deadlocks
+          setTimeout(async () => {
+            try {
+              const convertedUser = await convertSupabaseUser(session.user);
+              setUser(convertedUser);
+            } catch (error) {
+              console.error('Error converting user:', error);
+              setUser(null);
+            }
+          }, 0);
         } else {
           setUser(null);
         }
@@ -176,8 +231,9 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
     refreshUser,
     login,
     signup,
-    resetPassword
-  }), [user, isLoading, session, logout, refreshUser, login, signup, resetPassword]);
+    resetPassword,
+    sessionTimeLeft
+  }), [user, isLoading, session, logout, refreshUser, login, signup, resetPassword, sessionTimeLeft]);
 
   return (
     <SupabaseAuthContext.Provider value={value}>
