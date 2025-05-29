@@ -1,11 +1,11 @@
 
 // Environment configuration with security improvements
-// Remove hardcoded fallback credentials to prevent security issues
+// Use actual Supabase credentials from the integration
 
 const env = {
-  // Supabase configuration - no fallback values for security
-  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || '',
-  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+  // Supabase configuration - using actual credentials from Supabase integration
+  SUPABASE_URL: 'https://eubxxtqbyrlivnenhyjk.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
   
   // App configuration
   APP_NAME: import.meta.env.VITE_APP_NAME || 'CareerBuddy',
