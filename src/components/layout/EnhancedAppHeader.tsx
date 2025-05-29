@@ -19,7 +19,6 @@ import {
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSidebar } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 
@@ -27,7 +26,6 @@ export default function EnhancedAppHeader() {
   const { user, logout } = useSupabaseAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useRealTimeNotifications();
   const isMobile = useIsMobile();
-  const { toggleSidebar } = useSidebar();
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -46,7 +44,6 @@ export default function EnhancedAppHeader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={toggleSidebar}
             className="mr-2 h-8 w-8 p-0"
           >
             <Menu className="h-4 w-4" />
@@ -75,7 +72,7 @@ export default function EnhancedAppHeader() {
           {/* Notifications */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative h-8 w-8 p-0">
+              <Button variant="ghost" size="sm" className="relative h-8 w-8 p-0" data-tour="notifications">
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
                   <Badge 
@@ -149,7 +146,7 @@ export default function EnhancedAppHeader() {
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0" data-tour="profile">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.profilePicture} alt={user?.name || 'User'} />
                   <AvatarFallback className="text-xs">
