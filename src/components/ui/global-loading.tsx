@@ -20,3 +20,5 @@ export function GlobalLoading({ message = "Loading...", fullScreen = false }: Gl
     </div>
   );
 }
+
+export default GlobalLoading;

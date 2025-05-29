@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -14,9 +15,9 @@ import { AnalyticsProvider } from '@/context/AnalyticsContext';
 
 // Import components
 import PageLayout from '@/components/layout/PageLayout';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import RoleGuard from '@/components/layout/RoleGuard';
-import GlobalLoading from '@/components/ui/global-loading';
+import { GlobalLoading } from '@/components/ui/global-loading';
 
 // Import pages
 import Index from './pages/Index';
@@ -48,7 +49,7 @@ import {
 function App() {
   return (
     <Router>
-      <ErrorBoundary>
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
         <SupabaseAuthProvider>
           <SecurityProvider>
             <CompanyProvider>
