@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Laptop, Target, LineChart, FileText } from "lucide-react";
-import { User, Goal, Skill } from "@/types";
+import { User, Goal, Skill, Review } from "@/types";
 
 // Import our new components
 import UserProfile from "@/components/users/UserProfile";
@@ -123,8 +123,14 @@ export default function UserDetail() {
     );
   }
   
-  // Calculate performance data
-  const userReviews = reviews.filter(review => review.employeeId === userId);
+  // Calculate performance data - transform reviews to match expected Review interface
+  const userReviews: Review[] = reviews
+    .filter(review => review.employeeId === userId)
+    .map(review => ({
+      ...review,
+      ratings: review.ratings || [], // Ensure ratings property exists
+    }));
+    
   const averageRating = userReviews.length > 0
     ? userReviews.reduce((sum, review) => sum + review.overallRating, 0) / userReviews.length
     : 0;
