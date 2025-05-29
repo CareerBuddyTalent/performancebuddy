@@ -1,14 +1,22 @@
 
-
 import React, { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// Import screen, fireEvent, and waitFor directly
-import { screen } from '@testing-library/react'
-import { fireEvent } from '@testing-library/react'
-import { waitFor } from '@testing-library/react'
+// Import testing utilities from their proper packages
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+// Create fireEvent from userEvent for compatibility
+const fireEvent = {
+  click: (element: Element) => userEvent.click(element),
+  change: (element: Element, options: { target: { value: string } }) => {
+    userEvent.clear(element)
+    userEvent.type(element, options.target.value)
+  },
+  submit: (element: Element) => userEvent.click(element),
+}
 
 // Mock Supabase context
 const MockSupabaseAuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -44,6 +52,5 @@ const customRender = (
 export * from '@testing-library/react'
 // Override render with our custom render
 export { customRender as render }
-// Explicitly export the commonly used functions
-export { screen, fireEvent, waitFor }
-
+// Export the commonly used functions
+export { screen, fireEvent, waitFor, userEvent }
