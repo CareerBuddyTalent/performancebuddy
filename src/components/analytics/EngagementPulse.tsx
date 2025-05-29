@@ -1,110 +1,149 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Users, MessageSquare, Plus } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, TrendingDown, Minus, Users, MessageSquare, Target, Clock } from "lucide-react";
 
-const engagementData = [
-  { month: 'Jan', score: 7.2, participation: 85 },
-  { month: 'Feb', score: 7.5, participation: 88 },
-  { month: 'Mar', score: 7.1, participation: 82 },
-  { month: 'Apr', score: 7.8, participation: 91 },
-  { month: 'May', score: 8.2, participation: 94 },
-  { month: 'Jun', score: 8.0, participation: 89 }
-];
+interface EngagementMetric {
+  id: string;
+  name: string;
+  value: number;
+  previousValue: number;
+  trend: 'up' | 'down' | 'stable';
+  category: 'participation' | 'satisfaction' | 'productivity' | 'feedback';
+  icon: React.ReactNode;
+}
 
-const pulseMetrics = [
-  { label: 'Overall Satisfaction', score: 8.2, trend: '+0.3', color: 'text-green-600' },
-  { label: 'Work-Life Balance', score: 7.8, trend: '+0.1', color: 'text-green-600' },
-  { label: 'Career Growth', score: 7.5, trend: '-0.2', color: 'text-red-600' },
-  { label: 'Team Collaboration', score: 8.5, trend: '+0.5', color: 'text-green-600' }
+const mockEngagementData: EngagementMetric[] = [
+  {
+    id: '1',
+    name: 'Review Participation',
+    value: 87,
+    previousValue: 82,
+    trend: 'up',
+    category: 'participation',
+    icon: <Users className="h-4 w-4" />
+  },
+  {
+    id: '2',
+    name: 'Feedback Quality Score',
+    value: 74,
+    previousValue: 78,
+    trend: 'down',
+    category: 'feedback',
+    icon: <MessageSquare className="h-4 w-4" />
+  },
+  {
+    id: '3',
+    name: 'Goal Completion Rate',
+    value: 92,
+    previousValue: 88,
+    trend: 'up',
+    category: 'productivity',
+    icon: <Target className="h-4 w-4" />
+  },
+  {
+    id: '4',
+    name: 'Response Timeliness',
+    value: 68,
+    previousValue: 68,
+    trend: 'stable',
+    category: 'participation',
+    icon: <Clock className="h-4 w-4" />
+  }
 ];
 
 export function EngagementPulse() {
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up': return <TrendingUp className="h-4 w-4 text-green-500" />;
+      case 'down': return <TrendingDown className="h-4 w-4 text-red-500" />;
+      default: return <Minus className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case 'up': return 'text-green-600';
+      case 'down': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'participation': return 'bg-blue-100 text-blue-800';
+      case 'satisfaction': return 'bg-green-100 text-green-800';
+      case 'productivity': return 'bg-purple-100 text-purple-800';
+      case 'feedback': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const calculateChange = (current: number, previous: number) => {
+    return Math.abs(((current - previous) / previous) * 100);
+  };
+
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-red-500" />
-                Engagement Pulse
-              </CardTitle>
-              <CardDescription>Real-time team engagement metrics</CardDescription>
-            </div>
-            <Button size="sm" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create Pulse
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {pulseMetrics.map((metric, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">{metric.label}</span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Engagement Pulse</CardTitle>
+        <CardDescription>
+          Real-time engagement metrics across the organization
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {mockEngagementData.map((metric) => (
+            <div key={metric.id} className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold">{metric.score}/10</span>
-                  <span className={`text-sm ${metric.color}`}>
-                    {metric.trend}
-                  </span>
+                  {metric.icon}
+                  <span className="font-medium">{metric.name}</span>
                 </div>
+                <Badge className={getCategoryColor(metric.category)}>
+                  {metric.category}
+                </Badge>
               </div>
-              <Progress value={metric.score * 10} className="h-2" />
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">{metric.value}%</span>
+                  <div className="flex items-center gap-1">
+                    {getTrendIcon(metric.trend)}
+                    <span className={`text-sm ${getTrendColor(metric.trend)}`}>
+                      {metric.trend !== 'stable' ? `${calculateChange(metric.value, metric.previousValue).toFixed(1)}%` : '0%'}
+                    </span>
+                  </div>
+                </div>
+                <Progress value={metric.value} className="h-2" />
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                Previous period: {metric.previousValue}%
+              </p>
             </div>
           ))}
-          
-          <div className="pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Response Rate</span>
-              </div>
-              <Badge variant="secondary">89% (24/27)</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Engagement Trends</CardTitle>
-          <CardDescription>6-month engagement score evolution</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={engagementData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis domain={[6, 10]} />
-                <Tooltip />
-                <Line 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="#8884d8" 
-                  strokeWidth={2}
-                  dot={{ fill: '#8884d8' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          
-          <div className="mt-4 p-3 bg-green-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <MessageSquare className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-900">Key Insight</span>
+        <div className="border-t pt-4">
+          <h4 className="font-medium mb-3">Engagement Insights</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+              <span>Overall engagement is trending upward with 5% improvement</span>
             </div>
-            <p className="text-sm text-green-700">
-              Engagement scores show consistent improvement over the last 3 months, 
-              with highest satisfaction in team collaboration.
-            </p>
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-orange-500" />
+              <span>Feedback quality needs attention - consider training sessions</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-purple-500" />
+              <span>Goal completion rates are exceeding targets across teams</span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

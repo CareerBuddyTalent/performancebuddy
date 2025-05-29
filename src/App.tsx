@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useSupabaseAuth } from './context/SupabaseAuthContext';
 import Index from './pages/Index';
-import PageLayout from './components/PageLayout';
+import { PageLayout } from './components/PageLayout';
 import { Outlet } from 'react-router-dom';
 
 import { 

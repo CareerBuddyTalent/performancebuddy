@@ -1,3 +1,4 @@
+
 import {
   BarChart3,
   BookOpen,
@@ -10,6 +11,7 @@ import {
   User,
   Zap,
   Award,
+  LucideIcon,
 } from 'lucide-react';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -32,7 +34,7 @@ import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 interface NavItem {
   name: string;
   href: string;
-  icon: React.LucideIcon;
+  icon: LucideIcon;
 }
 
 interface PageLayoutProps {
@@ -54,7 +56,7 @@ const navigationItems = [
 ];
 
 export function PageLayout({ children }: PageLayoutProps) {
-  const { signOut, user } = useSupabaseAuth();
+  const { signOut: handleSignOut, user } = useSupabaseAuth();
   const location = useLocation();
 
   const activeLink = (href: string) => {
@@ -87,7 +89,7 @@ export function PageLayout({ children }: PageLayoutProps) {
                       <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()}>
+                    <DropdownMenuItem onClick={() => handleSignOut()}>
                       Log out
                       <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
                     </DropdownMenuItem>
