@@ -1,9 +1,14 @@
 
+
 import React, { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
-import { screen, fireEvent, waitFor } from '@testing-library/dom'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+// Import screen, fireEvent, and waitFor directly
+import { screen } from '@testing-library/react'
+import { fireEvent } from '@testing-library/react'
+import { waitFor } from '@testing-library/react'
 
 // Mock Supabase context
 const MockSupabaseAuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -39,5 +44,6 @@ const customRender = (
 export * from '@testing-library/react'
 // Override render with our custom render
 export { customRender as render }
-// Explicitly export the commonly used functions from @testing-library/dom
+// Explicitly export the commonly used functions
 export { screen, fireEvent, waitFor }
+
