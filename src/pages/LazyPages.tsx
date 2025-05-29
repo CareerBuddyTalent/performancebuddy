@@ -27,3 +27,6 @@ export const Enterprise = lazy(() => import('./Enterprise'));
 
 // Advanced Performance Management
 export const PerformanceManagement = lazy(() => import('./PerformanceManagement'));
+
+// KPI Tracking
+export const KPITracking = lazy(() => import('./KPITracking'));

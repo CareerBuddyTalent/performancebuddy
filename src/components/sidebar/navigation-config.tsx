@@ -57,6 +57,15 @@ export const navigationItems: NavigationItem[] = [
     roles: ['employee', 'manager', 'admin']
   },
   {
+    id: 'kpi-tracking',
+    label: 'KPI Tracking',
+    href: '/kpi-tracking',
+    icon: TrendingUp,
+    group: 'work',
+    roles: ['employee', 'manager', 'admin'],
+    badge: 'New'
+  },
+  {
     id: 'performance-management',
     label: 'Advanced Performance',
     href: '/performance-management',

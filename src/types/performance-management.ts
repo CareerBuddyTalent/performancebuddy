@@ -14,6 +14,8 @@ export interface CalibrationSession {
   bell_curve_settings: Record<string, any>;
   created_at: Date;
   updated_at: Date;
+  // Related data from joins
+  calibration_participants?: CalibrationParticipant[];
 }
 
 export interface CalibrationParticipant {
@@ -38,6 +40,8 @@ export interface SuccessionPlan {
   candidates?: SuccessionCandidate[];
   created_at: Date;
   updated_at: Date;
+  // Related data from joins
+  succession_candidates?: SuccessionCandidate[];
 }
 
 export interface SuccessionCandidate {
@@ -66,6 +70,8 @@ export interface CompetencyFramework {
   competencies?: FrameworkCompetency[];
   created_at: Date;
   updated_at: Date;
+  // Related data from joins
+  framework_competencies?: FrameworkCompetency[];
 }
 
 export interface FrameworkCompetency {
@@ -110,6 +116,8 @@ export interface PIPWorkflow {
   milestones?: PIPMilestone[];
   created_at: Date;
   updated_at: Date;
+  // Related data from joins
+  pip_milestones?: PIPMilestone[];
 }
 
 export interface PIPMilestone {
@@ -141,6 +149,8 @@ export interface ReviewOrchestration {
   assignments?: ReviewAssignment[];
   created_at: Date;
   updated_at: Date;
+  // Related data from joins
+  review_assignments?: ReviewAssignment[];
 }
 
 export interface ReviewAssignment {
@@ -184,4 +194,44 @@ export interface PerformanceAnalytic {
   trend_direction?: 'up' | 'down' | 'stable';
   metadata: Record<string, any>;
   created_at: Date;
+}
+
+// New types for enhanced KPI tracking
+export interface RecurringGoalTemplate {
+  id: string;
+  title: string;
+  description?: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
+  target_value?: number;
+  unit?: string;
+  department?: string;
+  role?: string;
+  created_by: string;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface KPIEntry {
+  id: string;
+  goal_id: string;
+  user_id: string;
+  value: number;
+  entry_date: Date;
+  period_start: Date;
+  period_end: Date;
+  notes?: string;
+  created_at: Date;
+}
+
+export interface TeamKPIAggregation {
+  team_id: string;
+  metric_name: string;
+  period: Date;
+  frequency: 'daily' | 'weekly' | 'monthly';
+  total_value: number;
+  average_value: number;
+  member_count: number;
+  top_performer?: string;
+  improvement_percentage?: number;
 }
