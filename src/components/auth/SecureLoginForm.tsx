@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Shield, Loader2 } from "lucide-react";
-import { useSecureAuth } from "@/hooks/useSecureAuth";
+import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { useSecurityAudit } from "@/hooks/useSecurityAudit";
-import { useSecureInput } from "@/hooks/useSecureInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 
@@ -17,9 +16,8 @@ export function SecureLoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, toggleShowPassword] = useToggle(false);
-  const { secureLogin } = useSecureAuth();
+  const { login } = useSupabaseAuth();
   const { logAuthEvent } = useSecurityAudit();
-  const { sanitizeEmail, validateEmail } = useSecureInput();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,33 +26,37 @@ export function SecureLoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!login) {
+      toast.error("Authentication service not available");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Validate inputs
-      const sanitizedEmail = sanitizeEmail(email);
-      const emailError = validateEmail(sanitizedEmail);
-      
-      if (emailError) {
-        toast.error(emailError);
+      // Basic validation
+      if (!email || !password) {
+        toast.error("Please fill in all fields");
         setIsLoading(false);
         return;
       }
 
-      if (!password || password.length < 8) {
-        toast.error("Password must be at least 8 characters");
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters");
         setIsLoading(false);
         return;
       }
 
-      const success = await secureLogin(sanitizedEmail, password);
-      
-      // Log the authentication attempt
-      await logAuthEvent('login', success);
+      console.log("Attempting login with email:", email);
+      const success = await login(email.trim().toLowerCase(), password);
       
       if (success) {
+        await logAuthEvent('login', true);
         toast.success("Welcome back! 🎉");
         navigate(from, { replace: true });
+      } else {
+        await logAuthEvent('login', false);
+        toast.error("Invalid email or password. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -82,7 +84,6 @@ export function SecureLoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          maxLength={254}
           className={`${isMobile ? 'h-12' : 'h-10'} transition-all focus:ring-2 focus:ring-primary/20`}
           disabled={isLoading}
         />
@@ -99,7 +100,6 @@ export function SecureLoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            minLength={8}
             className={`${isMobile ? 'h-12' : 'h-10'} pr-12 transition-all focus:ring-2 focus:ring-primary/20`}
             disabled={isLoading}
           />
@@ -138,7 +138,7 @@ export function SecureLoginForm() {
       <div className="text-xs text-center text-gray-500 bg-gray-50 p-3 rounded-lg">
         <div className="flex items-center justify-center gap-1">
           <Shield className="h-3 w-3" />
-          Account locked after 5 failed attempts for security
+          Secure login with enterprise-grade protection
         </div>
       </div>
     </form>

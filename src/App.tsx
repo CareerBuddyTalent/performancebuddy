@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useSupabaseAuth } from './context/SupabaseAuthContext';
 import Index from './pages/Index';
+import Login from './pages/Login';
 import { PageLayout } from './components/PageLayout';
 import { Outlet } from 'react-router-dom';
 
@@ -38,7 +39,7 @@ function App() {
       return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
     }
     if (!isAuthenticated) {
-      return <Navigate to="/" replace />;
+      return <Navigate to="/login" replace />;
     }
     return <>{children}</>;
   };
@@ -47,8 +48,9 @@ function App() {
     <Router>
       <div className="min-h-screen bg-background">
         <Routes>
-          {/* Public route for landing page */}
+          {/* Public routes */}
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
           
           {/* Protected routes */}
           <Route 
