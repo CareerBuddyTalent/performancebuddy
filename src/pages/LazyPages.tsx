@@ -12,6 +12,7 @@ export const OKRAlignment = lazy(() => import('./OKRAlignment'));
 export const UserManagement = lazy(() => import('./UserManagement'));
 export const CompanyManagement = lazy(() => import('./CompanyManagement'));
 export const ReviewTemplates = lazy(() => import('./ReviewTemplates'));
+export const Surveys = lazy(() => import('./Surveys'));
 export const Settings = lazy(() => import('./Settings'));
 export const TestingDashboard = lazy(() => import('./TestingDashboard'));
 export const NotFound = lazy(() => import('./NotFound'));

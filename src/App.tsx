@@ -27,6 +27,7 @@ import {
   UserManagement,
   CompanyManagement,
   ReviewTemplates,
+  Surveys,
   Settings,
   TestingDashboard,
   NotFound
@@ -68,6 +69,7 @@ function App() {
                   <Route path="okrs" element={<OKRs />} />
                   <Route path="okrs/alignment" element={<OKRAlignment />} />
                   <Route path="skills" element={<Skills />} />
+                  <Route path="surveys" element={<Surveys />} />
                   <Route
                     path="users"
                     element={
