@@ -1,3 +1,4 @@
+
 export type UserRole = 'employee' | 'manager' | 'admin';
 
 export interface Company {
@@ -13,6 +14,7 @@ export interface User {
   email: string;
   role: UserRole;
   profilePicture?: string;
+  avatar?: string; // Adding for compatibility
   department?: string;
   position?: string;
   manager?: string;
@@ -21,4 +23,6 @@ export interface User {
   companyId?: string; // Reference to the company
   company?: Company; // Company object
   bio?: string;
+  location?: string; // Adding missing location property
+  joinDate?: Date; // Adding missing joinDate property
 }

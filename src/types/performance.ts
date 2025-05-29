@@ -1,6 +1,3 @@
-
-import { ImprovementPlan } from './development';
-
 export interface PerformanceParameter {
   id: string;
   name: string;
@@ -14,23 +11,9 @@ export interface ReviewCycle {
   startDate: Date;
   endDate: Date;
   status: 'draft' | 'active' | 'completed';
-  parameters: ReviewParameter[]; // Updated from string[] to ReviewParameter[]
+  parameters: string[]; // ids of parameters
   type: 'weekly' | 'monthly' | 'quarterly' | 'bi-annual' | 'annual';
   purpose: 'goal' | 'feedback' | 'performance';
-  templateIds?: string[]; // Reference to templates used in this cycle
-  weightings?: {
-    [key: string]: number; // Category to weighting mapping (adds up to 100)
-  };
-}
-
-export interface ReviewParameter {
-  id: string;
-  name: string;
-  description?: string;
-  category: 'technical' | 'soft' | 'performance' | 'goals' | 'custom';
-  required: boolean;
-  maxScore: number;
-  weight?: number; // percentage weight in the overall review score
 }
 
 export interface PerformanceReview {
@@ -38,7 +21,24 @@ export interface PerformanceReview {
   employeeId: string;
   reviewerId: string;
   cycleId: string;
-  templateId?: string; // Reference to the template used
+  status: 'not_started' | 'in_progress' | 'submitted' | 'acknowledged';
+  ratings: {
+    parameterId: string;
+    score: number;
+    comment: string;
+  }[];
+  overallRating: number;
+  feedback: string;
+  createdAt: Date;
+  updatedAt: Date;
+  improvementPlan?: ImprovementPlan; // Optional improvement plan
+}
+
+export interface Review {
+  id: string;
+  employeeId: string;
+  reviewerId: string;
+  cycleId: string;
   status: 'not_started' | 'in_progress' | 'submitted' | 'acknowledged';
   ratings: {
     parameterId: string;
@@ -50,4 +50,26 @@ export interface PerformanceReview {
   createdAt: Date;
   updatedAt: Date;
   improvementPlan?: ImprovementPlan;
+}
+
+export interface ImprovementPlan {
+  id: string;
+  reviewId: string;
+  employeeId: string;
+  managerId: string;
+  startDate: Date;
+  endDate: Date;
+  status: 'active' | 'completed' | 'failed';
+  objectives: {
+    id: string;
+    description: string;
+    success_criteria: string;
+    status: 'not_started' | 'in_progress' | 'completed';
+  }[];
+  meetings: {
+    id: string;
+    date: Date;
+    notes: string;
+    attendees: string[]; // User IDs
+  }[];
 }

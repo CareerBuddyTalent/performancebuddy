@@ -29,19 +29,24 @@ export default function UserProfile({
     .join('')
     .toUpperCase();
 
+  // Use avatar or profilePicture, whichever is available
+  const avatarUrl = user.avatar || user.profilePicture;
+
   return (
     <div className="md:w-1/3">
       <Card>
         <CardHeader className="text-center">
           <Avatar className="h-24 w-24 mx-auto mb-4">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={avatarUrl} alt={user.name} />
             <AvatarFallback className="text-lg">{initials}</AvatarFallback>
           </Avatar>
           <CardTitle className="text-xl">{user.name}</CardTitle>
           <CardDescription>{user.role}</CardDescription>
-          <Badge variant="outline" className="w-fit mx-auto">
-            {user.department}
-          </Badge>
+          {user.department && (
+            <Badge variant="outline" className="w-fit mx-auto">
+              {user.department}
+            </Badge>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2 text-sm">
@@ -58,7 +63,7 @@ export default function UserProfile({
           
           <div className="flex items-center space-x-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>Joined {new Date(user.joinDate || Date.now()).toLocaleDateString()}</span>
+            <span>Joined {user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'Recently'}</span>
           </div>
           
           <div className="grid grid-cols-2 gap-4 pt-4">
