@@ -4,12 +4,12 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
-import RoleGuard from "@/components/layout/RoleGuard";
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { DashboardSkeleton } from "@/components/ui/optimized-skeleton";
+import { Outlet } from 'react-router-dom';
 
 interface PageLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
   allowedRoles?: string[];
 }
 
@@ -34,28 +34,26 @@ export default function PageLayout({ children, allowedRoles = ['admin', 'manager
 
   if (!isAuthenticated) {
     return (
-      <RoleGuard allowedRoles={allowedRoles}>
-        <div className="flex min-h-screen w-full items-center justify-center bg-background">
-          <div className="flex flex-col items-center space-y-4">
-            <p className="text-muted-foreground">Authentication required. Redirecting to login...</p>
-          </div>
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center space-y-4">
+          <p className="text-muted-foreground">Authentication required. Redirecting to login...</p>
         </div>
-      </RoleGuard>
+      </div>
     );
   }
 
   return (
-    <RoleGuard allowedRoles={allowedRoles}>
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <div className="flex flex-1 flex-col">
-            <AppHeader />
-            <main className="flex-1 p-6">{children}</main>
-            <Footer />
-          </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        <AppSidebar />
+        <div className="flex flex-1 flex-col">
+          <AppHeader />
+          <main className="flex-1 p-6">
+            {children || <Outlet />}
+          </main>
+          <Footer />
         </div>
-      </SidebarProvider>
-    </RoleGuard>
+      </div>
+    </SidebarProvider>
   );
 }
