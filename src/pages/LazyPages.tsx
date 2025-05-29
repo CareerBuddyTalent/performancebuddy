@@ -21,3 +21,6 @@ export const NotFound = lazy(() => import('./NotFound'));
 export const Learning = lazy(() => import('./Learning'));
 export const Workflows = lazy(() => import('./Workflows'));
 export const Integrations = lazy(() => import('./Integrations'));
+
+// Phase 5: Enterprise Features
+export const Enterprise = lazy(() => import('./Enterprise'));

@@ -1,22 +1,29 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Toaster } from 'sonner';
 
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { Suspense } from "react";
-import { Toaster } from "sonner";
-import { SupabaseAuthProvider } from "@/context/SupabaseAuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
-import { NotificationProvider } from "@/components/notifications/NotificationSystem";
-import { ReminderSystem } from "@/components/automation/ReminderSystem";
-import { SecurityProvider } from "@/components/security/SecurityProvider";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import PageLayout from "@/components/PageLayout";
-import Index from "@/pages/Index";
-import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
-import ForgotPassword from "@/pages/ForgotPassword";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { GlobalLoading } from "@/components/ui/global-loading";
+// Import contexts
+import { SupabaseAuthProvider } from '@/context/SupabaseAuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { CompanyProvider } from '@/context/CompanyContext';
+import { NotificationProvider } from '@/context/NotificationContext';
+import { SidebarProvider } from '@/context/SidebarContext';
+import { SecurityProvider } from '@/components/security/SecurityProvider';
+import { AnalyticsProvider } from '@/context/AnalyticsContext';
 
-// Lazy load pages
+// Import components
+import PageLayout from '@/components/layout/PageLayout';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import RoleGuard from '@/components/layout/RoleGuard';
+import GlobalLoading from '@/components/ui/global-loading';
+
+// Import pages
+import Index from './pages/Index';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ForgotPassword from './pages/ForgotPassword';
+import Collaboration from './pages/Collaboration';
 import {
   Dashboard,
   Home,
@@ -34,109 +41,114 @@ import {
   NotFound,
   Learning,
   Workflows,
-  Integrations
-} from "@/pages/LazyPages";
-
-// Import the collaboration page
-import Collaboration from "@/pages/Collaboration";
+  Integrations,
+  Enterprise
+} from './pages/LazyPages';
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
+    <Router>
+      <ErrorBoundary>
         <SupabaseAuthProvider>
           <SecurityProvider>
-            <NotificationProvider>
-              <Router>
-                <ReminderSystem />
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  
-                  {/* Protected routes with lazy loading */}
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <PageLayout>
-                          <Suspense fallback={<GlobalLoading message="Loading page..." />}>
-                            <Outlet />
-                          </Suspense>
-                        </PageLayout>
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="home" element={<Home />} />
-                    <Route path="performance" element={<Performance />} />
-                    <Route path="performance/reviews" element={<Reviews />} />
-                    <Route path="performance/templates" element={<ReviewTemplates />} />
-                    <Route path="okrs" element={<OKRs />} />
-                    <Route path="okrs/alignment" element={<OKRAlignment />} />
-                    <Route path="collaboration" element={<Collaboration />} />
-                    <Route path="skills" element={<Skills />} />
-                    <Route path="surveys" element={<Surveys />} />
-                    <Route path="learning" element={<Learning />} />
-                    <Route 
-                      path="workflows" 
-                      element={
-                        <ProtectedRoute requiredRoles={["admin", "manager"]}>
-                          <Workflows />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="integrations" 
-                      element={
-                        <ProtectedRoute requiredRoles={["admin"]}>
-                          <Integrations />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route
-                      path="users"
-                      element={
-                        <ProtectedRoute requiredRoles={["admin", "manager"]}>
-                          <UserManagement />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="companies"
-                      element={
-                        <ProtectedRoute requiredRoles={["admin"]}>
-                          <CompanyManagement />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="settings" element={<Settings />} />
-                    <Route 
-                      path="testing" 
-                      element={
-                        <ProtectedRoute requiredRoles={["admin"]}>
-                          <TestingDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </Route>
-                  
-                  {/* 404 page */}
-                  <Route path="*" element={
-                    <Suspense fallback={<GlobalLoading message="Loading..." />}>
-                      <NotFound />
-                    </Suspense>
-                  } />
-                </Routes>
-              </Router>
-              <Toaster position="top-right" />
-            </NotificationProvider>
+            <CompanyProvider>
+              <NotificationProvider>
+                <ThemeProvider>
+                  <AnalyticsProvider>
+                    <div className="min-h-screen bg-background">
+                      <Routes>
+                        {/* Public routes */}
+                        <Route path="/" element={<Index />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                        {/* Protected routes with layout */}
+                        <Route element={
+                          <ProtectedRoute>
+                            <SidebarProvider>
+                              <PageLayout />
+                            </SidebarProvider>
+                          </ProtectedRoute>
+                        }>
+                          {/* Main routes */}
+                          <Route path="/home" element={<Home />} />
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          
+                          {/* Work routes */}
+                          <Route path="/performance" element={<Performance />} />
+                          <Route path="/performance/reviews" element={<Reviews />} />
+                          <Route path="/okrs" element={<OKRs />} />
+                          <Route path="/okr-alignment" element={<OKRAlignment />} />
+                          <Route path="/collaboration" element={<Collaboration />} />
+                          <Route path="/skills" element={<Skills />} />
+                          <Route path="/surveys" element={<Surveys />} />
+                          
+                          {/* Advanced features */}
+                          <Route path="/learning" element={
+                            <RoleGuard allowedRoles={['employee', 'manager', 'admin']}>
+                              <Learning />
+                            </RoleGuard>
+                          } />
+                          <Route path="/workflows" element={
+                            <RoleGuard allowedRoles={['manager', 'admin']}>
+                              <Workflows />
+                            </RoleGuard>
+                          } />
+                          <Route path="/integrations" element={
+                            <RoleGuard allowedRoles={['admin']}>
+                              <Integrations />
+                            </RoleGuard>
+                          } />
+                          
+                          {/* Enterprise features */}
+                          <Route path="/enterprise" element={
+                            <RoleGuard allowedRoles={['admin']}>
+                              <Enterprise />
+                            </RoleGuard>
+                          } />
+                          
+                          {/* Admin routes */}
+                          <Route path="/users" element={
+                            <RoleGuard allowedRoles={['admin', 'manager']}>
+                              <UserManagement />
+                            </RoleGuard>
+                          } />
+                          <Route path="/companies" element={
+                            <RoleGuard allowedRoles={['admin']}>
+                              <CompanyManagement />
+                            </RoleGuard>
+                          } />
+                          <Route path="/review-templates" element={
+                            <RoleGuard allowedRoles={['admin', 'manager']}>
+                              <ReviewTemplates />
+                            </RoleGuard>
+                          } />
+                          <Route path="/testing" element={
+                            <RoleGuard allowedRoles={['admin']}>
+                              <TestingDashboard />
+                            </RoleGuard>
+                          } />
+                          
+                          {/* Settings */}
+                          <Route path="/settings" element={<Settings />} />
+                        </Route>
+
+                        {/* 404 route */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                      
+                      <Toaster />
+                      <GlobalLoading />
+                    </div>
+                  </AnalyticsProvider>
+                </ThemeProvider>
+              </NotificationProvider>
+            </CompanyProvider>
           </SecurityProvider>
         </SupabaseAuthProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </Router>
   );
 }
 

@@ -16,7 +16,8 @@ import {
   Heart,
   Zap,
   Puzzle,
-  GraduationCap
+  GraduationCap,
+  Shield
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -24,7 +25,7 @@ export interface NavigationItem {
   label: string;
   href: string;
   icon: any;
-  group: 'main' | 'work' | 'admin' | 'advanced';
+  group: 'main' | 'work' | 'admin' | 'advanced' | 'enterprise';
   roles: string[];
   badge?: string;
 }
@@ -119,6 +120,14 @@ export const navigationItems: NavigationItem[] = [
     roles: ['admin']
   },
   {
+    id: 'enterprise',
+    label: 'Enterprise',
+    href: '/enterprise',
+    icon: Shield,
+    group: 'enterprise',
+    roles: ['admin']
+  },
+  {
     id: 'users',
     label: 'Users',
     href: '/users',
@@ -151,6 +160,7 @@ export function getNavigationItemsByGroup(items: NavigationItem[], userRole: str
     mainNavItems: filteredItems.filter(item => item.group === 'main'),
     workNavItems: filteredItems.filter(item => item.group === 'work'),
     advancedNavItems: filteredItems.filter(item => item.group === 'advanced'),
+    enterpriseNavItems: filteredItems.filter(item => item.group === 'enterprise'),
     adminNavItems: filteredItems.filter(item => item.group === 'admin')
   };
 }
