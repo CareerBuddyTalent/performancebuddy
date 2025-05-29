@@ -2,71 +2,66 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface AuditEvent {
-  action: string;
-  resource?: string;
-  resourceId?: string;
+interface SecurityEvent {
+  action: 'login' | 'logout' | 'signup' | 'password_reset' | 'failed_login' | 'suspicious_activity';
+  success: boolean;
   metadata?: Record<string, any>;
 }
 
 export function useSecurityAudit() {
-  const logSecurityEvent = useCallback(async (event: AuditEvent) => {
+  const logAuthEvent = useCallback(async (action: SecurityEvent['action'], success: boolean, metadata?: Record<string, any>) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) return;
+      // Only log in production or when explicitly enabled
+      if (process.env.NODE_ENV === 'development' && !import.meta.env.VITE_ENABLE_AUDIT_LOGS) {
+        return;
+      }
 
-      // In production, this should go to a dedicated audit log table
-      const auditEntry = {
-        user_id: user.id,
-        action: event.action,
-        table_name: event.resource || 'unknown',
-        record_id: event.resourceId,
-        new_values: event.metadata,
-        user_agent: navigator.userAgent,
-        ip_address: null, // This would be captured server-side
-      };
+      const { error } = await supabase
+        .from('audit_log')
+        .insert({
+          action,
+          table_name: 'auth',
+          record_id: null,
+          user_id: (await supabase.auth.getUser()).data.user?.id || 'anonymous',
+          old_values: null,
+          new_values: { success, ...metadata },
+          user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
+        });
 
-      await supabase.from('audit_log').insert(auditEntry);
-    } catch (error) {
-      // Silently fail to avoid disrupting user experience
-      console.error('Failed to log security event:', error);
+      if (error) {
+        console.error('Failed to log security event:', error);
+      }
+    } catch (err) {
+      console.error('Security audit logging failed:', err);
     }
   }, []);
 
-  const logAuthEvent = useCallback(async (action: 'login' | 'logout' | 'signup' | 'password_reset', success: boolean) => {
-    await logSecurityEvent({
-      action: `auth_${action}`,
-      resource: 'authentication',
-      metadata: { success, timestamp: new Date().toISOString() }
-    });
-  }, [logSecurityEvent]);
+  const logDataAccess = useCallback(async (tableName: string, action: string, recordId?: string) => {
+    try {
+      if (process.env.NODE_ENV === 'development') return;
 
-  const logPermissionEvent = useCallback(async (action: string, resource: string, granted: boolean) => {
-    await logSecurityEvent({
-      action: 'permission_check',
-      resource,
-      metadata: { 
-        permission_action: action, 
-        granted, 
-        timestamp: new Date().toISOString() 
+      const { error } = await supabase
+        .from('audit_log')
+        .insert({
+          action: `data_${action}`,
+          table_name: tableName,
+          record_id: recordId || null,
+          user_id: (await supabase.auth.getUser()).data.user?.id || 'anonymous',
+          old_values: null,
+          new_values: { timestamp: new Date().toISOString() },
+          user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
+        });
+
+      if (error) {
+        console.error('Failed to log data access:', error);
       }
-    });
-  }, [logSecurityEvent]);
-
-  const logDataAccess = useCallback(async (resource: string, resourceId: string, action: 'read' | 'write' | 'delete') => {
-    await logSecurityEvent({
-      action: `data_${action}`,
-      resource,
-      resourceId,
-      metadata: { timestamp: new Date().toISOString() }
-    });
-  }, [logSecurityEvent]);
+    } catch (err) {
+      console.error('Data access logging failed:', err);
+    }
+  }, []);
 
   return {
-    logSecurityEvent,
     logAuthEvent,
-    logPermissionEvent,
-    logDataAccess
+    logDataAccess,
   };
 }

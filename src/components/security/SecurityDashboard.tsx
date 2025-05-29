@@ -1,188 +1,169 @@
 
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Shield, AlertTriangle, CheckCircle, Users, Lock, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { AlertTriangle, Shield, Users, Activity } from 'lucide-react';
+
+interface SecurityMetric {
+  id: string;
+  action: string;
+  user_id: string;
+  created_at: string;
+  new_values: any;
+}
 
 export function SecurityDashboard() {
-  const securityMetrics = [
-    { label: "Active Sessions", value: 156, icon: Activity, status: "normal" },
-    { label: "Failed Login Attempts", value: 12, icon: AlertTriangle, status: "warning" },
-    { label: "SSO Enabled Users", value: 89, icon: CheckCircle, status: "good" },
-    { label: "2FA Enabled", value: 67, icon: Shield, status: "normal" }
-  ];
+  const { user } = useSupabaseAuth();
+  const [auditLogs, setAuditLogs] = useState<SecurityMetric[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalLogins: 0,
+    failedLogins: 0,
+    activeUsers: 0,
+    suspiciousActivity: 0,
+  });
 
-  const securityScore = 87;
-  
-  const recentAlerts = [
-    { id: 1, type: "warning", message: "Multiple failed login attempts detected", time: "2 minutes ago" },
-    { id: 2, type: "info", message: "New SSO provider configured", time: "1 hour ago" },
-    { id: 3, type: "success", message: "Security policy updated successfully", time: "3 hours ago" },
-    { id: 4, type: "warning", message: "Unusual access pattern detected", time: "5 hours ago" }
-  ];
+  useEffect(() => {
+    if (user?.role !== 'admin') return;
 
-  const getAlertBadge = (type: string) => {
-    const variants = {
-      warning: "secondary",
-      info: "outline",
-      success: "default",
-      error: "destructive"
-    } as const;
-    
-    return <Badge variant={variants[type as keyof typeof variants] || "outline"}>{type}</Badge>;
-  };
+    const fetchSecurityData = async () => {
+      try {
+        // Fetch recent audit logs
+        const { data: logs, error: logsError } = await supabase
+          .from('audit_log')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (logsError) throw logsError;
+        setAuditLogs(logs || []);
+
+        // Calculate security stats
+        const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        
+        const loginLogs = logs?.filter(log => 
+          log.action === 'login' && log.created_at > last24Hours
+        ) || [];
+        
+        const failedLogins = loginLogs.filter(log => 
+          !log.new_values?.success
+        ).length;
+
+        setStats({
+          totalLogins: loginLogs.length,
+          failedLogins,
+          activeUsers: new Set(loginLogs.map(log => log.user_id)).size,
+          suspiciousActivity: failedLogins > 10 ? 1 : 0,
+        });
+      } catch (error) {
+        console.error('Failed to fetch security data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSecurityData();
+  }, [user]);
+
+  if (user?.role !== 'admin') {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="w-5 h-5" />
+            <span>Access denied. Admin privileges required.</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div>Loading security dashboard...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {securityMetrics.map((metric, index) => (
-          <Card key={index}>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <metric.icon className="h-4 w-4 text-blue-500" />
-                <p className="text-sm font-medium">{metric.label}</p>
-              </div>
-              <p className="text-2xl font-bold">{metric.value}</p>
-              <Badge variant={metric.status === 'good' ? 'default' : metric.status === 'warning' ? 'secondary' : 'outline'} className="mt-1">
-                {metric.status}
-              </Badge>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Security Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              Security Score
-            </CardTitle>
-            <CardDescription>
-              Overall security posture assessment
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Progress value={securityScore} className="flex-1" />
-              <span className="text-2xl font-bold">{securityScore}%</span>
-            </div>
-            <div className="grid gap-2 text-sm">
-              <div className="flex justify-between">
-                <span>Authentication Security</span>
-                <span className="font-medium">95%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Data Protection</span>
-                <span className="font-medium">92%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Access Controls</span>
-                <span className="font-medium">88%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Compliance</span>
-                <span className="font-medium">73%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Security Alerts
-            </CardTitle>
-            <CardDescription>
-              Recent security events and notifications
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Logins (24h)</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentAlerts.map((alert) => (
-                <div key={alert.id} className="flex items-start justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      {getAlertBadge(alert.type)}
-                    </div>
-                    <p className="text-sm">{alert.message}</p>
-                    <p className="text-xs text-muted-foreground">{alert.time}</p>
-                  </div>
+            <div className="text-2xl font-bold">{stats.totalLogins}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Failed Logins</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{stats.failedLogins}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+            <Activity className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeUsers}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Security Alerts</CardTitle>
+            <Shield className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.suspiciousActivity}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Security Events */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Security Events</CardTitle>
+          <CardDescription>
+            Audit log of authentication and security-related activities
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {auditLogs.slice(0, 10).map((log) => (
+              <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge variant={log.new_values?.success ? "default" : "destructive"}>
+                    {log.action}
+                  </Badge>
+                  <span className="text-sm text-gray-600">
+                    User: {log.user_id === 'anonymous' ? 'Anonymous' : log.user_id.slice(0, 8)}...
+                  </span>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Session Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Active Sessions</span>
-                <span className="font-medium">156</span>
+                <div className="text-sm text-gray-500">
+                  {new Date(log.created_at).toLocaleString()}
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Idle Sessions</span>
-                <span className="font-medium">23</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Expired Sessions</span>
-                <span className="font-medium">8</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Access Patterns</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Peak Hours</span>
-                <span className="font-medium">9AM - 5PM</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Geographic Spread</span>
-                <span className="font-medium">12 countries</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Mobile Access</span>
-                <span className="font-medium">34%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Compliance Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span>GDPR</span>
-                <Badge variant="default">Compliant</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>SOX</span>
-                <Badge variant="secondary">Partial</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>ISO 27001</span>
-                <Badge variant="default">Compliant</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

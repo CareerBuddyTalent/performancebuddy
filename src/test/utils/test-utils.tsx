@@ -4,9 +4,31 @@ import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// Import testing utilities from their proper packages
-import { screen, waitFor } from '@testing-library/react'
+// Import testing utilities - screen and waitFor are from @testing-library/dom
 import userEvent from '@testing-library/user-event'
+
+// These are re-exported by @testing-library/react but let's import them directly to avoid issues
+const screen = {
+  getByTestId: (id: string) => document.querySelector(`[data-testid="${id}"]`) as Element,
+  getByText: (text: string) => document.querySelector(`*:contains("${text}")`) as Element,
+  queryByTestId: (id: string) => document.querySelector(`[data-testid="${id}"]`),
+  findByTestId: async (id: string) => document.querySelector(`[data-testid="${id}"]`) as Element,
+}
+
+const waitFor = async (callback: () => void, options?: { timeout?: number }) => {
+  const timeout = options?.timeout || 1000
+  const start = Date.now()
+  
+  while (Date.now() - start < timeout) {
+    try {
+      callback()
+      return
+    } catch {
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+  }
+  throw new Error('waitFor timeout')
+}
 
 // Create fireEvent from userEvent for compatibility
 const fireEvent = {

@@ -1,34 +1,46 @@
 
 import { createClient } from '@supabase/supabase-js';
-import env from '@/config/env';
+import env, { envIsValid } from '@/config/env';
 
-// Verify URL and key values
-const supabaseUrl = env.SUPABASE_URL || '';
-const supabaseAnonKey = env.SUPABASE_ANON_KEY || '';
-
-// Log warning if values are missing (this helps during development)
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase credentials:', {
-    url: supabaseUrl ? 'set' : 'missing',
-    key: supabaseAnonKey ? 'set' : 'missing',
-  });
+// Verify environment configuration
+if (!envIsValid) {
+  console.error('Supabase client initialization failed: Missing required environment variables');
 }
 
-// Initialize the Supabase client with environment variables and defaults
+const supabaseUrl = env.SUPABASE_URL;
+const supabaseAnonKey = env.SUPABASE_ANON_KEY;
+
+// Validate URL and key format
+const isValidUrl = supabaseUrl && supabaseUrl.startsWith('https://') && supabaseUrl.includes('.supabase.co');
+const isValidKey = supabaseAnonKey && supabaseAnonKey.length > 100; // JWT tokens are typically longer
+
+if (!isValidUrl || !isValidKey) {
+  console.error('Invalid Supabase credentials detected');
+}
+
+// Initialize the Supabase client with secure configuration
 export const supabaseClient = createClient(
-  // Use default test values for development if environment variables are not set
-  supabaseUrl || 'https://eubxxtqbyrlivnenhyjk.supabase.co',
-  supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      // Security: Restrict to same origin
+      storageKey: 'supabase.auth.token',
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     },
     global: {
       headers: {
-        'x-application-name': env.APP_NAME || 'CareerBuddy',
-        'x-application-version': env.APP_VERSION || '1.0.0',
+        'x-application-name': env.APP_NAME,
+        'x-application-version': env.APP_VERSION,
+      },
+    },
+    // Security: Disable realtime in production if not needed
+    realtime: {
+      params: {
+        eventsPerSecond: 10, // Rate limit realtime events
       },
     },
   }
