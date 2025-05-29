@@ -8,9 +8,12 @@ import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
 import { DashboardSkeleton } from "@/components/ui/optimized-skeleton";
 
 export default function PageLayout() {
-  const { isLoading, isAuthenticated } = useSupabaseAuth();
+  const { isLoading, isAuthenticated, user } = useSupabaseAuth();
+
+  console.log('PageLayout render - Loading:', isLoading, 'Authenticated:', isAuthenticated, 'User:', !!user);
 
   if (isLoading) {
+    console.log('PageLayout: Showing loading state');
     return (
       <div className="flex min-h-screen w-full bg-background">
         <div className="w-64 border-r bg-card">
@@ -27,6 +30,7 @@ export default function PageLayout() {
   }
 
   if (!isAuthenticated) {
+    console.log('PageLayout: User not authenticated, showing auth required message');
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
@@ -36,6 +40,7 @@ export default function PageLayout() {
     );
   }
 
+  console.log('PageLayout: Rendering authenticated layout');
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">

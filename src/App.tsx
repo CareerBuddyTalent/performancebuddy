@@ -34,13 +34,22 @@ import {
 function App() {
   const { user, isLoading, isAuthenticated } = useSupabaseAuth();
 
+  console.log('App render - Loading:', isLoading, 'Authenticated:', isAuthenticated, 'User:', !!user);
+
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    console.log('ProtectedRoute check - Loading:', isLoading, 'Authenticated:', isAuthenticated);
+    
     if (isLoading) {
+      console.log('ProtectedRoute: Showing loading state');
       return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
     }
+    
     if (!isAuthenticated) {
+      console.log('ProtectedRoute: Redirecting to login');
       return <Navigate to="/login" replace />;
     }
+    
+    console.log('ProtectedRoute: Rendering protected content');
     return <>{children}</>;
   };
 

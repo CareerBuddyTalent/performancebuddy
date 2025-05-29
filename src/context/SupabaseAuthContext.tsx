@@ -28,30 +28,33 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const convertSupabaseUser = useCallback(async (supabaseUser: SupabaseUser): Promise<User> => {
     try {
-      // Get user profile from profiles table
+      console.log('Converting Supabase user:', supabaseUser.id);
+      
+      // Get user profile from profiles table with better error handling
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
+      if (profileError) {
+        console.warn('Profile fetch error (non-blocking):', profileError);
       }
 
-      // Get user role from user_roles table
+      // Get user role from user_roles table with better error handling
       const { data: userRole, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', supabaseUser.id)
-        .single();
+        .maybeSingle();
 
-      if (roleError && roleError.code !== 'PGRST116') {
-        console.error('Error fetching role:', roleError);
+      if (roleError) {
+        console.warn('Role fetch error (non-blocking):', roleError);
       }
 
-      // Create or update profile if it doesn't exist
+      // Create profile if it doesn't exist (graceful fallback)
       if (!profile) {
+        console.log('Creating missing profile for user:', supabaseUser.id);
         const newProfile = {
           id: supabaseUser.id,
           email: supabaseUser.email || '',
@@ -60,15 +63,18 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         const { error: insertError } = await supabase
           .from('profiles')
-          .insert(newProfile);
+          .insert(newProfile)
+          .select()
+          .single();
 
         if (insertError) {
-          console.error('Error creating profile:', insertError);
+          console.warn('Profile creation failed (non-blocking):', insertError);
         }
       }
 
-      // Create default role if it doesn't exist
+      // Create default role if it doesn't exist (graceful fallback)
       if (!userRole) {
+        console.log('Creating default role for user:', supabaseUser.id);
         const { error: roleInsertError } = await supabase
           .from('user_roles')
           .insert({
@@ -77,27 +83,36 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
           });
 
         if (roleInsertError) {
-          console.error('Error creating user role:', roleInsertError);
+          console.warn('Role creation failed (non-blocking):', roleInsertError);
         }
       }
 
-      return {
+      // Always return a valid user object, even if some data is missing
+      const convertedUser: User = {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
         name: profile?.name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
         role: (userRole?.role as 'admin' | 'manager' | 'employee') || 'employee',
         profilePicture: profile?.avatar_url || profile?.profile_picture
       };
+
+      console.log('Successfully converted user:', convertedUser.id, 'with role:', convertedUser.role);
+      return convertedUser;
+      
     } catch (error) {
-      console.error('Error in convertSupabaseUser:', error);
-      // Return basic user info as fallback
-      return {
+      console.error('Error in convertSupabaseUser (using fallback):', error);
+      
+      // Return basic user info as fallback - this ensures authentication still works
+      const fallbackUser: User = {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
         name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
         role: 'employee' as const,
         profilePicture: undefined
       };
+      
+      console.log('Using fallback user data:', fallbackUser);
+      return fallbackUser;
     }
   }, []);
 
@@ -216,6 +231,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const logout = useCallback(async () => {
     try {
+      console.log('Logging out user');
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Logout error:', error);
@@ -229,6 +245,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const refreshUser = useCallback(async () => {
     try {
+      console.log('Refreshing user data');
       const { data: { user: supabaseUser } } = await supabase.auth.getUser();
       if (supabaseUser) {
         const convertedUser = await convertSupabaseUser(supabaseUser);
@@ -241,74 +258,127 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   useEffect(() => {
     let mounted = true;
+    console.log('Setting up auth state listener');
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
+        console.log('Auth state change:', event, 'User ID:', session?.user?.id);
         
         if (!mounted) return;
         
         setSession(session);
         
         if (session?.user) {
-          // Use setTimeout to prevent potential deadlocks
+          console.log('Valid session found, converting user');
+          // Use setTimeout to prevent potential deadlocks and allow state to settle
           setTimeout(async () => {
             if (!mounted) return;
             
             try {
               const convertedUser = await convertSupabaseUser(session.user);
               if (mounted) {
+                console.log('Setting converted user:', convertedUser.id);
                 setUser(convertedUser);
               }
             } catch (error) {
-              console.error('Error converting user:', error);
+              console.error('Error converting user (setting fallback):', error);
               if (mounted) {
-                setUser(null);
+                // Set a basic user object to maintain authentication state
+                const fallbackUser: User = {
+                  id: session.user.id,
+                  email: session.user.email || '',
+                  name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                  role: 'employee' as const,
+                  profilePicture: undefined
+                };
+                setUser(fallbackUser);
+              }
+            } finally {
+              if (mounted) {
+                setIsLoading(false);
               }
             }
-          }, 0);
+          }, 100); // Small delay to allow auth state to settle
         } else {
+          console.log('No session found, clearing user');
           setUser(null);
-        }
-        
-        if (mounted) {
-          setIsLoading(false);
+          if (mounted) {
+            setIsLoading(false);
+          }
         }
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id || 'No session');
       if (!mounted) return;
       
       if (session?.user) {
+        setSession(session);
         convertSupabaseUser(session.user)
-          .then(user => mounted && setUser(user))
-          .catch(() => mounted && setUser(null));
-      }
-      if (mounted) {
-        setIsLoading(false);
+          .then(user => {
+            if (mounted) {
+              console.log('Initial session user set:', user.id);
+              setUser(user);
+            }
+          })
+          .catch(error => {
+            console.error('Initial session conversion failed (using fallback):', error);
+            if (mounted) {
+              // Set fallback user to maintain auth state
+              const fallbackUser: User = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+                role: 'employee' as const,
+                profilePicture: undefined
+              };
+              setUser(fallbackUser);
+            }
+          })
+          .finally(() => {
+            if (mounted) {
+              setIsLoading(false);
+            }
+          });
+      } else {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     });
 
     return () => {
+      console.log('Cleaning up auth listener');
       mounted = false;
       subscription.unsubscribe();
     };
   }, [convertSupabaseUser]);
 
+  // Improved isAuthenticated logic - prioritize session over user object
+  const isAuthenticated = useMemo(() => {
+    const hasValidSession = !!session && !!session.user;
+    const hasUserObject = !!user;
+    
+    console.log('Auth state check - Session:', !!session, 'User:', !!user, 'Authenticated:', hasValidSession);
+    
+    // Consider authenticated if we have a valid session, even if user object is still loading
+    return hasValidSession;
+  }, [session, user]);
+
   const value: SupabaseAuthContextType = useMemo(() => ({
     user,
     isLoading,
-    isAuthenticated: !!session && !!user,
+    isAuthenticated,
     logout,
     refreshUser,
     login,
     signup,
     resetPassword,
     sessionTimeLeft
-  }), [user, isLoading, session, logout, refreshUser, login, signup, resetPassword, sessionTimeLeft]);
+  }), [user, isLoading, isAuthenticated, logout, refreshUser, login, signup, resetPassword, sessionTimeLeft]);
 
   return (
     <SupabaseAuthContext.Provider value={value}>
