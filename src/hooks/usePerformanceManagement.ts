@@ -52,17 +52,16 @@ export function usePerformanceManagement() {
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create calibration session');
-      return null;
+      throw err;
     }
   };
 
-  // Succession Planning
+  // Succession Plans
   const [successionPlans, setSuccessionPlans] = useState<SuccessionPlan[]>([]);
-
+  
   const fetchSuccessionPlans = async () => {
     if (!user) return;
-
-    setLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('succession_plans')
@@ -76,40 +75,13 @@ export function usePerformanceManagement() {
       setSuccessionPlans(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch succession plans');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createSuccessionPlan = async (planData: Partial<SuccessionPlan>) => {
-    if (!user) return null;
-
-    try {
-      const { data, error } = await supabase
-        .from('succession_plans')
-        .insert({
-          ...planData,
-          created_by: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      await fetchSuccessionPlans();
-      return data;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create succession plan');
-      return null;
     }
   };
 
   // Competency Frameworks
   const [competencyFrameworks, setCompetencyFrameworks] = useState<CompetencyFramework[]>([]);
-
+  
   const fetchCompetencyFrameworks = async () => {
-    if (!user) return;
-
-    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('competency_frameworks')
@@ -124,18 +96,15 @@ export function usePerformanceManagement() {
       setCompetencyFrameworks(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch competency frameworks');
-    } finally {
-      setLoading(false);
     }
   };
 
   // PIP Workflows
   const [pipWorkflows, setPipWorkflows] = useState<PIPWorkflow[]>([]);
-
+  
   const fetchPipWorkflows = async () => {
     if (!user) return;
-
-    setLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('pip_workflows')
@@ -149,18 +118,15 @@ export function usePerformanceManagement() {
       setPipWorkflows(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch PIP workflows');
-    } finally {
-      setLoading(false);
     }
   };
 
   // Review Orchestrations
   const [reviewOrchestrations, setReviewOrchestrations] = useState<ReviewOrchestration[]>([]);
-
+  
   const fetchReviewOrchestrations = async () => {
     if (!user) return;
-
-    setLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('review_orchestrations')
@@ -174,8 +140,6 @@ export function usePerformanceManagement() {
       setReviewOrchestrations(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch review orchestrations');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -190,30 +154,20 @@ export function usePerformanceManagement() {
   }, [user]);
 
   return {
+    calibrationSessions,
+    successionPlans,
+    competencyFrameworks,
+    pipWorkflows,
+    reviewOrchestrations,
     loading,
     error,
-    setError,
-    
-    // Calibration
-    calibrationSessions,
-    fetchCalibrationSessions,
     createCalibrationSession,
-    
-    // Succession Planning
-    successionPlans,
-    fetchSuccessionPlans,
-    createSuccessionPlan,
-    
-    // Competency Frameworks
-    competencyFrameworks,
-    fetchCompetencyFrameworks,
-    
-    // PIP Workflows
-    pipWorkflows,
-    fetchPipWorkflows,
-    
-    // Review Orchestrations
-    reviewOrchestrations,
-    fetchReviewOrchestrations,
+    refreshData: () => {
+      fetchCalibrationSessions();
+      fetchSuccessionPlans();
+      fetchCompetencyFrameworks();
+      fetchPipWorkflows();
+      fetchReviewOrchestrations();
+    }
   };
 }
