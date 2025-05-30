@@ -38,21 +38,10 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         .maybeSingle();
 
       if (profileError) {
-        console.warn('Profile fetch error (non-blocking):', profileError);
+        console.warn('Profile fetch error (will create profile):', profileError);
       }
 
-      // Get user role from user_roles table with better error handling
-      const { data: userRole, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', supabaseUser.id)
-        .maybeSingle();
-
-      if (roleError) {
-        console.warn('Role fetch error (non-blocking):', roleError);
-      }
-
-      // Create profile if it doesn't exist (graceful fallback)
+      // Create profile if it doesn't exist
       if (!profile) {
         console.log('Creating missing profile for user:', supabaseUser.id);
         const newProfile = {
@@ -61,18 +50,32 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
           name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User'
         };
 
-        const { error: insertError } = await supabase
+        const { data: createdProfile, error: insertError } = await supabase
           .from('profiles')
           .insert(newProfile)
           .select()
           .single();
 
         if (insertError) {
-          console.warn('Profile creation failed (non-blocking):', insertError);
+          console.error('Profile creation failed:', insertError);
+          // Continue with fallback data instead of failing completely
+        } else {
+          console.log('Profile created successfully:', createdProfile);
         }
       }
 
-      // Create default role if it doesn't exist (graceful fallback)
+      // Get user role from user_roles table
+      const { data: userRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', supabaseUser.id)
+        .maybeSingle();
+
+      if (roleError) {
+        console.warn('Role fetch error (will create default role):', roleError);
+      }
+
+      // Create default role if it doesn't exist
       if (!userRole) {
         console.log('Creating default role for user:', supabaseUser.id);
         const { error: roleInsertError } = await supabase
@@ -83,15 +86,18 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
           });
 
         if (roleInsertError) {
-          console.warn('Role creation failed (non-blocking):', roleInsertError);
+          console.error('Role creation failed:', roleInsertError);
+          // Continue with default role instead of failing
+        } else {
+          console.log('Default role created successfully');
         }
       }
 
-      // Always return a valid user object, even if some data is missing
+      // Always return a valid user object
       const convertedUser: User = {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
-        name: profile?.name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User',
+        name: (profile?.name || supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'User'),
         role: (userRole?.role as 'admin' | 'manager' | 'employee') || 'employee',
         profilePicture: profile?.avatar_url || profile?.profile_picture
       };
@@ -102,7 +108,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
     } catch (error) {
       console.error('Error in convertSupabaseUser (using fallback):', error);
       
-      // Return basic user info as fallback - this ensures authentication still works
+      // Return basic user info as fallback
       const fallbackUser: User = {
         id: supabaseUser.id,
         email: supabaseUser.email || '',
@@ -174,23 +180,27 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
   const signup = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
+      console.log('Starting signup process for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: {
           data: {
             name: name.trim()
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
 
       if (error) {
-        console.error('Signup error:', error);
-        await logAuthEvent('signup', false);
+        console.error('Signup error:', error.message);
+        await logAuthEvent('signup', false, { error: error.message });
         return false;
       }
 
       if (data.user) {
+        console.log('Signup successful for user:', data.user.id);
         await logAuthEvent('signup', true);
         return true;
       }
@@ -198,7 +208,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
       return false;
     } catch (error) {
       console.error('Signup failed:', error);
-      await logAuthEvent('signup', false);
+      await logAuthEvent('signup', false, { error: 'Unexpected error' });
       return false;
     } finally {
       setIsLoading(false);
@@ -299,7 +309,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
                 setIsLoading(false);
               }
             }
-          }, 100); // Small delay to allow auth state to settle
+          }, 100);
         } else {
           console.log('No session found, clearing user');
           setUser(null);
@@ -360,7 +370,6 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Improved isAuthenticated logic - prioritize session over user object
   const isAuthenticated = useMemo(() => {
     const hasValidSession = !!session && !!session.user;
-    const hasUserObject = !!user;
     
     console.log('Auth state check - Session:', !!session, 'User:', !!user, 'Authenticated:', hasValidSession);
     

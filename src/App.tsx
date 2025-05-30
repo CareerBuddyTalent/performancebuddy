@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { useSupabaseAuth } from './context/SupabaseAuthContext';
 import Index from './pages/Index';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import { PageLayout } from './components/PageLayout';
 import { Outlet } from 'react-router-dom';
 
@@ -60,6 +61,7 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
           {/* Protected routes */}
           <Route 
