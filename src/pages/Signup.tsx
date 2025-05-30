@@ -1,13 +1,17 @@
 
 import { Navigate, Link } from "react-router-dom";
 import { useSupabaseAuth } from "@/context/SupabaseAuthContext";
+import { InvitationSignupForm } from "@/components/auth/InvitationSignupForm";
 import { SecureSignupForm } from "@/components/auth/SecureSignupForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSearchParams } from "react-router-dom";
 
 export default function Signup() {
   const { isAuthenticated } = useSupabaseAuth();
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const invitationToken = searchParams.get('token');
 
   // Redirect to dashboard if already signed in
   if (isAuthenticated) {
@@ -25,13 +29,19 @@ export default function Signup() {
               </div>
               <h1 className="text-xl font-semibold text-gray-900">PerformanceBuddy</h1>
             </div>
-            <CardTitle className={`text-center ${isMobile ? 'text-xl' : 'text-2xl'}`}>Create Account</CardTitle>
+            <CardTitle className={`text-center ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+              {invitationToken ? 'Join Your Team' : 'Create Account'}
+            </CardTitle>
             <CardDescription className="text-center text-gray-600">
-              Join thousands of teams improving performance
+              {invitationToken 
+                ? 'Complete your registration to join your team'
+                : 'Join thousands of teams improving performance'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent className={`${isMobile ? 'px-4 pb-6' : 'px-6 pb-8'}`}>
-            <SecureSignupForm />
+            {invitationToken ? <InvitationSignupForm /> : <SecureSignupForm />}
+            
             <div className={`${isMobile ? 'mt-4' : 'mt-6'} text-center space-y-3`}>
               <Link 
                 to="/login" 

@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 
 // Lazy load all pages to reduce initial bundle size
@@ -32,3 +31,6 @@ export const PerformanceManagement = lazy(() => import('./PerformanceManagement'
 export const KPITracking = lazy(() => import('./KPITracking'));
 
 export const AutomatedReviews = lazy(() => import('./AutomatedReviews'));
+
+// Team Invitations Page
+export const TeamInvitations = lazy(() => import('./TeamInvitations'));

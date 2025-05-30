@@ -29,7 +29,8 @@ import {
   Enterprise,
   PerformanceManagement,
   KPITracking,
-  AutomatedReviews
+  AutomatedReviews,
+  TeamInvitations
 } from './pages/LazyPages';
 
 function App() {
@@ -94,6 +95,7 @@ function App() {
             <Route path="users" element={<Suspense fallback={<div>Loading...</div>}><UserManagement /></Suspense>} />
             <Route path="companies" element={<Suspense fallback={<div>Loading...</div>}><CompanyManagement /></Suspense>} />
             <Route path="review-templates" element={<Suspense fallback={<div>Loading...</div>}><ReviewTemplates /></Suspense>} />
+            <Route path="team-invitations" element={<Suspense fallback={<div>Loading...</div>}><TeamInvitations /></Suspense>} />
             <Route path="testing" element={<Suspense fallback={<div>Loading...</div>}><TestingDashboard /></Suspense>} />
             
             <Route path="settings" element={<Suspense fallback={<div>Loading...</div>}><Settings /></Suspense>} />

@@ -774,6 +774,75 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          company_id: string | null
+          created_at: string
+          department: string | null
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_by: string
+          job_position: string | null
+          metadata: Json | null
+          role: Database["public"]["Enums"]["user_role"]
+          status: string
+          team_lead_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invitation_token: string
+          invited_by: string
+          job_position?: string | null
+          metadata?: Json | null
+          role?: Database["public"]["Enums"]["user_role"]
+          status?: string
+          team_lead_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_by?: string
+          job_position?: string | null
+          metadata?: Json | null
+          role?: Database["public"]["Enums"]["user_role"]
+          status?: string
+          team_lead_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_team_lead_id_fkey"
+            columns: ["team_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_import_urls: {
         Row: {
           company_name: string | null
@@ -2205,6 +2274,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: { token: string; user_id: string }
+        Returns: boolean
+      }
+      cleanup_expired_invitations: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      generate_invitation_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_count: {
         Args: { x: number }
         Returns: number
@@ -2257,6 +2338,19 @@ export type Database = {
       user_manages_company: {
         Args: { company_id: string }
         Returns: boolean
+      }
+      validate_invitation_token: {
+        Args: { token: string }
+        Returns: {
+          invitation_id: string
+          email: string
+          role: Database["public"]["Enums"]["user_role"]
+          department: string
+          job_position: string
+          team_lead_id: string
+          company_id: string
+          is_valid: boolean
+        }[]
       }
     }
     Enums: {
