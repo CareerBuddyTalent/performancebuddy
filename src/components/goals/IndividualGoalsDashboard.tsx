@@ -54,7 +54,7 @@ export default function IndividualGoalsDashboard() {
         <div>
           <h1 className="text-3xl font-bold">Goals</h1>
           <p className="text-muted-foreground">
-            Welcome back, {user?.user_metadata?.name || user?.email}! Track your progress and achieve your objectives.
+            Welcome back, {user?.name || user?.email}! Track your progress and achieve your objectives.
           </p>
         </div>
         
