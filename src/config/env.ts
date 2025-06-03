@@ -1,11 +1,11 @@
 
-// Environment configuration with security improvements
-// Use actual Supabase credentials from the integration
+// Environment configuration with proper Vite environment variables support
+// Use environment variables for production deployment
 
 const env = {
-  // Supabase configuration - using actual credentials from Supabase integration
-  SUPABASE_URL: 'https://eubxxtqbyrlivnenhyjk.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
+  // Supabase configuration - use environment variables in production
+  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://eubxxtqbyrlivnenhyjk.supabase.co',
+  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1Ynh4dHFieXJsaXZuZW5oeWprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzMwMzgsImV4cCI6MjA2MDQwOTAzOH0.HtVG14DfSBuZ0dGjsJOHySluwJnCa9eVFx13mQ14ILg',
   
   // App configuration
   APP_NAME: import.meta.env.VITE_APP_NAME || 'CareerBuddy',
@@ -35,7 +35,7 @@ export const validateEnvironment = () => {
     console.error('Missing required environment variables:', missing);
     // In development, show a helpful error
     if (env.NODE_ENV === 'development') {
-      console.error('Please check your .env file and ensure these variables are set.');
+      console.error('Please check your environment variables and ensure these are set.');
     }
   }
   

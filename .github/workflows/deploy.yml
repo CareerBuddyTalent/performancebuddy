@@ -14,10 +14,10 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -28,19 +28,40 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_APP_VERSION: ${{ github.sha }}
           VITE_APP_NAME: "CareerBuddy"
           VITE_ENABLE_ANALYTICS: "false"
           VITE_BUILD_TIME: ${{ github.event.repository.updated_at }}
           VITE_BUILD_COMMIT: ${{ github.sha }}
       
+      - name: Run tests (if available)
+        run: npm run test --if-present
+        continue-on-error: true
+      
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
+          retention-days: 30
+
+  deploy_preview:
+    needs: build_and_test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      
+      - name: Deploy to Vercel Preview
+        run: echo "Preview deployment would happen here"
+        # Add Vercel preview deployment if needed
 
   deploy_production:
     needs: build_and_test
@@ -49,19 +70,11 @@ jobs:
     
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
       
-      # Here you would typically add deployment steps
-      # For example, deploying to Vercel, Netlify, or any other provider
-      # This is a placeholder for actual deployment instructions
-      
-      - name: Deploy to production
-        run: echo "Deploying to production..."
-        # Example for Netlify deployment:
-        # uses: netlify/actions/cli@master
-        # with:
-        #   args: deploy --dir=dist --prod
-        #   secrets: '{"NETLIFY_AUTH_TOKEN":"${{ secrets.NETLIFY_AUTH_TOKEN }}","NETLIFY_SITE_ID":"${{ secrets.NETLIFY_SITE_ID }}"}'
+      - name: Deploy to Vercel Production
+        run: echo "Production deployment handled by Vercel GitHub integration"
+        # Vercel will handle deployment automatically via GitHub integration
