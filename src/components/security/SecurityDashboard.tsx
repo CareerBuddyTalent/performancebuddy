@@ -48,9 +48,11 @@ export function SecurityDashboard() {
           log.action === 'login' && log.created_at > last24Hours
         ) || [];
         
-        const failedLogins = loginLogs.filter(log => 
-          !log.new_values?.success
-        ).length;
+        const failedLogins = loginLogs.filter(log => {
+          // Safely check for success property in new_values
+          const newValues = log.new_values as any;
+          return newValues && typeof newValues === 'object' && !newValues.success;
+        }).length;
 
         setStats({
           totalLogins: loginLogs.length,
@@ -146,21 +148,26 @@ export function SecurityDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {auditLogs.slice(0, 10).map((log) => (
-              <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Badge variant={log.new_values?.success ? "default" : "destructive"}>
-                    {log.action}
-                  </Badge>
-                  <span className="text-sm text-gray-600">
-                    User: {log.user_id === 'anonymous' ? 'Anonymous' : log.user_id.slice(0, 8)}...
-                  </span>
+            {auditLogs.slice(0, 10).map((log) => {
+              const newValues = log.new_values as any;
+              const isSuccess = newValues && typeof newValues === 'object' && newValues.success;
+              
+              return (
+                <div key={log.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={isSuccess ? "default" : "destructive"}>
+                      {log.action}
+                    </Badge>
+                    <span className="text-sm text-gray-600">
+                      User: {log.user_id === 'anonymous' ? 'Anonymous' : log.user_id.slice(0, 8)}...
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {new Date(log.created_at).toLocaleString()}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {new Date(log.created_at).toLocaleString()}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

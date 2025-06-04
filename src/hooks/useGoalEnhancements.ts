@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,22 @@ interface GoalIntegration {
   updated_at: string;
 }
 
+// Helper function to ensure status is a valid value
+const normalizeStatus = (status: string): 'not_started' | 'in_progress' | 'completed' => {
+  if (status === 'not_started' || status === 'in_progress' || status === 'completed') {
+    return status;
+  }
+  return 'not_started'; // default fallback
+};
+
+// Helper function to ensure integration_type is valid
+const normalizeIntegrationType = (type: string): 'salesforce' | 'jira' | 'notion' => {
+  if (type === 'salesforce' || type === 'jira' || type === 'notion') {
+    return type;
+  }
+  return 'jira'; // default fallback
+};
+
 export function useGoalEnhancements(goalId?: string) {
   const { user } = useSupabaseAuth();
   const [milestones, setMilestones] = useState<GoalMilestone[]>([]);
@@ -61,7 +78,13 @@ export function useGoalEnhancements(goalId?: string) {
           .order('due_date');
 
         if (milestonesError) throw milestonesError;
-        setMilestones(milestonesData || []);
+        
+        // Transform and normalize the data
+        const normalizedMilestones: GoalMilestone[] = (milestonesData || []).map(milestone => ({
+          ...milestone,
+          status: normalizeStatus(milestone.status)
+        }));
+        setMilestones(normalizedMilestones);
 
         // Fetch metrics for the goal
         const { data: metricsData, error: metricsError } = await supabase
@@ -81,7 +104,13 @@ export function useGoalEnhancements(goalId?: string) {
           .order('integration_type');
 
         if (integrationsError) throw integrationsError;
-        setIntegrations(integrationsData || []);
+        
+        // Transform and normalize the data
+        const normalizedIntegrations: GoalIntegration[] = (integrationsData || []).map(integration => ({
+          ...integration,
+          integration_type: normalizeIntegrationType(integration.integration_type)
+        }));
+        setIntegrations(normalizedIntegrations);
       } catch (err: any) {
         console.error('Error fetching goal enhancements:', err);
         setError(err.message);
@@ -108,8 +137,13 @@ export function useGoalEnhancements(goalId?: string) {
 
       if (error) throw error;
 
-      setMilestones(prev => [...prev, data]);
-      return data;
+      const normalizedData: GoalMilestone = {
+        ...data,
+        status: normalizeStatus(data.status)
+      };
+
+      setMilestones(prev => [...prev, normalizedData]);
+      return normalizedData;
     } catch (err: any) {
       console.error('Error creating milestone:', err);
       throw err;
@@ -130,8 +164,13 @@ export function useGoalEnhancements(goalId?: string) {
 
       if (error) throw error;
 
+      const normalizedData: GoalMilestone = {
+        ...data,
+        status: normalizeStatus(data.status)
+      };
+
       setMilestones(prev => prev.map(milestone => 
-        milestone.id === milestoneId ? data : milestone
+        milestone.id === milestoneId ? normalizedData : milestone
       ));
     } catch (err: any) {
       console.error('Error updating milestone:', err);
