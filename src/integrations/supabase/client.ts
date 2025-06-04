@@ -30,60 +30,69 @@ if (!env.IS_BUILD_TIME) {
 
 // Create a comprehensive mock client for build time
 const createMockClient = () => {
-  const mockQueryBuilder = {
-    select: () => mockQueryBuilder,
-    insert: () => mockQueryBuilder,
-    update: () => mockQueryBuilder,
-    delete: () => mockQueryBuilder,
-    upsert: () => mockQueryBuilder,
-    eq: () => mockQueryBuilder,
-    neq: () => mockQueryBuilder,
-    gt: () => mockQueryBuilder,
-    gte: () => mockQueryBuilder,
-    lt: () => mockQueryBuilder,
-    lte: () => mockQueryBuilder,
-    like: () => mockQueryBuilder,
-    ilike: () => mockQueryBuilder,
-    is: () => mockQueryBuilder,
-    in: () => mockQueryBuilder,
-    contains: () => mockQueryBuilder,
-    containedBy: () => mockQueryBuilder,
-    rangeGt: () => mockQueryBuilder,
-    rangeGte: () => mockQueryBuilder,
-    rangeLt: () => mockQueryBuilder,
-    rangeLte: () => mockQueryBuilder,
-    rangeAdjacent: () => mockQueryBuilder,
-    overlaps: () => mockQueryBuilder,
-    textSearch: () => mockQueryBuilder,
-    match: () => mockQueryBuilder,
-    not: () => mockQueryBuilder,
-    or: () => mockQueryBuilder,
-    filter: () => mockQueryBuilder,
-    order: () => mockQueryBuilder,
-    limit: () => mockQueryBuilder,
-    range: () => mockQueryBuilder,
-    abortSignal: () => mockQueryBuilder,
-    single: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-    maybeSingle: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-    csv: () => Promise.resolve({ data: '', error: new Error('Build time mock') }),
-    geojson: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-    explain: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-    rollback: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-    returns: () => mockQueryBuilder,
-    then: () => Promise.resolve({ data: [], error: null }),
-    catch: () => Promise.resolve({ data: [], error: null }),
-    finally: () => Promise.resolve({ data: [], error: null })
-  };
+  // Mock response for build time
+  const mockResponse = { data: [], error: null };
+  const mockErrorResponse = { data: null, error: new Error('Build time mock') };
 
-  // Make the query builder thenable (Promise-like)
-  Object.defineProperty(mockQueryBuilder, 'then', {
-    value: function(resolve?: any, reject?: any) {
-      return Promise.resolve({ data: [], error: null }).then(resolve, reject);
-    },
-    writable: false,
-    enumerable: false,
-    configurable: true
-  });
+  // Create a proper mock query builder that returns Promises
+  const createMockQueryBuilder = () => {
+    const builder = {
+      select: (columns?: string) => createMockQueryBuilder(),
+      insert: (values: any) => createMockQueryBuilder(),
+      update: (values: any) => createMockQueryBuilder(),
+      delete: () => createMockQueryBuilder(),
+      upsert: (values: any) => createMockQueryBuilder(),
+      eq: (column: string, value: any) => createMockQueryBuilder(),
+      neq: (column: string, value: any) => createMockQueryBuilder(),
+      gt: (column: string, value: any) => createMockQueryBuilder(),
+      gte: (column: string, value: any) => createMockQueryBuilder(),
+      lt: (column: string, value: any) => createMockQueryBuilder(),
+      lte: (column: string, value: any) => createMockQueryBuilder(),
+      like: (column: string, pattern: string) => createMockQueryBuilder(),
+      ilike: (column: string, pattern: string) => createMockQueryBuilder(),
+      is: (column: string, value: any) => createMockQueryBuilder(),
+      in: (column: string, values: any[]) => createMockQueryBuilder(),
+      contains: (column: string, value: any) => createMockQueryBuilder(),
+      containedBy: (column: string, value: any) => createMockQueryBuilder(),
+      rangeGt: (column: string, value: any) => createMockQueryBuilder(),
+      rangeGte: (column: string, value: any) => createMockQueryBuilder(),
+      rangeLt: (column: string, value: any) => createMockQueryBuilder(),
+      rangeLte: (column: string, value: any) => createMockQueryBuilder(),
+      rangeAdjacent: (column: string, value: any) => createMockQueryBuilder(),
+      overlaps: (column: string, value: any) => createMockQueryBuilder(),
+      textSearch: (column: string, query: string) => createMockQueryBuilder(),
+      match: (query: Record<string, any>) => createMockQueryBuilder(),
+      not: (column: string, operator: string, value: any) => createMockQueryBuilder(),
+      or: (filters: string) => createMockQueryBuilder(),
+      filter: (column: string, operator: string, value: any) => createMockQueryBuilder(),
+      order: (column: string, options?: { ascending?: boolean }) => createMockQueryBuilder(),
+      limit: (count: number) => createMockQueryBuilder(),
+      range: (from: number, to: number) => createMockQueryBuilder(),
+      abortSignal: (signal: AbortSignal) => createMockQueryBuilder(),
+      single: () => Promise.resolve(mockErrorResponse),
+      maybeSingle: () => Promise.resolve(mockErrorResponse),
+      csv: () => Promise.resolve({ data: '', error: new Error('Build time mock') }),
+      geojson: () => Promise.resolve(mockErrorResponse),
+      explain: () => Promise.resolve(mockErrorResponse),
+      rollback: () => Promise.resolve(mockErrorResponse),
+      returns: () => createMockQueryBuilder(),
+    };
+
+    // Make the builder awaitable by adding Symbol.asyncIterator
+    (builder as any)[Symbol.asyncIterator] = async function* () {
+      yield mockResponse;
+    };
+
+    // Override valueOf to return a Promise when used in await context
+    (builder as any).valueOf = () => Promise.resolve(mockResponse);
+    
+    // Make it thenable for direct Promise usage
+    (builder as any).then = (resolve?: any, reject?: any) => {
+      return Promise.resolve(mockResponse).then(resolve, reject);
+    };
+
+    return builder;
+  };
 
   return {
     auth: {
@@ -95,18 +104,18 @@ const createMockClient = () => {
       signOut: () => Promise.resolve({ error: null }),
       resetPasswordForEmail: () => Promise.resolve({ data: {}, error: new Error('Build time mock') }),
     },
-    from: () => mockQueryBuilder,
-    rpc: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
+    from: (table: string) => createMockQueryBuilder(),
+    rpc: (fn: string, args?: any) => Promise.resolve(mockErrorResponse),
     functions: {
-      invoke: () => Promise.resolve({ data: null, error: new Error('Build time mock') })
+      invoke: (functionName: string, options?: any) => Promise.resolve(mockErrorResponse)
     },
     storage: {
-      from: () => ({
-        upload: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-        download: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
+      from: (bucket: string) => ({
+        upload: () => Promise.resolve(mockErrorResponse),
+        download: () => Promise.resolve(mockErrorResponse),
         list: () => Promise.resolve({ data: [], error: new Error('Build time mock') }),
-        remove: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
-        createSignedUrl: () => Promise.resolve({ data: null, error: new Error('Build time mock') }),
+        remove: () => Promise.resolve(mockErrorResponse),
+        createSignedUrl: () => Promise.resolve(mockErrorResponse),
         createSignedUrls: () => Promise.resolve({ data: [], error: new Error('Build time mock') }),
         getPublicUrl: () => ({ data: { publicUrl: '' } })
       })
