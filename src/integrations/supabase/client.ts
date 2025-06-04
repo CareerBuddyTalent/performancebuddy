@@ -34,8 +34,9 @@ const createMockClient = () => {
   const mockResponse = { data: [], error: null };
   const mockErrorResponse = { data: null, error: new Error('Build time mock') };
 
-  // Create a proper mock query builder that returns Promises
+  // Create a proper mock query builder that returns the expected structure when awaited
   const createMockQueryBuilder = () => {
+    // This object will be returned when methods are chained
     const builder = {
       select: (columns?: string) => createMockQueryBuilder(),
       insert: (values: any) => createMockQueryBuilder(),
@@ -78,18 +79,18 @@ const createMockClient = () => {
       returns: () => createMockQueryBuilder(),
     };
 
-    // Make the builder awaitable by adding Symbol.asyncIterator
-    (builder as any)[Symbol.asyncIterator] = async function* () {
-      yield mockResponse;
-    };
-
-    // Override valueOf to return a Promise when used in await context
-    (builder as any).valueOf = () => Promise.resolve(mockResponse);
-    
-    // Make it thenable for direct Promise usage
-    (builder as any).then = (resolve?: any, reject?: any) => {
+    // Make the builder thenable so it works with await
+    (builder as any).then = (resolve?: (value: any) => any, reject?: (reason?: any) => any) => {
       return Promise.resolve(mockResponse).then(resolve, reject);
     };
+
+    // Add catch method for error handling
+    (builder as any).catch = (reject?: (reason?: any) => any) => {
+      return Promise.resolve(mockResponse).catch(reject);
+    };
+
+    // Make it work with async/await by making it a proper thenable
+    (builder as any)[Symbol.toStringTag] = 'Promise';
 
     return builder;
   };
