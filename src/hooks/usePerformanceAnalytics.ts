@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/context/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +38,14 @@ interface SkillAssessment {
   assessment_date: string;
   created_at: string;
 }
+
+// Helper function to normalize assessment_type
+const normalizeAssessmentType = (type: string): 'self' | 'peer' | 'manager' | 'external' => {
+  if (type === 'self' || type === 'peer' || type === 'manager' || type === 'external') {
+    return type;
+  }
+  return 'self'; // default fallback
+};
 
 export function usePerformanceAnalytics() {
   const { user } = useSupabaseAuth();
@@ -81,7 +90,13 @@ export function usePerformanceAnalytics() {
             .order('assessment_date', { ascending: false });
 
           if (assessmentsError) throw assessmentsError;
-          setSkillAssessments(assessmentsData || []);
+          
+          // Transform and normalize the data
+          const normalizedAssessments: SkillAssessment[] = (assessmentsData || []).map(assessment => ({
+            ...assessment,
+            assessment_type: normalizeAssessmentType(assessment.assessment_type)
+          }));
+          setSkillAssessments(normalizedAssessments);
         }
       } catch (err: any) {
         console.error('Error fetching analytics data:', err);
@@ -109,8 +124,13 @@ export function usePerformanceAnalytics() {
 
       if (error) throw error;
 
-      setSkillAssessments(prev => [data, ...prev]);
-      return data;
+      const normalizedData: SkillAssessment = {
+        ...data,
+        assessment_type: normalizeAssessmentType(data.assessment_type)
+      };
+
+      setSkillAssessments(prev => [normalizedData, ...prev]);
+      return normalizedData;
     } catch (err: any) {
       console.error('Error creating skill assessment:', err);
       throw err;

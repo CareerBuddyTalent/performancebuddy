@@ -21,8 +21,8 @@ const transformGoalFromDb = (dbGoal: any): Goal => {
   };
 };
 
-// Helper function to transform application Goal to database format
-const transformGoalToDb = (goal: Omit<Goal, 'id' | 'createdAt' | 'updatedAt'>) => {
+// Helper function to transform application Goal to database format for INSERT
+const transformGoalToDbInsert = (goal: Omit<Goal, 'id' | 'createdAt' | 'updatedAt'>) => {
   return {
     user_id: goal.userId,
     title: goal.title,
@@ -32,9 +32,23 @@ const transformGoalToDb = (goal: Omit<Goal, 'id' | 'createdAt' | 'updatedAt'>) =
     progress: goal.progress,
     aligned_with: goal.alignedWith,
     level: goal.level,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
   };
+};
+
+// Helper function to transform application Goal to database format for UPDATE
+const transformGoalToDbUpdate = (updates: Partial<Goal>) => {
+  const dbUpdates: any = {};
+  
+  if (updates.title !== undefined) dbUpdates.title = updates.title;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate?.toISOString();
+  if (updates.status !== undefined) dbUpdates.status = updates.status;
+  if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
+  if (updates.alignedWith !== undefined) dbUpdates.aligned_with = updates.alignedWith;
+  if (updates.level !== undefined) dbUpdates.level = updates.level;
+  
+  dbUpdates.updated_at = new Date().toISOString();
+  return dbUpdates;
 };
 
 export const useGoalsData = () => {
@@ -78,7 +92,7 @@ export const useGoalsData = () => {
   const createGoal = async (goalData: Omit<Goal, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) throw new Error('User not authenticated');
 
-    const dbGoalData = transformGoalToDb(goalData);
+    const dbGoalData = transformGoalToDbInsert(goalData);
 
     const { data, error } = await supabase
       .from('goals')
@@ -94,17 +108,7 @@ export const useGoalsData = () => {
   };
 
   const updateGoal = async (goalId: string, updates: Partial<Goal>) => {
-    const dbUpdates: any = {};
-    
-    if (updates.title !== undefined) dbUpdates.title = updates.title;
-    if (updates.description !== undefined) dbUpdates.description = updates.description;
-    if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate?.toISOString();
-    if (updates.status !== undefined) dbUpdates.status = updates.status;
-    if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
-    if (updates.alignedWith !== undefined) dbUpdates.aligned_with = updates.alignedWith;
-    if (updates.level !== undefined) dbUpdates.level = updates.level;
-    
-    dbUpdates.updated_at = new Date().toISOString();
+    const dbUpdates = transformGoalToDbUpdate(updates);
 
     const { data, error } = await supabase
       .from('goals')
