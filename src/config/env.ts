@@ -22,10 +22,21 @@ const env = {
   // Security settings
   SESSION_TIMEOUT_MINUTES: parseInt(import.meta.env.VITE_SESSION_TIMEOUT_MINUTES || '60'),
   MAX_LOGIN_ATTEMPTS: parseInt(import.meta.env.VITE_MAX_LOGIN_ATTEMPTS || '5'),
+
+  // Build-time detection
+  IS_BUILD_TIME: typeof window === 'undefined',
 };
 
-// Validate required environment variables
+// Validate required environment variables (only during runtime, not build time)
 export const validateEnvironment = () => {
+  // Skip validation during build time
+  if (env.IS_BUILD_TIME) {
+    return {
+      isValid: true,
+      issues: []
+    };
+  }
+
   const required = ['SUPABASE_URL', 'SUPABASE_ANON_KEY'];
   const missing = required.filter(key => !env[key as keyof typeof env]);
   
@@ -51,8 +62,8 @@ const validateEnv = () => {
   return validation.isValid;
 };
 
-// Validate on import
-const isValid = validateEnv();
+// Only validate during runtime, not build time
+const isValid = env.IS_BUILD_TIME ? true : validateEnv();
 
 export { isValid as envIsValid };
 export default env;

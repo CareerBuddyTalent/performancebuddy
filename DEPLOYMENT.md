@@ -36,6 +36,16 @@ VITE_ENABLE_DEBUG_LOGS=false
 2. Login: `vercel login`
 3. Deploy: `vercel --prod`
 
+## Build Configuration
+
+The project is now configured with:
+- **esbuild minification** (no additional dependencies required)
+- **Build-time safety checks** to prevent Supabase connections during build
+- **React Router SPA routing** via `vercel.json`
+- **Production optimizations** in `vite.config.ts`
+- **Security headers** for production
+- **Code splitting** for better performance
+
 ## Supabase Configuration
 
 After deployment, update your Supabase settings:
@@ -45,13 +55,30 @@ After deployment, update your Supabase settings:
    - Site URL: `https://your-app.vercel.app`
    - Redirect URLs: `https://your-app.vercel.app/**`
 
-## Build Configuration
+## Troubleshooting Common Issues
 
-The project is configured with:
-- React Router SPA routing via `vercel.json`
-- Production optimizations in `vite.config.ts`
-- Security headers for production
-- Code splitting for better performance
+### Build Errors
+
+**Error: "terser not found"**
+- Fixed in latest configuration by using esbuild instead of terser
+
+**Error: "Failed to get database function names"**
+- This was caused by Supabase connections during build time
+- Fixed by implementing build-time detection and mock clients
+
+**Error: Missing environment variables**
+- Ensure all required VITE_ prefixed variables are set in Vercel dashboard
+- Check that variable names match exactly (case-sensitive)
+
+### Runtime Issues
+
+**Authentication not working**
+- Verify Supabase URL configuration includes your Vercel domain
+- Check that environment variables are properly set in Vercel
+
+**Database connections failing**
+- Ensure Supabase project is accessible from your domain
+- Verify RLS policies allow your application access
 
 ## Verification Checklist
 
@@ -59,10 +86,17 @@ After deployment:
 - [ ] All routes work correctly
 - [ ] Authentication flows work
 - [ ] Database connections work
-- [ ] Edge functions are accessible
 - [ ] No console errors in production
+- [ ] Environment variables are properly loaded
 
-## Troubleshooting
+## Performance Optimization
+
+The build is optimized with:
+- Code splitting for vendor libraries
+- Optimized chunk sizes
+- CSS code splitting
+- Source maps only in development
+- Minification with esbuild
 
 If you encounter issues:
 1. Check Vercel function logs

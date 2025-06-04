@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Production optimizations
-    minify: 'terser',
+    // Use esbuild for minification (default, no additional dependencies needed)
+    minify: mode === 'production' ? 'esbuild' : false,
     sourcemap: mode === 'development',
     rollupOptions: {
       output: {
